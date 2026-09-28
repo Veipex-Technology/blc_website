@@ -1,7 +1,34 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
-const nextConfig: NextConfig = {
-  /* config options here */
+const nextConfig: NextConfig = {};
+
+const erpUrl = new URL(process.env.ERP_BASE_URL ?? "https://erp.example.com");
+nextConfig.images = {
+  remotePatterns: [
+    {
+      protocol: erpUrl.protocol.replace(":", "") as "http" | "https",
+      hostname: erpUrl.hostname,
+      port: erpUrl.port,
+      pathname: "/**",
+    },
+  ],
 };
+nextConfig.headers = async () => [
+  {
+    source: "/(.*)",
+    headers: [
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      {
+        key: "Permissions-Policy",
+        value: "camera=(), microphone=(), geolocation=()",
+      },
+      { key: "Content-Security-Policy", value: "frame-ancestors 'none';" },
+    ],
+  },
+];
 
-export default nextConfig;
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+
+export default withNextIntl(nextConfig);
