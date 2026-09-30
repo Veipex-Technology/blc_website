@@ -32,10 +32,11 @@ import {
   getFaqs,
   getPartners,
   getPosts,
-  getServices,
   getSiteSettings,
   getTestimonials,
 } from "@/lib/erp/api";
+
+import { getServicesFromERP } from "@/lib/erp/services";
 import type { Locale } from "@/i18n/routing";
 
 const serviceIcons: Record<string, LucideIcon> = {
@@ -73,7 +74,7 @@ export default async function HomePage({
   const common = await getTranslations({ locale, namespace: "common" });
   const [services, testimonials, partners, postsResult, faqs, settings] =
     await Promise.all([
-      getServices(locale),
+      getServicesFromERP(),
       getTestimonials(locale),
       getPartners(locale),
       getPosts({ lang: locale, page: 1 }),
@@ -197,11 +198,30 @@ export default async function HomePage({
           </Reveal>
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {services.map((service) => {
-              const Icon = serviceIcons[service.icon];
+              const isArabic = locale === "ar";
+
+              const slug = isArabic
+                ? service.ar_slug || service.en_slug
+                : service.en_slug;
+
+              const title = isArabic
+                ? service.service_name_ar || service.service_name
+                : service.service_name;
+
+              const tagline = isArabic
+                ? service.service_sub_title_ar || service.service_sub_title
+                : service.service_sub_title;
+
+              const Icon = Heart;
+
+              if (!slug || !title) {
+                return null;
+              }
+
               return (
-                <Reveal key={service.slug}>
+                <Reveal key={service.name}>
                   <Link
-                    href={`/${locale}/services/${service.slug}`}
+                    href={`/${locale}/services/${slug}`}
                     className="group block h-full rounded-card bg-white p-6 shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-lg focus-ring-light"
                   >
                     <Icon
@@ -209,14 +229,18 @@ export default async function HomePage({
                       aria-hidden="true"
                       className="text-[var(--blc-gold-500)]"
                     />
+
                     <h3 className="mt-6 text-xl font-bold text-[var(--blc-green-900)]">
-                      {service.title}
+                      {title}
                     </h3>
+
                     <p className="mt-3 text-[var(--blc-green-700)]">
-                      {service.tagline}
+                      {tagline}
                     </p>
+
                     <span className="mt-6 inline-flex items-center gap-2 font-semibold text-[var(--blc-gold-500)]">
                       {common("cta_learn_more")}
+
                       <ArrowUpRight
                         size={17}
                         aria-hidden="true"
