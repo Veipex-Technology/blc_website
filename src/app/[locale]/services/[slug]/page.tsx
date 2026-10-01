@@ -1,17 +1,5 @@
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  Accessibility,
-  FlaskConical,
-  Footprints,
-  Heart,
-  MessageCircle,
-  Phone,
-  RefreshCw,
-  Stethoscope,
-  Users,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { ArrowUpRight, Heart, MessageCircle, Phone } from "lucide-react";
 import sanitizeHtml from "sanitize-html";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -24,72 +12,67 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
 
 import { getSiteSettings } from "@/lib/erp/api";
-import { getServicesFromERP } from "@/lib/erp/services";
+import { getServicesFromERP, type Service } from "@/lib/erp/services";
 
 import type { Locale } from "@/i18n/routing";
 
-const serviceIcons: Record<string, LucideIcon> = {
-  heart: Heart,
-  stethoscope: Stethoscope,
-  refresh: RefreshCw,
-  accessibility: Accessibility,
-  flask: FlaskConical,
-  users: Users,
-  footprints: Footprints,
+type PageProps = {
+  params: Promise<{ locale: Locale; slug: string }>;
 };
+
+function decodeSlug(slug: string): string {
+  try {
+    return decodeURIComponent(slug);
+  } catch {
+    return slug;
+  }
+}
+
+function findService(services: Service[], slug: string) {
+  const decoded = decodeSlug(slug);
+  return services.find(
+    (item) =>
+      item.en_slug === decoded ||
+      item.ar_slug === decoded ||
+      item.en_slug === slug ||
+      item.ar_slug === slug,
+  );
+}
+
+function stripHtml(html: string) {
+  return sanitizeHtml(html, { allowedTags: [], allowedAttributes: {} });
+}
 
 export async function generateStaticParams() {
   const services = await getServicesFromERP();
 
-  return [
-    ...services
-      .filter((service) => service.en_slug)
-      .map((service) => ({
-        locale: "en" as Locale,
-        slug: service.en_slug!,
-      })),
+  const enParams = services
+    .filter((service) => service.en_slug)
+    .map((service) => ({
+      locale: "en" as Locale,
+      slug: service.en_slug!,
+    }));
 
-    ...services
-      .filter((service) => service.ar_slug)
-      .map((service) => ({
-        locale: "ar" as Locale,
-        slug: service.ar_slug!,
-      })),
-  ];
+  const arParams = services
+    .filter((service) => service.ar_slug)
+    .map((service) => ({
+      locale: "ar" as Locale,
+      slug: service.ar_slug!,
+    }));
+
+  return [...enParams, ...arParams];
 }
 
 export async function generateMetadata({
   params,
-}: {
-  params: Promise<{ locale: Locale; slug: string }>;
-}): Promise<Metadata> {
+}: PageProps): Promise<Metadata> {
   const { locale, slug } = await params;
+  const isArabic = locale === "ar";
 
   const services = await getServicesFromERP();
-  console.log("LOCALE:", locale);
-  console.log("SLUG:", slug);
-  console.log(
-    "SERVICES:",
-    services.map((service) => ({
-      name: service.name,
-      en_slug: service.en_slug,
-      ar_slug: service.ar_slug,
-      service_feature: service.service_feature,
-      ar_service_feature: service.ar_service_feature,
-    })),
-  );
-  const service = services.find((item) => {
-    const serviceSlug =
-      locale === "ar" ? item.ar_slug || item.en_slug : item.en_slug;
+  const service = findService(services, slug);
 
-    return serviceSlug === slug;
-  });
-
-  if (!service) {
-    return {};
-  }
-
-  const isArabic = locale === "ar";
+  if (!service) return {};
 
   const title = isArabic
     ? service.service_name_ar || service.service_name
@@ -101,49 +84,29 @@ export async function generateMetadata({
 
   return createPageMetadata({
     locale,
-    path: `services/${slug}`,
+    path: `${isArabic ? "خدمات" : "services"}/${decodeSlug(slug)}`,
     title: title || "Service",
-    description: sanitizeHtml(description, {
-      allowedTags: [],
-      allowedAttributes: {},
-    }),
+    description: stripHtml(description),
   });
 }
 
-export default async function ServicePage({
-  params,
-}: {
-  params: Promise<{ locale: Locale; slug: string }>;
-}) {
+export default async function ServicePage({ params }: PageProps) {
   const { locale, slug } = await params;
-
   const isArabic = locale === "ar";
+  const servicesSegment = isArabic ? "خدمات" : "services";
 
-  const t = await getTranslations({
-    locale,
-    namespace: "services",
-  });
+  const [t, common, services, settings] = await Promise.all([
+    getTranslations({ locale, namespace: "services" }),
+    getTranslations({ locale, namespace: "common" }),
+    getServicesFromERP(),
+    getSiteSettings(locale),
+  ]);
 
-  const common = await getTranslations({
-    locale,
-    namespace: "common",
-  });
-
-  // Fetch services directly from ERPNext
-  const services = await getServicesFromERP();
-
-  // Find current service using localized slug
-  const service = services.find((item) => {
-    return item.en_slug === slug || item.ar_slug === slug;
-  });
+  const service = findService(services, slug);
 
   if (!service) {
     notFound();
   }
-
-  // --------------------------------------------------
-  // Localized service fields
-  // --------------------------------------------------
 
   const title = isArabic
     ? service.service_name_ar || service.service_name
@@ -157,16 +120,12 @@ export default async function ServicePage({
     ? service.ar_service_description || service.service_description || ""
     : service.service_description || "";
 
-  // --------------------------------------------------
-  // Localized service features
-  // --------------------------------------------------
-
   const features = isArabic
-    ? service.ar_service_feature || service.service_feature || []
+    ? service.ar_service_feature?.length
+      ? service.ar_service_feature
+      : service.service_feature || []
     : service.service_feature || [];
 
-  // Default icon because Services BLC does not contain
-  // an icon field.
   const Icon = Heart;
 
   const safeDescription = sanitizeHtml(description, {
@@ -174,50 +133,32 @@ export default async function ServicePage({
     allowedAttributes: {},
   });
 
-  const [settings] = await Promise.all([getSiteSettings(locale)]);
-
-  // --------------------------------------------------
-  // Related services
-  // --------------------------------------------------
-
   const related = services
     .filter((candidate) => candidate.name !== service.name)
-    .filter((candidate) => {
-      const candidateSlug = isArabic
-        ? candidate.ar_slug || candidate.en_slug
-        : candidate.en_slug;
-
-      return Boolean(candidateSlug);
-    })
+    .filter((candidate) =>
+      Boolean(
+        isArabic ? candidate.ar_slug || candidate.en_slug : candidate.en_slug,
+      ),
+    )
     .slice(0, 3);
 
   const phoneHref = `tel:${settings.phone.replace(/[^+\d]/g, "")}`;
 
-  const whatsappHref = `https://wa.me/${
-    settings.whatsapp_number
-  }?text=${encodeURIComponent(common("whatsapp_prefill"))}`;
-
-  const requestHref = `/${locale}/contact?service=${encodeURIComponent(
-    isArabic ? service.ar_slug || service.en_slug || "" : service.en_slug || "",
+  const whatsappHref = `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(
+    common("whatsapp_prefill"),
   )}`;
+
+  // Change "contact" to your real contact/request route.
+  const requestHref = `/${locale}/contact`;
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Service",
     name: title,
-    description: sanitizeHtml(description, {
-      allowedTags: [],
-      allowedAttributes: {},
-    }),
+    description: stripHtml(description),
     serviceType: title,
-    areaServed: {
-      "@type": "City",
-      name: "Alexandria",
-    },
-    provider: {
-      "@type": "Organization",
-      name: "Better Life Care",
-    },
+    areaServed: { "@type": "City", name: "Alexandria" },
+    provider: { "@type": "Organization", name: "Better Life Care" },
   };
 
   return (
@@ -252,14 +193,11 @@ export default async function ServicePage({
                 {safeDescription && (
                   <div
                     className="mt-10 max-w-3xl text-lg leading-relaxed text-[var(--blc-green-700)] [&_p+p]:mt-5"
-                    dangerouslySetInnerHTML={{
-                      __html: safeDescription,
-                    }}
+                    dangerouslySetInnerHTML={{ __html: safeDescription }}
                   />
                 )}
               </Reveal>
 
-              {/* Service Features */}
               {features.length > 0 && (
                 <Reveal className="mt-14">
                   <SectionHeading title={t("included")} />
@@ -276,7 +214,6 @@ export default async function ServicePage({
                         >
                           ✓
                         </span>
-
                         <span>{feature.feature}</span>
                       </li>
                     ))}
@@ -285,7 +222,6 @@ export default async function ServicePage({
               )}
             </div>
 
-            {/* CTA */}
             <Reveal className="lg:sticky lg:top-28">
               <aside className="rounded-card bg-[var(--blc-green-900)] p-6 text-white shadow-soft">
                 <h2 className="text-xl font-bold">{common("cta_request")}</h2>
@@ -300,7 +236,6 @@ export default async function ServicePage({
                     className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-5 font-semibold text-[var(--blc-green-900)] hover:bg-[var(--blc-cream-100)] focus-ring-light"
                   >
                     <Phone size={18} aria-hidden="true" />
-
                     {common("cta_call")}
                   </a>
 
@@ -309,7 +244,6 @@ export default async function ServicePage({
                     className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border-2 border-[var(--blc-gold-300)] px-5 font-semibold text-white hover:bg-[var(--blc-green-700)] focus-ring-dark"
                   >
                     <MessageCircle size={18} aria-hidden="true" />
-
                     {common("cta_whatsapp")}
                   </a>
 
@@ -326,7 +260,6 @@ export default async function ServicePage({
         </Container>
       </Section>
 
-      {/* Related Services */}
       {related.length > 0 && (
         <Section variant="cream">
           <Container>
@@ -350,14 +283,12 @@ export default async function ServicePage({
                     relatedService.service_sub_title
                   : relatedService.service_sub_title;
 
-                if (!relatedSlug || !relatedTitle) {
-                  return null;
-                }
+                if (!relatedSlug || !relatedTitle) return null;
 
                 return (
                   <Reveal key={relatedService.name}>
                     <Link
-                      href={`/${locale}/services/${relatedSlug}`}
+                      href={`/${locale}/${servicesSegment}/${encodeURIComponent(relatedSlug)}`}
                       className="group block h-full rounded-card bg-white p-6 shadow-soft hover:-translate-y-1 focus-ring-light"
                     >
                       <h2 className="text-xl font-bold text-[var(--blc-green-900)]">
@@ -372,7 +303,6 @@ export default async function ServicePage({
 
                       <span className="mt-5 inline-flex items-center gap-2 font-semibold text-[var(--blc-gold-500)]">
                         {common("cta_learn_more")}
-
                         <ArrowUpRight
                           size={17}
                           aria-hidden="true"
@@ -390,9 +320,7 @@ export default async function ServicePage({
 
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(jsonLd),
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
     </main>
   );
