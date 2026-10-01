@@ -81,3 +81,21 @@ export type InquiryInput = {
   consent: boolean;
   source_page?: string;
 };
+
+export type ServiceChild = {
+  name: string;
+  service?: string;
+};
+
+export type ContactUsBLCForm = {
+  name: string;
+
+  full_name?: string;
+  phone_number?: string;
+  email_id?: string;
+  how_we_help_you?: string;
+
+  needed_services?: ServiceChild[];
+
+  reciver_mail?: string;
+};
