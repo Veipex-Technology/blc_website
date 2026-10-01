@@ -22,21 +22,31 @@ export type Service = {
   ar_service_feature?: ServiceFeature[];
 };
 
-export async function getServicesFromERP(): Promise<Service[]> {
-  const baseUrl = "http://127.0.0.1:8000";
+function getErpConfig() {
+  const baseUrl = process.env.ERP_BASE_URL;
+  const apiKey = process.env.ERP_API_KEY;
+  const apiSecret = process.env.ERP_API_SECRET;
 
-  const apiKey = "24d0a9267c137ae";
-  const apiSecret = "3700ac8a792ecad";
+  if (!baseUrl || !apiKey || !apiSecret) {
+    throw new Error(
+      "Missing ERP_BASE_URL, ERP_API_KEY or ERP_API_SECRET in environment.",
+    );
+  }
 
-  const headers = {
-    Authorization: `token ${apiKey}:${apiSecret}`,
-    Accept: "application/json",
+  return {
+    baseUrl,
+    headers: {
+      Authorization: `token ${apiKey}:${apiSecret}`,
+      Accept: "application/json",
+    },
   };
+}
 
-  // --------------------------------------------------
-  // 1. Get list of Services BLC
-  // --------------------------------------------------
+export async function getServicesFromERP(): Promise<Service[]> {
+  const { baseUrl, headers } = getErpConfig();
 
+  // Child tables are NOT returned by the list endpoint, so only request
+  // scalar fields here and load child tables from the full document below.
   const fields = [
     "name",
     "service_name",
@@ -44,7 +54,6 @@ export async function getServicesFromERP(): Promise<Service[]> {
     "image_en",
     "en_slug",
     "service_description",
-
     "service_name_ar",
     "service_sub_title_ar",
     "image_ar",
@@ -59,71 +68,40 @@ export async function getServicesFromERP(): Promise<Service[]> {
 
   const response = await fetch(
     `${baseUrl}/api/resource/Services%20BLC?${params.toString()}`,
-    {
-      headers,
-      cache: "no-store",
-    },
+    { headers, cache: "no-store" },
   );
 
   if (!response.ok) {
     const errorText = await response.text();
-
-    throw new Error(
-      `Services BLC could not be loaded. ERPNext returned ${response.status}: ${errorText}`,
-    );
+    throw new Error(`Services BLC could not be loaded: ${errorText}`);
   }
 
-  const result = (await response.json()) as {
-    data?: Service[];
-  };
-
+  const result = (await response.json()) as { data?: Service[] };
   const services = Array.isArray(result.data) ? result.data : [];
 
-  // --------------------------------------------------
-  // 2. Get each complete Service document
-  // --------------------------------------------------
-
-  const servicesWithFeatures = await Promise.all(
-    services.map(async (service) => {
-      const serviceResponse = await fetch(
-        `${baseUrl}/api/resource/Services%20BLC/${encodeURIComponent(
-          service.name,
-        )}`,
-        {
-          headers,
-          cache: "no-store",
-        },
-      );
-
-      if (!serviceResponse.ok) {
-        const errorText = await serviceResponse.text();
-
-        console.error(
-          `Could not load service ${service.name}:`,
-          serviceResponse.status,
-          errorText,
+  return Promise.all(
+    services.map(async (service): Promise<Service> => {
+      try {
+        const res = await fetch(
+          `${baseUrl}/api/resource/Services%20BLC/${encodeURIComponent(service.name)}`,
+          { headers, cache: "no-store" },
         );
+
+        if (!res.ok) {
+          return { ...service, service_feature: [], ar_service_feature: [] };
+        }
+
+        const full = ((await res.json()) as { data?: Service }).data;
 
         return {
           ...service,
-          service_feature: [],
-          ar_service_feature: [],
+          ...full,
+          service_feature: full?.service_feature ?? [],
+          ar_service_feature: full?.ar_service_feature ?? [],
         };
+      } catch {
+        return { ...service, service_feature: [], ar_service_feature: [] };
       }
-
-      const serviceResult = (await serviceResponse.json()) as {
-        data?: Service;
-      };
-
-      const fullService = serviceResult.data;
-
-      return {
-        ...service,
-        service_feature: fullService?.service_feature ?? [],
-        ar_service_feature: fullService?.ar_service_feature ?? [],
-      };
     }),
   );
-
-  return servicesWithFeatures;
 }
