@@ -8,7 +8,10 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+
 import { getServices, getSiteSettings } from "@/lib/erp/api";
+import { getBLCContactUsInfoFromERP } from "@/lib/erp/contact-info";
+
 import { ContactForm } from "@/components/contact-form";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
@@ -31,7 +34,12 @@ export async function generateMetadata({
   params: Promise<{ locale: Locale }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "contact" });
+
+  const t = await getTranslations({
+    locale,
+    namespace: "contact",
+  });
+
   return createPageMetadata({
     locale,
     path: "contact",
@@ -49,20 +57,89 @@ export default async function ContactPage({
 }) {
   const { locale } = await params;
   const query = await searchParams;
-  const t = await getTranslations({ locale, namespace: "contact" });
-  const common = await getTranslations({ locale, namespace: "common" });
-  const footer = await getTranslations({ locale, namespace: "footer" });
-  const [settings, services] = await Promise.all([
-    getSiteSettings(locale),
+
+  const t = await getTranslations({
+    locale,
+    namespace: "contact",
+  });
+
+  const common = await getTranslations({
+    locale,
+    namespace: "common",
+  });
+
+  const footer = await getTranslations({
+    locale,
+    namespace: "footer",
+  });
+
+  /*
+   * Load all dynamic data from ERP.
+   *
+   * BLC-Contact-us Info:
+   * - phone_number
+   * - whats_app_number
+   * - email
+   * - address
+   * - timetable
+   *
+   * Services:
+   * - Used by ContactForm
+   *
+   * Site Settings:
+   * - Social links
+   * - Map
+   */
+  const [contactInfoRecords, services, settings] = await Promise.all([
+    getBLCContactUsInfoFromERP(),
     getServices(locale),
+    getSiteSettings(locale),
   ]);
-  const phoneHref = `tel:${settings.phone.replace(/[^+\d]/g, "")}`;
-  const whatsappHref = `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(common("whatsapp_prefill"))}`;
+
+  /*
+   * BLC-Contact-us Info normally contains the contact information.
+   *
+   * If there are multiple records, the first record is used.
+   */
+  const contactInfo = contactInfoRecords[0];
+
+  const phone = contactInfo?.phone_number?.trim() || "";
+  const whatsappNumber = contactInfo?.whats_app_number?.trim() || "";
+  const email = contactInfo?.email?.trim() || "";
+  const address = contactInfo?.address?.trim() || "";
+
+  /*
+   * Remove spaces, brackets, dashes, etc. from WhatsApp number.
+   *
+   * Example:
+   * +20 100 123 4567
+   * becomes:
+   * +201001234567
+   */
+  const whatsappCleanNumber = whatsappNumber.replace(/[^\d]/g, "");
+
+  const phoneHref = phone ? `tel:${phone.replace(/[^+\d]/g, "")}` : "#";
+
+  const whatsappHref = whatsappCleanNumber
+    ? `https://wa.me/${whatsappCleanNumber}?text=${encodeURIComponent(
+        common("whatsapp_prefill"),
+      )}`
+    : "#";
+
+  /*
+   * Select service from URL:
+   *
+   * /contact?service=some-service
+   */
   const initialService = services.some(
     (service) => service.slug === query.service,
   )
     ? query.service
     : undefined;
+
+  /*
+   * Dynamic services for ContactForm.
+   */
   const serviceOptions = services
     .filter((service) => service.published)
     .sort((a, b) => a.sort_order - b.sort_order)
@@ -70,102 +147,170 @@ export default async function ContactPage({
       slug: service.slug,
       title: service.title,
     }));
+
+  /*
+   * Social links can continue coming from Website Info /
+   * Site Settings.
+   */
   const socialLinks = socialConfig
-    .map((social) => ({ ...social, href: settings.social[social.key] }))
+    .map((social) => ({
+      ...social,
+      href: settings.social[social.key],
+    }))
     .filter((social): social is typeof social & { href: string } =>
       Boolean(social.href),
     );
+
+  /*
+   * Dynamic timetable from BLC-Contact-us Info.
+   */
+  const timetable = contactInfo?.timetable ?? [];
+
   return (
     <main>
       <Section>
         <Container>
           <SectionHeading title={t("title")} subtitle={t("intro")} />
+
           <div className="mt-12 grid gap-8 lg:grid-cols-2 lg:items-start">
+            {/* CONTACT INFORMATION */}
             <aside className="rounded-card bg-[var(--blc-cream-100)] p-7 shadow-soft">
               <h2 className="text-2xl font-bold text-[var(--blc-green-900)]">
                 {t("details")}
               </h2>
+
               <div className="mt-7 grid gap-5 text-[var(--blc-green-700)]">
-                <a
-                  href={phoneHref}
-                  className="flex items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
-                >
-                  <Phone
-                    size={20}
-                    className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
-                    aria-hidden="true"
-                  />
-                  <span>
-                    <strong className="block text-[var(--blc-green-900)]">
-                      {t("phone")}
-                    </strong>
-                    {settings.phone}
-                  </span>
-                </a>
-                <a
-                  href={whatsappHref}
-                  className="flex items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
-                >
-                  <MessageCircle
-                    size={20}
-                    className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
-                    aria-hidden="true"
-                  />
-                  <span>
-                    <strong className="block text-[var(--blc-green-900)]">
-                      {t("whatsapp")}
-                    </strong>
-                    {settings.whatsapp_number}
-                  </span>
-                </a>
-                <a
-                  href={`mailto:${settings.email}`}
-                  className="flex items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
-                >
-                  <Mail
-                    size={20}
-                    className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
-                    aria-hidden="true"
-                  />
-                  <span>
-                    <strong className="block text-[var(--blc-green-900)]">
-                      {t("email")}
-                    </strong>
-                    {settings.email}
-                  </span>
-                </a>
-                <div className="flex items-start gap-3">
-                  <MapPin
-                    size={20}
-                    className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
-                    aria-hidden="true"
-                  />
-                  <span>
-                    <strong className="block text-[var(--blc-green-900)]">
-                      {t("address")}
-                    </strong>
-                    {settings.address}
-                  </span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Clock3
-                    size={20}
-                    className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
-                    aria-hidden="true"
-                  />
-                  <span>
-                    <strong className="block text-[var(--blc-green-900)]">
-                      {t("working_hours")}
-                    </strong>
-                    {settings.working_hours}
-                  </span>
-                </div>
+                {/* PHONE */}
+                {phone && (
+                  <a
+                    href={phoneHref}
+                    className="flex items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
+                  >
+                    <Phone
+                      size={20}
+                      className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
+                      aria-hidden="true"
+                    />
+
+                    <span>
+                      <strong className="block text-[var(--blc-green-900)]">
+                        {t("phone")}
+                      </strong>
+
+                      {phone}
+                    </span>
+                  </a>
+                )}
+
+                {/* WHATSAPP */}
+                {whatsappNumber && (
+                  <a
+                    href={whatsappHref}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
+                  >
+                    <MessageCircle
+                      size={20}
+                      className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
+                      aria-hidden="true"
+                    />
+
+                    <span>
+                      <strong className="block text-[var(--blc-green-900)]">
+                        {t("whatsapp")}
+                      </strong>
+
+                      {whatsappNumber}
+                    </span>
+                  </a>
+                )}
+
+                {/* EMAIL */}
+                {email && (
+                  <a
+                    href={`mailto:${email}`}
+                    className="flex items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
+                  >
+                    <Mail
+                      size={20}
+                      className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
+                      aria-hidden="true"
+                    />
+
+                    <span>
+                      <strong className="block text-[var(--blc-green-900)]">
+                        {t("email")}
+                      </strong>
+
+                      {email}
+                    </span>
+                  </a>
+                )}
+
+                {/* ADDRESS */}
+                {address && (
+                  <div className="flex items-start gap-3">
+                    <MapPin
+                      size={20}
+                      className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
+                      aria-hidden="true"
+                    />
+
+                    <span>
+                      <strong className="block text-[var(--blc-green-900)]">
+                        {t("address")}
+                      </strong>
+
+                      {address}
+                    </span>
+                  </div>
+                )}
               </div>
+
+              {/* DYNAMIC TIMETABLE */}
+              {timetable.length > 0 && (
+                <div className="mt-8 border-t border-[var(--blc-sand-200)] pt-6">
+                  <div className="flex items-start gap-3">
+                    <Clock3
+                      size={20}
+                      className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
+                      aria-hidden="true"
+                    />
+
+                    <div className="w-full">
+                      <h3 className="font-semibold text-[var(--blc-green-900)]">
+                        {t("working_hours")}
+                      </h3>
+
+                      <div className="mt-3 grid gap-2">
+                        {timetable.map((item) => (
+                          <div
+                            key={item.name}
+                            className="flex items-center justify-between gap-4 text-sm text-[var(--blc-green-700)]"
+                          >
+                            <span>{item.day || item.name}</span>
+
+                            <span className="font-medium text-[var(--blc-green-900)]">
+                              {item.start_time && item.end_time
+                                ? `${item.start_time} - ${item.end_time}`
+                                : item.start_time || item.end_time || ""}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SOCIAL LINKS */}
               {socialLinks.length > 0 && (
                 <div className="mt-8 border-t border-[var(--blc-sand-200)] pt-6">
                   <h3 className="font-semibold text-[var(--blc-green-900)]">
                     {t("social")}
                   </h3>
+
                   <div className="mt-3 flex flex-wrap gap-3">
                     {socialLinks.map((social) => (
                       <a
@@ -182,11 +327,14 @@ export default async function ContactPage({
                   </div>
                 </div>
               )}
+
+              {/* MAP */}
               {settings.map_embed_url && (
                 <div className="mt-8">
                   <h3 className="mb-3 font-semibold text-[var(--blc-green-900)]">
                     {t("map")}
                   </h3>
+
                   <iframe
                     title={t("map")}
                     src={settings.map_embed_url}
@@ -197,10 +345,13 @@ export default async function ContactPage({
                 </div>
               )}
             </aside>
+
+            {/* CONTACT FORM */}
             <section className="rounded-card border border-[var(--blc-sand-200)] bg-white p-7 shadow-soft">
               <h2 className="text-2xl font-bold text-[var(--blc-green-900)]">
                 {t("form_title")}
               </h2>
+
               <div className="mt-7">
                 <ContactForm
                   locale={locale}
