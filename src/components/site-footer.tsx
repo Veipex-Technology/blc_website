@@ -1,18 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Link2 } from "lucide-react";
+
 import type { Locale } from "@/i18n/routing";
 import type { SiteSettings } from "@/lib/erp/types";
+import { getServicesFromERP } from "@/lib/erp/services";
 
-const serviceKeys = [
-  "elderly_care",
-  "home_nursing",
-  "post_hospital",
-  "rehabilitation",
-  "diagnostics",
-  "caregiver",
-  "foot_care",
-] as const;
 const socialConfig = [
   { key: "facebook", labelKey: "facebook" },
   { key: "instagram", labelKey: "instagram" },
@@ -22,12 +15,11 @@ const socialConfig = [
   { key: "x", labelKey: "x" },
 ] as const;
 
-export function SiteFooter({
+export async function SiteFooter({
   locale,
   settings,
   labels,
   navLabels,
-  services,
 }: {
   locale: Locale;
   settings: SiteSettings;
@@ -57,26 +49,50 @@ export function SiteFooter({
     blog: string;
     contact: string;
   };
-  services: Record<(typeof serviceKeys)[number], string>;
 }) {
+  const [erpServices] = await Promise.all([getServicesFromERP()]);
+
   const socialLinks = socialConfig
-    .map((social) => ({ ...social, href: settings.social[social.key] }))
+    .map((social) => ({
+      ...social,
+      href: settings.social[social.key],
+    }))
     .filter((social): social is typeof social & { href: string } =>
       Boolean(social.href),
     );
+
   const quickLinks = [
-    { href: `/${locale}`, label: navLabels.home },
-    { href: `/${locale}/about`, label: navLabels.about },
-    { href: `/${locale}/services`, label: navLabels.services },
-    { href: `/${locale}/blog`, label: navLabels.blog },
-    { href: `/${locale}/contact`, label: navLabels.contact },
+    {
+      href: `/${locale}`,
+      label: navLabels.home,
+    },
+    {
+      href: `/${locale}/about`,
+      label: navLabels.about,
+    },
+    {
+      href: `/${locale}/services`,
+      label: navLabels.services,
+    },
+    {
+      href: `/${locale}/blog`,
+      label: navLabels.blog,
+    },
+    {
+      href: `/${locale}/contact`,
+      label: navLabels.contact,
+    },
   ];
+
+  const isArabic = locale === "ar";
+
   return (
     <footer
       className="bg-[var(--blc-green-900)] px-5 py-12 text-white lg:px-8"
       role="contentinfo"
     >
       <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-2 lg:grid-cols-4">
+        {/* Brand */}
         <div>
           <div className="inline-flex rounded-xl bg-white p-2">
             <Image
@@ -87,9 +103,11 @@ export function SiteFooter({
               className="h-12 w-auto object-contain"
             />
           </div>
+
           <p className="mt-4 max-w-xs text-sm text-[var(--blc-cream-100)]">
             {labels.tagline}
           </p>
+
           <div className="mt-5 flex flex-wrap gap-3" aria-label={labels.follow}>
             {socialLinks.map(({ key, labelKey, href }) => (
               <a
@@ -105,27 +123,51 @@ export function SiteFooter({
             ))}
           </div>
         </div>
+
+        {/* Dynamic ERP Services */}
         <div>
           <h2 className="font-semibold text-[var(--blc-gold-300)]">
             {labels.services}
           </h2>
+
           <ul className="mt-4 grid gap-2 text-sm text-[var(--blc-cream-100)]">
-            {serviceKeys.map((key) => (
-              <li key={key}>
-                <Link
-                  href={`/${locale}/services`}
-                  className="hover:text-white focus-ring-dark"
-                >
-                  {services[key]}
-                </Link>
-              </li>
-            ))}
+            {erpServices.map((service) => {
+              const serviceName = isArabic
+                ? service.service_name_ar || service.service_name
+                : service.service_name;
+
+              const serviceSlug = isArabic
+                ? service.ar_slug || service.en_slug
+                : service.en_slug || service.ar_slug;
+
+              if (!serviceName) {
+                return null;
+              }
+
+              const href = serviceSlug
+                ? `/${locale}/services/${encodeURIComponent(serviceSlug)}`
+                : `/${locale}/services`;
+
+              return (
+                <li key={service.name}>
+                  <Link
+                    href={href}
+                    className="hover:text-white focus-ring-dark"
+                  >
+                    {serviceName}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </div>
+
+        {/* Quick Links */}
         <div>
           <h2 className="font-semibold text-[var(--blc-gold-300)]">
             {labels.quickLinks}
           </h2>
+
           <ul className="mt-4 grid gap-2 text-sm text-[var(--blc-cream-100)]">
             {quickLinks.map((link) => (
               <li key={link.href}>
@@ -137,6 +179,7 @@ export function SiteFooter({
                 </Link>
               </li>
             ))}
+
             <li>
               <Link
                 href={`/${locale}/privacy-policy`}
@@ -147,10 +190,13 @@ export function SiteFooter({
             </li>
           </ul>
         </div>
+
+        {/* Contact */}
         <div>
           <h2 className="font-semibold text-[var(--blc-gold-300)]">
             {labels.contact}
           </h2>
+
           <address className="mt-4 grid gap-2 text-sm not-italic text-[var(--blc-cream-100)]">
             <a
               href={`tel:${settings.phone.replace(/[^+\d]/g, "")}`}
@@ -158,18 +204,22 @@ export function SiteFooter({
             >
               {labels.phone}: {settings.phone}
             </a>
+
             <a
               href={`mailto:${settings.email}`}
               className="break-all hover:text-white focus-ring-dark"
             >
               {labels.email}: {settings.email}
             </a>
+
             <span>
               {labels.address}: {settings.address}
             </span>
           </address>
         </div>
       </div>
+
+      {/* Copyright */}
       <p className="mx-auto mt-10 max-w-7xl border-t border-white/20 pt-5 text-sm text-[var(--blc-cream-100)]">
         {labels.rights}
       </p>
