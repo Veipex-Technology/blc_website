@@ -11,6 +11,7 @@ import { getTranslations } from "next-intl/server";
 
 import { getServices, getSiteSettings } from "@/lib/erp/api";
 import { getBLCContactUsInfoFromERP } from "@/lib/erp/contact-info";
+import { getSocialPlatformsFromERP } from "@/lib/erp/social-platforms";
 
 import { ContactForm } from "@/components/contact-form";
 import { Container } from "@/components/ui/container";
@@ -18,15 +19,6 @@ import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
 import type { Locale } from "@/i18n/routing";
-
-const socialConfig = [
-  { key: "facebook", label: "facebook" },
-  { key: "instagram", label: "instagram" },
-  { key: "linkedin", label: "linkedin" },
-  { key: "youtube", label: "youtube" },
-  { key: "tiktok", label: "tiktok" },
-  { key: "x", label: "x" },
-] as const;
 
 export async function generateMetadata({
   params,
@@ -90,11 +82,13 @@ export default async function ContactPage({
    * - Social links
    * - Map
    */
-  const [contactInfoRecords, services, settings] = await Promise.all([
-    getBLCContactUsInfoFromERP(),
-    getServices(locale),
-    getSiteSettings(locale),
-  ]);
+  const [contactInfoRecords, services, settings, socialPlatforms] =
+    await Promise.all([
+      getBLCContactUsInfoFromERP(),
+      getServices(locale),
+      getSiteSettings(locale),
+      getSocialPlatformsFromERP(),
+    ]);
 
   /*
    * BLC-Contact-us Info normally contains the contact information.
@@ -152,14 +146,14 @@ export default async function ContactPage({
    * Social links can continue coming from Website Info /
    * Site Settings.
    */
-  const socialLinks = socialConfig
+  const socialLinks = socialPlatforms
     .map((social) => ({
-      ...social,
-      href: settings.social[social.key],
+      name: social.name,
+      platformName: social.platform_name?.trim() || "",
+      href: social.platform_url?.trim() || "",
+      icon: social.platform_icon?.trim() || "",
     }))
-    .filter((social): social is typeof social & { href: string } =>
-      Boolean(social.href),
-    );
+    .filter((social) => Boolean(social.platformName) && Boolean(social.href));
 
   /*
    * Dynamic timetable from BLC-Contact-us Info.
@@ -314,20 +308,28 @@ export default async function ContactPage({
                   <div className="mt-3 flex flex-wrap gap-3">
                     {socialLinks.map((social) => (
                       <a
-                        key={social.key}
+                        key={social.name}
                         href={social.href}
                         target="_blank"
                         rel="noreferrer"
-                        aria-label={footer(social.label)}
+                        aria-label={social.platformName}
+                        title={social.platformName}
                         className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-full border border-[var(--blc-green-700)] text-[var(--blc-green-900)] hover:border-[var(--blc-gold-500)] focus-ring-light"
                       >
-                        <Link2 size={18} aria-hidden="true" />
+                        {social.icon ? (
+                          <img
+                            src={social.icon}
+                            alt={social.platformName}
+                            className="h-5 w-5 object-contain"
+                          />
+                        ) : (
+                          <Link2 size={18} aria-hidden="true" />
+                        )}
                       </a>
                     ))}
                   </div>
                 </div>
               )}
-
               {/* MAP */}
               {settings.map_embed_url && (
                 <div className="mt-8">
