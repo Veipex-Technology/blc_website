@@ -1,15 +1,25 @@
 export type MissionVisionBLC = {
   name: string;
 
-  // Mission
+  // English Mission
   title?: string;
   description?: string;
   mission_image?: string;
 
-  // Vision
+  // English Vision
   vission_title?: string;
   vission_description?: string;
   vission_image?: string;
+
+  // Arabic Mission
+  ar_mission_title?: string;
+  ar_mission_description?: string;
+  ar_mission_image?: string;
+
+  // Arabic Vision
+  ar_vission_title?: string;
+  ar_vission_description?: string;
+  ar_vission_image?: string;
 };
 
 function getErpConfig() {
@@ -41,12 +51,26 @@ export async function getMissionVisionFromERP(): Promise<MissionVisionBLC[]> {
 
   const fields = [
     "name",
+
+    // English Mission
     "title",
     "description",
     "mission_image",
+
+    // English Vision
     "vission_title",
     "vission_description",
     "vission_image",
+
+    // Arabic Mission
+    "ar_mission_title",
+    "ar_mission_description",
+    "ar_mission_image",
+
+    // Arabic Vision
+    "ar_vission_title",
+    "ar_vission_description",
+    "ar_vission_image",
   ];
 
   const params = new URLSearchParams({

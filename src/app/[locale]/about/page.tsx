@@ -50,28 +50,52 @@ export default async function AboutPage({
     namespace: "common",
   });
 
-  // Get Mission & Vision from ERPNext
   const missionVisionRecords = await getMissionVisionFromERP();
 
-  // Use the first Mission-Vision-BLC record
   const missionVision = missionVisionRecords[0] ?? null;
 
-  const phone = "tel:[Phone Number]";
+  /*
+   * Select Mission/Vision content according to locale.
+   *
+   * English:
+   * title / description / mission_image
+   * vission_title / vission_description / vission_image
+   *
+   * Arabic:
+   * ar_mission_title / ar_mission_description / ar_mission_image
+   * ar_vission_title / ar_vission_description / ar_vission_image
+   */
 
-  const whatsapp = `https://wa.me/?text=${encodeURIComponent(
-    common("whatsapp_prefill"),
-  )}`;
+  const isArabic = locale === "ar";
 
-  // ERP Text Editor fields return HTML.
-  const missionDescription = missionVision?.description
-    ? sanitizeHtml(missionVision.description)
-    : "";
+  const missionTitle = isArabic
+    ? missionVision?.ar_mission_title || missionVision?.title
+    : missionVision?.title;
 
-  const visionDescription = missionVision?.vission_description
-    ? sanitizeHtml(missionVision.vission_description)
-    : "";
+  const missionDescription = isArabic
+    ? missionVision?.ar_mission_description || missionVision?.description
+    : missionVision?.description;
 
-  // ERP image paths may be relative to ERPNext.
+  const missionImage = isArabic
+    ? missionVision?.ar_mission_image || missionVision?.mission_image
+    : missionVision?.mission_image;
+
+  const visionTitle = isArabic
+    ? missionVision?.ar_vission_title || missionVision?.vission_title
+    : missionVision?.vission_title;
+
+  const visionDescription = isArabic
+    ? missionVision?.ar_vission_description ||
+      missionVision?.vission_description
+    : missionVision?.vission_description;
+
+  const visionImage = isArabic
+    ? missionVision?.ar_vission_image || missionVision?.vission_image
+    : missionVision?.vission_image;
+
+  /**
+   * Convert ERPNext file paths to full URLs.
+   */
   const getErpImageUrl = (image?: string) => {
     if (!image) return null;
 
@@ -88,8 +112,20 @@ export default async function AboutPage({
     return `${baseUrl}${image.startsWith("/") ? image : `/${image}`}`;
   };
 
-  const missionImage = getErpImageUrl(missionVision?.mission_image);
-  const visionImage = getErpImageUrl(missionVision?.vission_image);
+  const missionImageUrl = getErpImageUrl(missionImage);
+  const visionImageUrl = getErpImageUrl(visionImage);
+
+  const missionHtml = missionDescription
+    ? sanitizeHtml(missionDescription)
+    : "";
+
+  const visionHtml = visionDescription ? sanitizeHtml(visionDescription) : "";
+
+  const phone = "tel:[Phone Number]";
+
+  const whatsapp = `https://wa.me/?text=${encodeURIComponent(
+    common("whatsapp_prefill"),
+  )}`;
 
   const consultant = (() =>
     null as {
@@ -102,6 +138,7 @@ export default async function AboutPage({
 
   return (
     <main>
+      {/* Story */}
       <Section>
         <Container>
           <Reveal>
@@ -114,6 +151,7 @@ export default async function AboutPage({
         </Container>
       </Section>
 
+      {/* Standards */}
       <Section variant="sand">
         <Container>
           <div className="relative overflow-hidden">
@@ -139,11 +177,7 @@ export default async function AboutPage({
                   <article className="rounded-card bg-white p-7 shadow-soft">
                     <Image
                       src={consultant.photo_url}
-                      alt={
-                        locale === "ar"
-                          ? consultant.name_ar
-                          : consultant.name_en
-                      }
+                      alt={isArabic ? consultant.name_ar : consultant.name_en}
                       width={120}
                       height={120}
                       className="size-24 rounded-full object-cover"
@@ -154,13 +188,11 @@ export default async function AboutPage({
                     </p>
 
                     <h2 className="mt-2 text-2xl font-bold text-[var(--blc-green-900)]">
-                      {locale === "ar"
-                        ? consultant.name_ar
-                        : consultant.name_en}
+                      {isArabic ? consultant.name_ar : consultant.name_en}
                     </h2>
 
                     <p className="mt-3 text-[var(--blc-green-700)]">
-                      {locale === "ar" ? consultant.bio_ar : consultant.bio_en}
+                      {isArabic ? consultant.bio_ar : consultant.bio_en}
                     </p>
                   </article>
                 </Reveal>
@@ -170,6 +202,7 @@ export default async function AboutPage({
         </Container>
       </Section>
 
+      {/* More About BLC */}
       <Section variant="cream">
         <Container>
           <Reveal>
@@ -189,8 +222,8 @@ export default async function AboutPage({
             <SectionHeading
               title={
                 missionVision
-                  ? `${missionVision.title || t("mission_title")} & ${
-                      missionVision.vission_title || t("vision_title")
+                  ? `${missionTitle || t("mission_title")} & ${
+                      visionTitle || t("vision_title")
                     }`
                   : `${t("mission_title")} & ${t("vision_title")}`
               }
@@ -202,11 +235,11 @@ export default async function AboutPage({
               {/* Mission */}
               <Reveal>
                 <article className="h-full overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white">
-                  {missionImage && (
+                  {missionImageUrl && (
                     <div className="relative aspect-[16/9] w-full">
                       <Image
-                        src={missionImage}
-                        alt={missionVision.title || "Mission"}
+                        src={missionImageUrl}
+                        alt={missionTitle || t("mission_title")}
                         fill
                         sizes="(max-width: 768px) 100vw, 50vw"
                         className="object-cover"
@@ -216,14 +249,14 @@ export default async function AboutPage({
 
                   <div className="p-8">
                     <h2 className="text-2xl font-bold text-[var(--blc-green-900)]">
-                      {missionVision.title || t("mission_title")}
+                      {missionTitle || t("mission_title")}
                     </h2>
 
-                    {missionDescription && (
+                    {missionHtml && (
                       <div
                         className="prose prose-lg mt-4 max-w-none text-[var(--blc-green-700)]"
                         dangerouslySetInnerHTML={{
-                          __html: missionDescription,
+                          __html: missionHtml,
                         }}
                       />
                     )}
@@ -234,11 +267,11 @@ export default async function AboutPage({
               {/* Vision */}
               <Reveal>
                 <article className="h-full overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white">
-                  {visionImage && (
+                  {visionImageUrl && (
                     <div className="relative aspect-[16/9] w-full">
                       <Image
-                        src={visionImage}
-                        alt={missionVision.vission_title || "Vision"}
+                        src={visionImageUrl}
+                        alt={visionTitle || t("vision_title")}
                         fill
                         sizes="(max-width: 768px) 100vw, 50vw"
                         className="object-cover"
@@ -248,14 +281,14 @@ export default async function AboutPage({
 
                   <div className="p-8">
                     <h2 className="text-2xl font-bold text-[var(--blc-green-900)]">
-                      {missionVision.vission_title || t("vision_title")}
+                      {visionTitle || t("vision_title")}
                     </h2>
 
-                    {visionDescription && (
+                    {visionHtml && (
                       <div
                         className="prose prose-lg mt-4 max-w-none text-[var(--blc-green-700)]"
                         dangerouslySetInnerHTML={{
-                          __html: visionDescription,
+                          __html: visionHtml,
                         }}
                       />
                     )}
@@ -293,6 +326,7 @@ export default async function AboutPage({
         </Container>
       </Section>
 
+      {/* Promise */}
       <Section variant="cream">
         <Container>
           <Reveal>
@@ -312,6 +346,7 @@ export default async function AboutPage({
         </Container>
       </Section>
 
+      {/* CTA */}
       <Section variant="dark" className="text-center">
         <Container>
           <Reveal>
