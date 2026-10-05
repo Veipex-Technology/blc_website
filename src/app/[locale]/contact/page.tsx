@@ -1,4 +1,6 @@
+import Image from "next/image";
 import {
+  ArrowUpRight,
   Clock3,
   Link2,
   Mail,
@@ -15,6 +17,7 @@ import { getSocialPlatformsFromERP } from "@/lib/erp/social-platforms";
 
 import { ContactForm } from "@/components/contact-form";
 import { Container } from "@/components/ui/container";
+import { Reveal } from "@/components/reveal";
 import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
@@ -162,13 +165,70 @@ export default async function ContactPage({
 
   return (
     <main>
-      <Section>
+      <Section variant="cream" dir={locale === "ar" ? "rtl" : "ltr"}>
         <Container>
-          <SectionHeading title={t("title")} subtitle={t("intro")} />
+          <div className="relative grid items-center gap-10 overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white p-6 shadow-soft sm:p-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16 lg:p-12">
+            <div
+              className="pointer-events-none absolute -end-20 -top-24 size-64 rounded-full border-[28px] border-[var(--blc-gold-300)]/20"
+              aria-hidden="true"
+            />
+
+            <Reveal className="relative z-10 max-w-xl">
+              <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--blc-gold-500)]/40 bg-[var(--blc-cream-100)] px-4 py-2 text-sm font-semibold uppercase tracking-wide text-[var(--blc-gold-500)]">
+                <MapPin size={17} aria-hidden="true" />
+                {common("brand_name")}
+              </p>
+              <SectionHeading
+                title={t("title")}
+                subtitle={t("intro")}
+                className="max-w-xl"
+              />
+            </Reveal>
+
+            <Reveal className="relative z-10 mx-auto w-full max-w-xl lg:max-w-none">
+              <div
+                className="absolute -inset-4 rounded-[1.5rem] border border-[var(--blc-gold-300)]/50"
+                aria-hidden="true"
+              />
+              <div className="relative aspect-[4/3] overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-[var(--blc-green-900)] shadow-[0_18px_50px_rgb(2_56_48_/_0.16)]">
+                {settings.map_embed_url ? (
+                  <iframe
+                    title={t("map")}
+                    src={settings.map_embed_url}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    className="absolute inset-0 h-full w-full border-0"
+                  />
+                ) : (
+                  <Image
+                    src="/images/hero-placeholder.jpg"
+                    alt={
+                      locale === "ar"
+                        ? "التواصل مع بيتر لايف كير"
+                        : "Contact Better Life Care"
+                    }
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 52vw"
+                    className="object-cover transition-transform duration-700 hover:scale-105"
+                  />
+                )}
+                <div className="absolute bottom-5 start-5 flex items-center gap-3 rounded-card border border-white/30 bg-[var(--blc-green-900)]/85 px-4 py-3 text-white shadow-soft backdrop-blur-sm sm:bottom-6 sm:start-6">
+                  <MapPin
+                    size={20}
+                    className="text-[var(--blc-gold-300)]"
+                    aria-hidden="true"
+                  />
+                  <span className="text-sm font-semibold">
+                    {address || t("details")}
+                  </span>
+                </div>
+              </div>
+            </Reveal>
+          </div>
 
           <div className="mt-12 grid gap-8 lg:grid-cols-2 lg:items-start">
             {/* CONTACT INFORMATION */}
-            <aside className="rounded-card bg-[var(--blc-cream-100)] p-7 shadow-soft">
+            <aside className="rounded-card bg-[var(--blc-white)] p-7 shadow-soft">
               <h2 className="text-2xl font-bold text-[var(--blc-green-900)]">
                 {t("details")}
               </h2>
@@ -365,6 +425,95 @@ export default async function ContactPage({
           </div>
         </Container>
       </Section>
+
+      {settings.map_embed_url && (
+        <Section variant="sand" dir={locale === "ar" ? "rtl" : "ltr"}>
+          <Container>
+            <Reveal>
+              <SectionHeading
+                eyebrow={common("brand_name")}
+                title={t("map")}
+                subtitle={address || t("intro")}
+                className="mx-auto text-center"
+              />
+            </Reveal>
+
+            <div className="mt-10 grid gap-7 lg:grid-cols-[1.35fr_0.65fr] lg:items-stretch">
+              <Reveal className="h-full">
+                <div className="h-full overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white p-2 shadow-soft sm:p-3">
+                  <iframe
+                    title={t("map")}
+                    src={settings.map_embed_url}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    className="h-[360px] w-full rounded-card border-0 sm:h-[460px]"
+                  />
+                </div>
+              </Reveal>
+
+              <Reveal className="h-full">
+                <aside className="flex h-full flex-col rounded-card border border-[var(--blc-sand-200)] bg-white p-7 shadow-soft sm:p-9">
+                  <MapPin
+                    size={28}
+                    className="text-[var(--blc-gold-500)]"
+                    aria-hidden="true"
+                  />
+                  <h2 className="mt-5 text-2xl font-bold text-[var(--blc-green-900)]">
+                    {t("details")}
+                  </h2>
+
+                  <div className="mt-6 grid gap-5 text-[var(--blc-green-700)]">
+                    {address && (
+                      <p>
+                        <strong className="block text-[var(--blc-green-900)]">
+                          {t("address")}
+                        </strong>
+                        {address}
+                      </p>
+                    )}
+                    {phone && (
+                      <a
+                        href={phoneHref}
+                        className="block hover:text-[var(--blc-green-900)] focus-ring-light"
+                      >
+                        <strong className="block text-[var(--blc-green-900)]">
+                          {t("phone")}
+                        </strong>
+                        {phone}
+                      </a>
+                    )}
+                    {email && (
+                      <a
+                        href={`mailto:${email}`}
+                        className="block break-words hover:text-[var(--blc-green-900)] focus-ring-light"
+                      >
+                        <strong className="block text-[var(--blc-green-900)]">
+                          {t("email")}
+                        </strong>
+                        {email}
+                      </a>
+                    )}
+                  </div>
+
+                  <a
+                    href={settings.map_embed_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-auto inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--blc-green-900)] px-5 font-semibold text-white hover:bg-[var(--blc-green-700)] focus-ring-dark"
+                  >
+                    {t("map")}
+                    <ArrowUpRight
+                      size={17}
+                      aria-hidden="true"
+                      className="rtl:rotate-180"
+                    />
+                  </a>
+                </aside>
+              </Reveal>
+            </div>
+          </Container>
+        </Section>
+      )}
     </main>
   );
 }

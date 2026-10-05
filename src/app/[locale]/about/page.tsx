@@ -1,6 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
-import { MessageCircle, Phone } from "lucide-react";
+import {
+  Eye,
+  Globe2,
+  GraduationCap,
+  HeartHandshake,
+  MessageCircle,
+  Phone,
+  TrendingUp,
+} from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import sanitizeHtml from "sanitize-html";
@@ -121,6 +129,28 @@ export default async function AboutPage({
 
   const visionHtml = visionDescription ? sanitizeHtml(visionDescription) : "";
 
+  const missionVisionPresentation = isArabic
+    ? {
+        eyebrow: "هدفنا",
+        title: "نسترشد برسالتنا ونقود برؤيتنا.",
+        subtitle:
+          "التزامنا بالرعاية الحانية والتميز المهني وتحسين جودة الحياة يوجّه كل ما نفعله.",
+        missionLabel: "رسالتنا",
+        visionLabel: "رؤيتنا",
+        missionFallback: "الرسالة",
+        visionFallback: "الرؤية",
+      }
+    : {
+        eyebrow: "Our Purpose",
+        title: "Driven by Mission. Guided by Vision.",
+        subtitle:
+          "Our commitment to compassionate care, professional excellence, and a better quality of life guides everything we do.",
+        missionLabel: "Our Mission",
+        visionLabel: "Our Vision",
+        missionFallback: "Mission",
+        visionFallback: "Vision",
+      };
+
   const phone = "tel:[Phone Number]";
 
   const whatsapp = `https://wa.me/?text=${encodeURIComponent(
@@ -136,18 +166,143 @@ export default async function AboutPage({
       bio_en: string;
     } | null)();
 
+  const consultantSection = isArabic
+    ? {
+        eyebrow: "التعليم التمريضي المهني",
+        title: "مستشار تمريض ألماني",
+        subtitle: "التعلم من الخبرة الدولية",
+        intro:
+          "يقدم مستشارنا الألماني خبرة مهنية في التمريض إلى فريقنا، ويساعد ممرضينا على التعلم والتطور والالتزام بالممارسات التمريضية المهنية لتقديم مستوى أعلى من الرعاية.",
+        body: "يعمل مستشارنا الألماني عن قرب مع فريق التمريض لتعزيز المعرفة المهنية والممارسات السريرية والتواصل ومعايير الجودة. ومن خلال التوجيه المنظم والتعلم العملي، يواصل ممرضونا تطوير المهارات اللازمة لتقديم رعاية آمنة وحانية ومهنية.",
+        badge: "خبرة ألمانية في التمريض",
+        imageAlt: "مستشار تمريض ألماني في بيئة تدريب سريرية",
+        highlights: [
+          {
+            icon: GraduationCap,
+            title: "تدريب مهني",
+            text: "إرشاد عملي يستند إلى معايير التمريض المهنية.",
+          },
+          {
+            icon: Globe2,
+            title: "خبرة ألمانية",
+            text: "معرفة وخبرة دولية تصل مباشرة إلى فريق التمريض لدينا.",
+          },
+          {
+            icon: TrendingUp,
+            title: "تطوير مستمر",
+            text: "تعلم مستمر يساعد ممرضينا على النمو مهنياً.",
+          },
+        ],
+      }
+    : {
+        eyebrow: "Professional Nursing Education",
+        title: "German Nursing Consultant",
+        subtitle: "Learning from international expertise",
+        intro:
+          "Our German consultant brings professional German nursing expertise to our team, helping our nurses learn, improve, and follow professional nursing practices to deliver a higher standard of care.",
+        body: "Our German consultant works closely with our nursing team to strengthen professional knowledge, clinical practices, communication, and quality standards. Through structured guidance and practical learning, our nurses continue developing the skills needed to provide safe, compassionate, and professional care.",
+        badge: "German Nursing Expertise",
+        imageAlt:
+          "German nursing consultant in a clinical training environment",
+        highlights: [
+          {
+            icon: GraduationCap,
+            title: "Professional Training",
+            text: "Practical guidance based on professional nursing standards.",
+          },
+          {
+            icon: Globe2,
+            title: "German Expertise",
+            text: "International knowledge and experience brought directly to our nursing team.",
+          },
+          {
+            icon: TrendingUp,
+            title: "Continuous Development",
+            text: "Ongoing learning that helps our nurses grow professionally.",
+          },
+        ],
+      };
+
   return (
     <main>
-      {/* Story */}
-      <Section>
-        <Container>
-          <Reveal>
-            <SectionHeading
-              eyebrow={t("story_title")}
-              title={t("title")}
-              subtitle={t("story_text")}
-            />
+      {/* Page Header */}
+      <Section
+        variant="dark"
+        dir={isArabic ? "rtl" : "ltr"}
+        className="relative overflow-hidden py-14 lg:py-20"
+      >
+        <Image
+          src="/brand/logo.png"
+          alt=""
+          width={320}
+          height={320}
+          className="pointer-events-none absolute -end-16 -top-24 w-72 opacity-[0.08] grayscale brightness-0 invert"
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute -bottom-28 -start-20 size-64 rounded-full border-[28px] border-[var(--blc-gold-300)]/15"
+          aria-hidden="true"
+        />
+        <Container className="relative">
+          <Reveal className="max-w-4xl">
+            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--blc-gold-300)]">
+              {t("story_title")}
+            </p>
+            <h1 className="max-w-3xl text-4xl font-bold leading-tight text-white sm:text-6xl lg:text-7xl">
+              {t("title")}
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--blc-cream-100)] sm:text-xl">
+              {common("tagline")}
+            </p>
           </Reveal>
+        </Container>
+      </Section>
+
+      {/* Story */}
+      <Section variant="cream" dir={isArabic ? "rtl" : "ltr"}>
+        <Container>
+          <div className="relative grid items-center gap-12 overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white p-6 shadow-soft sm:p-10 lg:grid-cols-[1fr_0.9fr] lg:gap-20 lg:p-14">
+            <div
+              className="pointer-events-none absolute -end-20 -top-24 size-72 rounded-full border-[30px] border-[var(--blc-gold-300)]/20"
+              aria-hidden="true"
+            />
+
+            <Reveal className="relative z-10 max-w-2xl">
+              <p className="mb-5 inline-flex rounded-full border border-[var(--blc-gold-500)]/40 bg-[var(--blc-cream-100)] px-4 py-2 text-sm font-semibold uppercase tracking-wide text-[var(--blc-gold-500)]">
+                {common("tagline")}
+              </p>
+              <SectionHeading
+                eyebrow={t("story_title")}
+                title={t("title")}
+                subtitle={t("story_text")}
+                className="max-w-2xl"
+              />
+            </Reveal>
+
+            <Reveal className="relative z-10 mx-auto w-full max-w-md lg:max-w-none">
+              <div
+                className="absolute -inset-4 rounded-[1.5rem] border border-[var(--blc-gold-300)]/50"
+                aria-hidden="true"
+              />
+              <div className="relative flex aspect-[4/5] items-center justify-center overflow-hidden rounded-card bg-[var(--blc-green-900)] shadow-[0_20px_55px_rgb(2_56_48_/_0.18)] sm:aspect-[5/4] lg:aspect-[4/5]">
+                <Image
+                  src="/brand/logo.png"
+                  alt={common("brand_name")}
+                  width={420}
+                  height={420}
+                  className="relative z-10 w-3/5 max-w-xs object-contain brightness-0 invert opacity-90 transition-transform duration-700 hover:scale-105"
+                />
+                <div
+                  className="absolute -bottom-20 -start-16 size-64 rounded-full border-[28px] border-[var(--blc-gold-300)]/20"
+                  aria-hidden="true"
+                />
+                <div
+                  className="absolute -end-12 -top-12 size-44 rounded-full bg-[var(--blc-green-700)]/60"
+                  aria-hidden="true"
+                />
+              </div>
+            </Reveal>
+          </div>
         </Container>
       </Section>
 
@@ -202,6 +357,88 @@ export default async function AboutPage({
         </Container>
       </Section>
 
+      {/* German Nursing Consultant */}
+      <Section variant="cream" dir={isArabic ? "rtl" : "ltr"}>
+        <Container>
+          <div className="relative overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white p-5 shadow-soft sm:p-8 lg:p-10">
+            <div
+              className="pointer-events-none absolute -end-20 -top-20 size-56 rounded-full border-[24px] border-[var(--blc-gold-300)]/20"
+              aria-hidden="true"
+            />
+
+            <div className="relative grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+              <Reveal>
+                <div className="relative mx-auto w-full max-w-xl lg:mx-0">
+                  <div
+                    className="absolute -bottom-4 -start-4 size-28 rounded-card bg-[var(--blc-green-900)]/10 sm:-bottom-5 sm:-start-5"
+                    aria-hidden="true"
+                  />
+                  <div className="relative aspect-[4/5] overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-[var(--blc-sand-200)] shadow-soft">
+                    <Image
+                      src="/images/hero-placeholder.jpg"
+                      alt={consultantSection.imageAlt}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 45vw"
+                      className="object-cover transition-transform duration-700 hover:scale-105"
+                    />
+                    <div className="absolute inset-x-4 bottom-4 rounded-card border border-white/40 bg-[var(--blc-green-900)]/90 p-4 text-white backdrop-blur-sm sm:inset-x-6 sm:bottom-6">
+                      <p className="text-sm font-semibold tracking-wide text-[var(--blc-gold-300)]">
+                        {consultantSection.badge}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Reveal>
+
+              <Reveal>
+                <div className="max-w-2xl">
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--blc-gold-500)]">
+                    {consultantSection.eyebrow}
+                  </p>
+                  <h2 className="mt-3 text-3xl font-bold leading-tight text-[var(--blc-green-900)] sm:text-4xl lg:text-5xl">
+                    {consultantSection.title}
+                  </h2>
+                  <p className="mt-4 text-lg font-semibold text-[var(--blc-green-700)]">
+                    {consultantSection.subtitle}
+                  </p>
+                  <p className="mt-5 text-lg leading-8 text-[var(--blc-green-700)]">
+                    {consultantSection.intro}
+                  </p>
+                  <p className="mt-4 leading-7 text-[var(--blc-green-700)]">
+                    {consultantSection.body}
+                  </p>
+
+                  <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                    {consultantSection.highlights.map((highlight) => {
+                      const Icon = highlight.icon;
+
+                      return (
+                        <article
+                          key={highlight.title}
+                          className="rounded-card border border-[var(--blc-sand-200)] bg-[var(--blc-cream-100)]/50 p-4 transition-colors hover:border-[var(--blc-gold-300)]"
+                        >
+                          <Icon
+                            size={22}
+                            className="text-[var(--blc-gold-500)]"
+                            aria-hidden="true"
+                          />
+                          <h3 className="mt-4 text-base font-bold text-[var(--blc-green-900)]">
+                            {highlight.title}
+                          </h3>
+                          <p className="mt-2 text-sm leading-6 text-[var(--blc-green-700)]">
+                            {highlight.text}
+                          </p>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </div>
+              </Reveal>
+            </div>
+          </div>
+        </Container>
+      </Section>
+
       {/* More About BLC */}
       <Section variant="cream">
         <Container>
@@ -215,132 +452,178 @@ export default async function AboutPage({
         </Container>
       </Section>
 
-      {/* Mission & Vision */}
-      <Section>
+      {/* Dynamic Mission & Vision Presentation */}
+      <Section variant="sand" dir={isArabic ? "rtl" : "ltr"}>
         <Container>
           <Reveal>
             <SectionHeading
-              title={
-                missionVision
-                  ? `${missionTitle || t("mission_title")} & ${
-                      visionTitle || t("vision_title")
-                    }`
-                  : `${t("mission_title")} & ${t("vision_title")}`
-              }
+              eyebrow={missionVisionPresentation.eyebrow}
+              title={missionVisionPresentation.title}
+              subtitle={missionVisionPresentation.subtitle}
+              className="mx-auto text-center"
             />
           </Reveal>
 
-          {missionVision ? (
-            <div className="mt-10 grid gap-6 md:grid-cols-2">
-              {/* Mission */}
-              <Reveal>
-                <article className="h-full overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white">
-                  {missionImageUrl && (
-                    <div className="relative aspect-[16/9] w-full">
-                      <Image
-                        src={missionImageUrl}
-                        alt={missionTitle || t("mission_title")}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        className="object-cover"
+          <div className="mt-12 grid items-stretch gap-7 lg:grid-cols-2 lg:gap-10">
+            <Reveal>
+              <article className="group flex h-full flex-col overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white shadow-soft transition-shadow duration-500 hover:shadow-[0_16px_40px_rgb(2_56_48_/_0.14)]">
+                <div className="relative aspect-[16/10] overflow-hidden border-b border-[var(--blc-sand-200)] bg-[var(--blc-green-900)]">
+                  {missionImageUrl ? (
+                    <Image
+                      src={missionImageUrl}
+                      alt={
+                        missionTitle || missionVisionPresentation.missionLabel
+                      }
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_20%_20%,rgba(229,198,144,0.42),transparent_26%),linear-gradient(135deg,var(--blc-green-900),var(--blc-green-700))]">
+                      <div
+                        className="absolute -end-12 -top-16 size-52 rounded-full border border-white/20"
+                        aria-hidden="true"
                       />
+                      <div
+                        className="absolute -bottom-20 -start-10 size-56 rounded-full border-[18px] border-[var(--blc-gold-300)]/15"
+                        aria-hidden="true"
+                      />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+                        <div className="flex size-16 items-center justify-center rounded-full border border-white/40 bg-white/10 backdrop-blur-sm">
+                          <HeartHandshake
+                            size={30}
+                            strokeWidth={1.5}
+                            aria-hidden="true"
+                          />
+                        </div>
+                        <span className="mt-4 text-sm font-semibold tracking-[0.16em] text-[var(--blc-gold-300)]">
+                          {missionVisionPresentation.missionFallback}
+                        </span>
+                      </div>
                     </div>
                   )}
+                </div>
 
-                  <div className="p-8">
-                    <h2 className="text-2xl font-bold text-[var(--blc-green-900)]">
-                      {missionTitle || t("mission_title")}
-                    </h2>
+                <div className="relative flex-1 p-7 sm:p-9">
+                  <div
+                    className="absolute start-7 top-0 h-1 w-12 -translate-y-1/2 rounded-full bg-[var(--blc-gold-500)] sm:start-9"
+                    aria-hidden="true"
+                  />
+                  <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--blc-gold-500)]">
+                    <HeartHandshake size={17} aria-hidden="true" />
+                    {missionVisionPresentation.missionLabel}
+                  </p>
+                  <h3 className="mt-4 text-2xl font-bold leading-tight text-[var(--blc-green-900)] sm:text-3xl">
+                    {missionTitle || t("mission_title")}
+                  </h3>
+                  {missionHtml ? (
+                    <div
+                      className="prose mt-4 max-w-none text-[var(--blc-green-700)]"
+                      dangerouslySetInnerHTML={{ __html: missionHtml }}
+                    />
+                  ) : (
+                    <p className="mt-4 leading-7 text-[var(--blc-green-700)]">
+                      {t("mission")}
+                    </p>
+                  )}
+                </div>
+              </article>
+            </Reveal>
 
-                    {missionHtml && (
+            <Reveal>
+              <article className="group flex h-full flex-col overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white shadow-soft transition-shadow duration-500 hover:shadow-[0_16px_40px_rgb(2_56_48_/_0.14)]">
+                <div className="relative aspect-[16/10] overflow-hidden border-b border-[var(--blc-sand-200)] bg-[var(--blc-green-700)]">
+                  {visionImageUrl ? (
+                    <Image
+                      src={visionImageUrl}
+                      alt={visionTitle || missionVisionPresentation.visionLabel}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_80%_20%,rgba(229,198,144,0.42),transparent_26%),linear-gradient(135deg,var(--blc-green-700),var(--blc-green-900))]">
                       <div
-                        className="prose prose-lg mt-4 max-w-none text-[var(--blc-green-700)]"
-                        dangerouslySetInnerHTML={{
-                          __html: missionHtml,
-                        }}
+                        className="absolute -start-12 -top-16 size-52 rounded-full border border-white/20"
+                        aria-hidden="true"
                       />
-                    )}
-                  </div>
-                </article>
-              </Reveal>
-
-              {/* Vision */}
-              <Reveal>
-                <article className="h-full overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white">
-                  {visionImageUrl && (
-                    <div className="relative aspect-[16/9] w-full">
-                      <Image
-                        src={visionImageUrl}
-                        alt={visionTitle || t("vision_title")}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        className="object-cover"
+                      <div
+                        className="absolute -bottom-20 -end-10 size-56 rounded-full border-[18px] border-[var(--blc-gold-300)]/15"
+                        aria-hidden="true"
                       />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+                        <div className="flex size-16 items-center justify-center rounded-full border border-white/40 bg-white/10 backdrop-blur-sm">
+                          <Eye size={30} strokeWidth={1.5} aria-hidden="true" />
+                        </div>
+                        <span className="mt-4 text-sm font-semibold tracking-[0.16em] text-[var(--blc-gold-300)]">
+                          {missionVisionPresentation.visionFallback}
+                        </span>
+                      </div>
                     </div>
                   )}
+                </div>
 
-                  <div className="p-8">
-                    <h2 className="text-2xl font-bold text-[var(--blc-green-900)]">
-                      {visionTitle || t("vision_title")}
-                    </h2>
-
-                    {visionHtml && (
-                      <div
-                        className="prose prose-lg mt-4 max-w-none text-[var(--blc-green-700)]"
-                        dangerouslySetInnerHTML={{
-                          __html: visionHtml,
-                        }}
-                      />
-                    )}
-                  </div>
-                </article>
-              </Reveal>
-            </div>
-          ) : (
-            <div className="mt-10 grid gap-6 md:grid-cols-2">
-              <Reveal>
-                <article className="h-full rounded-card border border-[var(--blc-sand-200)] p-8">
-                  <h2 className="text-2xl font-bold text-[var(--blc-green-900)]">
-                    {t("mission_title")}
-                  </h2>
-
-                  <p className="mt-4 text-lg text-[var(--blc-green-700)]">
-                    {t("mission")}
+                <div className="relative flex-1 p-7 sm:p-9">
+                  <div
+                    className="absolute start-7 top-0 h-1 w-12 -translate-y-1/2 rounded-full bg-[var(--blc-gold-500)] sm:start-9"
+                    aria-hidden="true"
+                  />
+                  <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--blc-gold-500)]">
+                    <Eye size={17} aria-hidden="true" />
+                    {missionVisionPresentation.visionLabel}
                   </p>
-                </article>
-              </Reveal>
-
-              <Reveal>
-                <article className="h-full rounded-card border border-[var(--blc-sand-200)] p-8">
-                  <h2 className="text-2xl font-bold text-[var(--blc-green-900)]">
-                    {t("vision_title")}
-                  </h2>
-
-                  <p className="mt-4 text-lg text-[var(--blc-green-700)]">
-                    {t("vision")}
-                  </p>
-                </article>
-              </Reveal>
-            </div>
-          )}
+                  <h3 className="mt-4 text-2xl font-bold leading-tight text-[var(--blc-green-900)] sm:text-3xl">
+                    {visionTitle || t("vision_title")}
+                  </h3>
+                  {visionHtml ? (
+                    <div
+                      className="prose mt-4 max-w-none text-[var(--blc-green-700)]"
+                      dangerouslySetInnerHTML={{ __html: visionHtml }}
+                    />
+                  ) : (
+                    <p className="mt-4 leading-7 text-[var(--blc-green-700)]">
+                      {t("vision")}
+                    </p>
+                  )}
+                </div>
+              </article>
+            </Reveal>
+          </div>
         </Container>
       </Section>
 
+      {/* Mission & Vision */}
+
       {/* Promise */}
-      <Section variant="cream">
+      <Section variant="cream" dir={isArabic ? "rtl" : "ltr"}>
         <Container>
           <Reveal>
-            <SectionHeading title={t("promise_title")} />
+            <SectionHeading
+              eyebrow={common("tagline")}
+              title={t("promise_title")}
+              className="max-w-2xl"
+            />
 
-            <div className="mt-8 grid gap-3">
-              {(["promise_1", "promise_2", "promise_3"] as const).map((key) => (
-                <p
-                  key={key}
-                  className="text-3xl font-bold text-[var(--blc-gold-500)] sm:text-4xl"
-                >
-                  {t(key)}
-                </p>
-              ))}
+            <div className="mt-10 grid gap-4 md:grid-cols-3">
+              {(["promise_1", "promise_2", "promise_3"] as const).map(
+                (key, index) => (
+                  <article
+                    key={key}
+                    className="group relative min-h-40 overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white p-7 shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-lg"
+                  >
+                    <span className="text-4xl font-bold text-[var(--blc-gold-300)]">
+                      0{index + 1}
+                    </span>
+                    <p className="relative z-10 mt-7 text-xl font-bold leading-snug text-[var(--blc-green-900)]">
+                      {t(key)}
+                    </p>
+                    <span
+                      className="absolute -bottom-12 -end-8 size-32 rounded-full border-[16px] border-[var(--blc-green-900)]/5 transition-transform duration-500 group-hover:scale-110"
+                      aria-hidden="true"
+                    />
+                  </article>
+                ),
+              )}
             </div>
           </Reveal>
         </Container>
