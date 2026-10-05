@@ -5,6 +5,7 @@ import { Link2 } from "lucide-react";
 import type { Locale } from "@/i18n/routing";
 import type { SiteSettings } from "@/lib/erp/types";
 import { getServicesFromERP } from "@/lib/erp/services";
+import { getBLCContactUsInfoFromERP } from "@/lib/erp/contact-info";
 
 const socialConfig = [
   { key: "facebook", labelKey: "facebook" },
@@ -50,7 +51,37 @@ export async function SiteFooter({
     contact: string;
   };
 }) {
-  const [erpServices] = await Promise.all([getServicesFromERP()]);
+  /*
+   * Get services and contact information directly from ERP.
+   */
+  const [erpServices, contactInfoRecords] = await Promise.all([
+    getServicesFromERP(),
+    getBLCContactUsInfoFromERP(),
+  ]);
+
+  /*
+   * BLC-Contact-us Info
+   *
+   * Uses the first ERP record.
+   */
+  const contactInfo = contactInfoRecords[0];
+
+  const phone = contactInfo?.phone_number?.trim() || "";
+  const whatsappNumber = contactInfo?.whats_app_number?.trim() || "";
+  const email = contactInfo?.email?.trim() || "";
+  const address = contactInfo?.address?.trim() || "";
+
+  /*
+   * Phone link.
+   */
+  const phoneHref = phone ? `tel:${phone.replace(/[^+\d]/g, "")}` : "#";
+
+  /*
+   * WhatsApp number is loaded from ERP as well.
+   */
+  const whatsappHref = whatsappNumber
+    ? `https://wa.me/${whatsappNumber.replace(/[^\d]/g, "")}`
+    : "#";
 
   const socialLinks = socialConfig
     .map((social) => ({
@@ -191,30 +222,36 @@ export async function SiteFooter({
           </ul>
         </div>
 
-        {/* Contact */}
+        {/* Dynamic Contact Information */}
         <div>
           <h2 className="font-semibold text-[var(--blc-gold-300)]">
             {labels.contact}
           </h2>
 
           <address className="mt-4 grid gap-2 text-sm not-italic text-[var(--blc-cream-100)]">
-            <a
-              href={`tel:${settings.phone.replace(/[^+\d]/g, "")}`}
-              className="hover:text-white focus-ring-dark"
-            >
-              {labels.phone}: {settings.phone}
-            </a>
+            {/* Phone */}
+            {phone && (
+              <a href={phoneHref} className="hover:text-white focus-ring-dark">
+                {labels.phone}: {phone}
+              </a>
+            )}
 
-            <a
-              href={`mailto:${settings.email}`}
-              className="break-all hover:text-white focus-ring-dark"
-            >
-              {labels.email}: {settings.email}
-            </a>
+            {/* Email */}
+            {email && (
+              <a
+                href={`mailto:${email}`}
+                className="break-all hover:text-white focus-ring-dark"
+              >
+                {labels.email}: {email}
+              </a>
+            )}
 
-            <span>
-              {labels.address}: {settings.address}
-            </span>
+            {/* Address */}
+            {address && (
+              <span>
+                {labels.address}: {address}
+              </span>
+            )}
           </address>
         </div>
       </div>
