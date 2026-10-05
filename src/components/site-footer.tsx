@@ -6,15 +6,7 @@ import type { Locale } from "@/i18n/routing";
 import type { SiteSettings } from "@/lib/erp/types";
 import { getServicesFromERP } from "@/lib/erp/services";
 import { getBLCContactUsInfoFromERP } from "@/lib/erp/contact-info";
-
-const socialConfig = [
-  { key: "facebook", labelKey: "facebook" },
-  { key: "instagram", labelKey: "instagram" },
-  { key: "linkedin", labelKey: "linkedin" },
-  { key: "youtube", labelKey: "youtube" },
-  { key: "tiktok", labelKey: "tiktok" },
-  { key: "x", labelKey: "x" },
-] as const;
+import { getSocialPlatformsFromERP } from "@/lib/erp/social-platforms";
 
 export async function SiteFooter({
   locale,
@@ -52,11 +44,26 @@ export async function SiteFooter({
   };
 }) {
   /*
-   * Get services and contact information directly from ERP.
+   * Load all dynamic footer data directly from ERP.
+   *
+   * Services:
+   * - Used in the Services footer section.
+   *
+   * BLC-Contact-us Info:
+   * - phone_number
+   * - whats_app_number
+   * - email
+   * - address
+   *
+   * Social Platforms:
+   * - platform_name
+   * - platform_url
+   * - platform_icon
    */
-  const [erpServices, contactInfoRecords] = await Promise.all([
+  const [erpServices, contactInfoRecords, socialPlatforms] = await Promise.all([
     getServicesFromERP(),
     getBLCContactUsInfoFromERP(),
+    getSocialPlatformsFromERP(),
   ]);
 
   /*
@@ -83,14 +90,20 @@ export async function SiteFooter({
     ? `https://wa.me/${whatsappNumber.replace(/[^\d]/g, "")}`
     : "#";
 
-  const socialLinks = socialConfig
+  /*
+   * Social links loaded dynamically from ERP.
+   *
+   * Only platforms that have both a name and URL
+   * are displayed.
+   */
+  const socialLinks = socialPlatforms
     .map((social) => ({
-      ...social,
-      href: settings.social[social.key],
+      name: social.name,
+      platformName: social.platform_name?.trim() || "",
+      href: social.platform_url?.trim() || "",
+      icon: social.platform_icon?.trim() || "",
     }))
-    .filter((social): social is typeof social & { href: string } =>
-      Boolean(social.href),
-    );
+    .filter((social) => Boolean(social.platformName) && Boolean(social.href));
 
   const quickLinks = [
     {
@@ -139,20 +152,35 @@ export async function SiteFooter({
             {labels.tagline}
           </p>
 
-          <div className="mt-5 flex flex-wrap gap-3" aria-label={labels.follow}>
-            {socialLinks.map(({ key, labelKey, href }) => (
-              <a
-                key={key}
-                href={href}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={labels[labelKey as keyof typeof labels] as string}
-                className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-full border border-white/30 text-white hover:border-[var(--blc-gold-300)] hover:text-[var(--blc-gold-300)] focus-ring-dark"
-              >
-                <Link2 size={18} aria-hidden="true" />
-              </a>
-            ))}
-          </div>
+          {/* Dynamic ERP Social Platforms */}
+          {socialLinks.length > 0 && (
+            <div
+              className="mt-5 flex flex-wrap gap-3"
+              aria-label={labels.follow}
+            >
+              {socialLinks.map((social) => (
+                <a
+                  key={social.name}
+                  href={social.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={social.platformName}
+                  title={social.platformName}
+                  className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-full border border-white/30 text-white hover:border-[var(--blc-gold-300)] hover:text-[var(--blc-gold-300)] focus-ring-dark"
+                >
+                  {social.icon ? (
+                    <img
+                      src={social.icon}
+                      alt={social.platformName}
+                      className="h-5 w-5 object-contain"
+                    />
+                  ) : (
+                    <Link2 size={18} aria-hidden="true" />
+                  )}
+                </a>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Dynamic ERP Services */}
