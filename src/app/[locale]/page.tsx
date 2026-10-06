@@ -25,7 +25,9 @@ import { Accordion } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/reveal";
+import { HeroMotion, HeroTextLayer } from "@/components/sections/HeroMotion";
 import { Section } from "@/components/ui/section";
+import { Services } from "@/components/sections/Services";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
 import {
@@ -113,81 +115,93 @@ export default async function HomePage({
           aria-hidden="true"
         />
 
-        <Container className="relative grid min-h-[clamp(42rem,78vh,54rem)] items-center gap-14 py-16 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20 lg:py-24">
-          <Reveal className="relative z-10 max-w-2xl">
-            <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--blc-gold-500)]/40 bg-white/60 px-4 py-2 text-sm font-semibold uppercase tracking-wide text-[var(--blc-gold-500)]">
-              <HeartHandshake size={17} aria-hidden="true" />
-              {common("tagline")}
-            </p>
-            <h1 className="max-w-xl text-start text-5xl font-bold leading-[1.05] text-[var(--blc-green-900)] sm:text-6xl lg:text-7xl">
-              {t("title")}
-            </h1>
-            <p className="mt-7 max-w-xl text-start text-lg leading-8 text-[var(--blc-green-700)] sm:text-xl">
-              {t("subtitle")}
-            </p>
-            <div className="mt-9 flex flex-wrap items-center gap-3">
-              <a
-                href={phone}
-                className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[var(--blc-green-900)] px-6 font-semibold text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-[var(--blc-green-700)] focus-ring-dark"
-              >
-                <Phone size={18} aria-hidden="true" />
-                {common("cta_call")}
-              </a>
-              <a
-                href={whatsapp}
-                className="inline-flex min-h-12 items-center gap-2 rounded-full border-2 border-[var(--blc-green-900)] px-6 font-semibold text-[var(--blc-green-900)] transition hover:-translate-y-0.5 hover:bg-white/60 focus-ring-light"
-              >
-                <MessageCircle size={18} aria-hidden="true" />
-                {common("cta_whatsapp")}
-              </a>
-              <Link
-                href={`/${locale}/contact`}
-                className="inline-flex min-h-11 items-center text-start font-semibold text-[var(--blc-green-900)] underline decoration-[var(--blc-gold-500)] underline-offset-4 hover:text-[var(--blc-green-700)] focus-ring-light"
-              >
-                {t("request_care")}
-              </Link>
-            </div>
-          </Reveal>
+        <HeroMotion>
+          <Container className="relative z-10 grid min-h-[clamp(42rem,78vh,54rem)] items-center gap-14 py-16 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20 lg:py-24">
+            <Reveal className="relative z-10 max-w-2xl">
+              <HeroTextLayer delay={0.05}>
+                <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--blc-gold-500)]/40 bg-white/60 px-4 py-2 text-sm font-semibold uppercase tracking-wide text-[var(--blc-gold-500)]">
+                  <HeartHandshake size={17} aria-hidden="true" />
+                  {common("tagline")}
+                </p>
+              </HeroTextLayer>
+              <HeroTextLayer delay={0.15}>
+                <h1 className="max-w-xl text-start text-5xl font-bold leading-[1.05] text-[var(--blc-green-900)] sm:text-6xl lg:text-7xl">
+                  {t("title")}
+                </h1>
+              </HeroTextLayer>
+              <HeroTextLayer delay={0.25}>
+                <p className="mt-7 max-w-xl text-start text-lg leading-8 text-[var(--blc-green-700)] sm:text-xl">
+                  {t("subtitle")}
+                </p>
+              </HeroTextLayer>
+              <HeroTextLayer delay={0.38}>
+                <div className="mt-9 flex flex-wrap items-center gap-3">
+                  <a
+                    href={phone}
+                    className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[var(--blc-green-900)] px-6 font-semibold text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-[var(--blc-green-700)] focus-ring-dark"
+                  >
+                    <Phone size={18} aria-hidden="true" />
+                    {common("cta_call")}
+                  </a>
+                  <a
+                    href={whatsapp}
+                    className="inline-flex min-h-12 items-center gap-2 rounded-full border-2 border-[var(--blc-green-900)] px-6 font-semibold text-[var(--blc-green-900)] transition hover:-translate-y-0.5 hover:bg-white/60 focus-ring-light"
+                  >
+                    <MessageCircle size={18} aria-hidden="true" />
+                    {common("cta_whatsapp")}
+                  </a>
+                  <Link
+                    href={`/${locale}/contact`}
+                    className="inline-flex min-h-11 items-center text-start font-semibold text-[var(--blc-green-900)] underline decoration-[var(--blc-gold-500)] underline-offset-4 hover:text-[var(--blc-green-700)] focus-ring-light"
+                  >
+                    {t("request_care")}
+                  </Link>
+                </div>
+              </HeroTextLayer>
+            </Reveal>
 
-          <Reveal className="relative mx-auto w-full max-w-xl lg:max-w-none">
-            <div
-              className="absolute -inset-5 rounded-[2rem] border border-[var(--blc-gold-300)]/50 lg:-inset-7"
-              aria-hidden="true"
-            />
-            <div className="relative aspect-[4/5] overflow-hidden rounded-[1.75rem] border border-white/70 bg-[var(--blc-green-900)] shadow-[0_24px_70px_rgb(2_56_48_/_0.2)] sm:aspect-[5/4] lg:aspect-[4/5]">
-              <Image
-                src="/images/hero-placeholder.jpg"
-                alt={
-                  locale === "ar"
-                    ? "رعاية منزلية دافئة في الإسكندرية"
-                    : "Warm home care in Alexandria"
-                }
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 52vw"
-                className="object-cover transition-transform duration-700 hover:scale-105"
-              />
-              <div
-                className="absolute inset-0 bg-gradient-to-t from-[var(--blc-green-900)]/65 via-transparent to-[var(--blc-green-900)]/10"
-                aria-hidden="true"
-              />
-              <div
-                className="absolute -end-16 -top-16 size-48 rounded-full border-[20px] border-[var(--blc-cream-100)]/20"
-                aria-hidden="true"
-              />
-              <div className="absolute bottom-5 start-5 flex items-center gap-3 rounded-card border border-white/30 bg-[var(--blc-green-900)]/85 px-4 py-3 text-white shadow-soft backdrop-blur-sm sm:bottom-7 sm:start-7">
-                <HeartHandshake
-                  size={21}
-                  className="text-[var(--blc-gold-300)]"
+            <HeroTextLayer delay={0.2} className="relative z-10">
+              <Reveal className="relative mx-auto w-full max-w-xl lg:max-w-none">
+                <div
+                  className="absolute -inset-5 rounded-[2rem] border border-[var(--blc-gold-300)]/50 lg:-inset-7"
                   aria-hidden="true"
                 />
-                <span className="text-sm font-semibold">
-                  {common("brand_name")}
-                </span>
-              </div>
-            </div>
-          </Reveal>
-        </Container>
+                <div className="relative aspect-[4/5] overflow-hidden rounded-[1.75rem] border border-white/70 bg-[var(--blc-green-900)] shadow-[0_24px_70px_rgb(2_56_48_/_0.2)] sm:aspect-[5/4] lg:aspect-[4/5]">
+                  <Image
+                    src="/images/hero-placeholder.jpg"
+                    alt={
+                      locale === "ar"
+                        ? "رعاية منزلية دافئة في الإسكندرية"
+                        : "Warm home care in Alexandria"
+                    }
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 52vw"
+                    className="object-cover transition-transform duration-700 hover:scale-105"
+                  />
+                  <div
+                    className="absolute inset-0 bg-gradient-to-t from-[var(--blc-green-900)]/65 via-transparent to-[var(--blc-green-900)]/10"
+                    aria-hidden="true"
+                  />
+                  <div
+                    className="absolute -end-16 -top-16 size-48 rounded-full border-[20px] border-[var(--blc-cream-100)]/20"
+                    aria-hidden="true"
+                  />
+                  <div className="absolute bottom-5 start-5 flex items-center gap-3 rounded-card border border-white/30 bg-[var(--blc-green-900)]/85 px-4 py-3 text-white shadow-soft backdrop-blur-sm sm:bottom-7 sm:start-7">
+                    <HeartHandshake
+                      size={21}
+                      className="text-[var(--blc-gold-300)]"
+                      aria-hidden="true"
+                    />
+                    <span className="text-sm font-semibold">
+                      {common("brand_name")}
+                    </span>
+                  </div>
+                </div>
+              </Reveal>
+            </HeroTextLayer>
+          </Container>
+        </HeroMotion>
       </section>
 
       <Section variant="cream" className="py-8 lg:py-10">
@@ -227,93 +241,7 @@ export default async function HomePage({
         </Container>
       </Section>
 
-      <Section variant="cream">
-        <Container>
-          <Reveal>
-            <SectionHeading
-              title={t("services_title")}
-              subtitle={t("services_subtitle")}
-            />
-          </Reveal>
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {services.map((service) => {
-              const isArabic = locale === "ar";
-
-              const slug = isArabic
-                ? service.ar_slug || service.en_slug
-                : service.en_slug;
-
-              const title = isArabic
-                ? service.service_name_ar || service.service_name
-                : service.service_name;
-
-              const tagline = isArabic
-                ? service.service_sub_title_ar || service.service_sub_title
-                : service.service_sub_title;
-
-              const Icon = Heart;
-
-              if (!slug || !title) {
-                return null;
-              }
-
-              return (
-                <Reveal key={service.name}>
-                  <Link
-                    href={`/${locale}/services/${slug}`}
-                    className="group block h-full rounded-card bg-white p-6 shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-lg focus-ring-light"
-                  >
-                    <div className="relative mb-6 aspect-[16/10] overflow-hidden rounded-card bg-[var(--blc-green-900)]">
-                      <div
-                        className="absolute -end-10 -top-14 size-44 rounded-full border border-[var(--blc-gold-300)]/25"
-                        aria-hidden="true"
-                      />
-                      <div
-                        className="absolute -bottom-16 -start-8 size-48 rounded-full bg-[var(--blc-green-700)]/50"
-                        aria-hidden="true"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="flex size-16 items-center justify-center rounded-full border border-[var(--blc-cream-100)]/40 bg-[var(--blc-cream-100)]/10 transition-transform duration-500 group-hover:scale-105">
-                          <Icon
-                            size={30}
-                            strokeWidth={1.5}
-                            aria-hidden="true"
-                            className="text-[var(--blc-cream-100)]"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <Icon
-                      size={30}
-                      aria-hidden="true"
-                      className="text-[var(--blc-gold-500)]"
-                    />
-
-                    <h3 className="mt-6 text-xl font-bold text-[var(--blc-green-900)]">
-                      {title}
-                    </h3>
-
-                    <p className="mt-3 text-[var(--blc-green-700)]">
-                      {tagline}
-                    </p>
-
-                    <span className="mt-6 inline-flex items-center gap-2 font-semibold text-[var(--blc-gold-500)]">
-                      {common("cta_learn_more")}
-
-                      <ArrowUpRight
-                        size={17}
-                        aria-hidden="true"
-                        className="transition-transform group-hover:translate-x-1 rtl:rotate-180"
-                      />
-                    </span>
-                  </Link>
-                </Reveal>
-              );
-            })}
-          </div>
-        </Container>
-      </Section>
+      <Services services={services} locale={locale} />
 
       <Section variant="sand">
         <Container>
