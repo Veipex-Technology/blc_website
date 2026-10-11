@@ -1,10 +1,13 @@
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ChevronRight, NotebookText } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-import { Reveal } from "@/components/reveal";
+import { MotionCard } from "@/components/motion/motion-card";
+import { MotionFilters } from "@/components/motion/motion-filters";
+import { MotionHero } from "@/components/motion/motion-hero";
+import { MotionImage } from "@/components/motion/motion-image";
+import { MotionSection } from "@/components/motion/motion-section";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -150,60 +153,99 @@ export default async function BlogPage({
 
   return (
     <main>
+      {/* Editorial Blog Header */}
+      <Section
+        variant="dark"
+        dir={locale === "ar" ? "rtl" : "ltr"}
+        className="relative overflow-hidden py-16 lg:py-24"
+      >
+        <div
+          className="pointer-events-none absolute -end-24 -top-32 size-80 rounded-full border-[32px] border-[var(--blc-gold-300)]/15"
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute -bottom-40 -start-20 size-72 rounded-full border border-white/10"
+          aria-hidden="true"
+        />
+
+        <Container className="relative">
+          <MotionHero
+            dir={locale === "ar" ? "rtl" : "ltr"}
+            className="mx-auto max-w-4xl text-center"
+          >
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--blc-gold-300)]">
+              {t("header_eyebrow")}
+            </p>
+
+            <h1 className="mt-5 text-4xl font-bold leading-tight text-white sm:text-6xl lg:text-7xl">
+              {t("header_title")}
+            </h1>
+
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[var(--blc-cream-100)] sm:text-xl">
+              {t("header_description")}
+            </p>
+
+            <nav
+              aria-label={t("breadcrumb_label")}
+              className="mt-8 flex items-center justify-center gap-2 text-sm text-[var(--blc-cream-100)]/75"
+            >
+              <Link
+                href={`/${locale}`}
+                className="transition-colors hover:text-white focus-ring-dark"
+              >
+                {t("breadcrumb_home")}
+              </Link>
+              <ChevronRight
+                size={15}
+                aria-hidden="true"
+                className="rtl:rotate-180"
+              />
+              <span className="text-[var(--blc-gold-300)]">
+                {t("breadcrumb_blog")}
+              </span>
+            </nav>
+          </MotionHero>
+        </Container>
+      </Section>
+
       <Section>
         <Container>
-          <Reveal>
+          <MotionSection variant="fade">
             <SectionHeading title={t("title")} subtitle={t("intro")} />
-          </Reveal>
+          </MotionSection>
 
           {/* Categories */}
-          <nav
-            aria-label={t("categories_label")}
-            className="mt-10 flex flex-wrap gap-3"
-          >
-            <Link
-              href={`/${locale}/blog`}
-              aria-current={!currentCategory ? "page" : undefined}
-              className={`rounded-full border px-4 py-2 text-sm font-semibold focus-ring-light ${
-                !currentCategory
-                  ? "border-[var(--blc-green-900)] bg-[var(--blc-green-900)] text-white"
-                  : "border-[var(--blc-sand-200)] text-[var(--blc-green-900)] hover:border-[var(--blc-gold-500)]"
-              }`}
-            >
-              {t("all")}
-            </Link>
-
-            {categories.map((category) => {
-              const active = currentCategory === category.slug;
-
-              return (
-                <Link
-                  key={category.slug}
-                  href={`/${locale}/blog?category=${encodeURIComponent(
-                    category.slug,
-                  )}`}
-                  aria-current={active ? "page" : undefined}
-                  className={`rounded-full border px-4 py-2 text-sm font-semibold focus-ring-light ${
-                    active
-                      ? "border-[var(--blc-green-900)] bg-[var(--blc-green-900)] text-white"
-                      : "border-[var(--blc-sand-200)] text-[var(--blc-green-900)] hover:border-[var(--blc-gold-500)]"
-                  }`}
-                >
-                  {category.title}
-                </Link>
-              );
-            })}
-          </nav>
+          <MotionFilters
+            locale={locale}
+            filters={categories}
+            currentCategory={currentCategory}
+            allLabel={t("all")}
+            ariaLabel={t("categories_label")}
+          />
 
           {/* Empty State */}
           {visiblePosts.length === 0 ? (
-            <div className="mt-12 rounded-card bg-[var(--blc-cream-100)] p-10 text-center">
-              <p className="text-xl font-semibold text-[var(--blc-green-900)]">
-                {t("empty")}
-              </p>
-            </div>
+            <MotionSection variant="fade" className="mt-12">
+              <div className="rounded-card border border-[var(--blc-sand-200)] bg-[var(--blc-cream-100)] p-10 text-center shadow-soft">
+                <div className="mx-auto flex size-14 items-center justify-center rounded-full border border-[var(--blc-gold-300)] bg-white text-[var(--blc-gold-500)]">
+                  <NotebookText size={25} aria-hidden="true" />
+                </div>
+                <h2 className="mt-5 text-xl font-semibold text-[var(--blc-green-900)]">
+                  {t("empty")}
+                </h2>
+                <p className="mx-auto mt-3 max-w-md text-[var(--blc-green-700)]">
+                  {t("empty_description")}
+                </p>
+                <Link
+                  href={`/${locale}`}
+                  className="mt-6 inline-flex rounded-full border border-[var(--blc-green-900)] px-5 py-2.5 text-sm font-semibold text-[var(--blc-green-900)] transition-colors hover:bg-[var(--blc-green-900)] hover:text-white focus-ring-light"
+                >
+                  {t("breadcrumb_home")}
+                </Link>
+              </div>
+            </MotionSection>
           ) : (
-            <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <MotionSection className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {visiblePosts.map((post) => {
                 /**
                  * Blog Post ERP fields:
@@ -215,76 +257,75 @@ export default async function BlogPage({
                  * image       -> post.meta_image
                  */
                 return (
-                  <Reveal key={post.name}>
-                    <article className="group h-full overflow-hidden rounded-card bg-white shadow-soft">
-                      <Link
-                        href={`/${locale}/blog/${post.route}`}
-                        className="block h-full focus-ring-light"
-                      >
-                        {/* Blog Image */}
-                        <div className="relative aspect-[16/9] overflow-hidden bg-[var(--blc-sand-200)]">
-                          {post.meta_image ? (
-                            <Image
-                              src={post.meta_image}
-                              alt={post.title ?? "Blog post"}
-                              fill
-                              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                              className="object-cover transition duration-500 group-hover:scale-105"
-                            />
-                          ) : (
-                            <div className="flex h-full items-center justify-center text-sm font-semibold text-[var(--blc-green-700)]">
-                              {post.title}
-                            </div>
+                  <MotionCard
+                    key={post.name}
+                    className="group h-full overflow-hidden rounded-card bg-white shadow-soft"
+                  >
+                    <Link
+                      href={`/${locale}/blog/${post.route}`}
+                      className="block h-full focus-ring-light"
+                    >
+                      {/* Blog Image */}
+                      <div className="relative aspect-[16/9] overflow-hidden bg-[var(--blc-sand-200)]">
+                        {post.meta_image ? (
+                          <MotionImage
+                            src={post.meta_image}
+                            alt={post.title ?? "Blog post"}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                            className="blog-card-image object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-sm font-semibold text-[var(--blc-green-700)]"></div>
+                        )}
+                      </div>
+
+                      <div className="p-6">
+                        {/* Category + Date */}
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--blc-green-700)]">
+                          {post.blog_category && (
+                            <span className="font-semibold text-[var(--blc-gold-500)]">
+                              {post.blog_category}
+                            </span>
+                          )}
+
+                          {post.published_on && (
+                            <time dateTime={post.published_on}>
+                              {dateFormatter.format(
+                                new Date(post.published_on),
+                              )}
+                            </time>
                           )}
                         </div>
 
-                        <div className="p-6">
-                          {/* Category + Date */}
-                          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--blc-green-700)]">
-                            {post.blog_category && (
-                              <span className="font-semibold text-[var(--blc-gold-500)]">
-                                {post.blog_category}
-                              </span>
-                            )}
+                        {/* Blog Title */}
+                        <h2 className="blog-card-title mt-4 text-xl font-bold text-[var(--blc-green-900)]">
+                          {post.title}
+                        </h2>
 
-                            {post.published_on && (
-                              <time dateTime={post.published_on}>
-                                {dateFormatter.format(
-                                  new Date(post.published_on),
-                                )}
-                              </time>
-                            )}
-                          </div>
+                        {/* Blog Intro */}
+                        {post.blog_intro && (
+                          <p className="mt-3 text-[var(--blc-green-700)]">
+                            {post.blog_intro}
+                          </p>
+                        )}
 
-                          {/* Blog Title */}
-                          <h2 className="mt-4 text-xl font-bold text-[var(--blc-green-900)]">
-                            {post.title}
-                          </h2>
+                        {/* Read More */}
+                        <span className="blog-card-read-more mt-6 inline-flex items-center gap-2 font-semibold text-[var(--blc-gold-500)]">
+                          {t("read_more")}
 
-                          {/* Blog Intro */}
-                          {post.blog_intro && (
-                            <p className="mt-3 text-[var(--blc-green-700)]">
-                              {post.blog_intro}
-                            </p>
-                          )}
-
-                          {/* Read More */}
-                          <span className="mt-6 inline-flex items-center gap-2 font-semibold text-[var(--blc-gold-500)]">
-                            {t("read_more")}
-
-                            <ArrowUpRight
-                              size={17}
-                              aria-hidden="true"
-                              className="rtl:rotate-180"
-                            />
-                          </span>
-                        </div>
-                      </Link>
-                    </article>
-                  </Reveal>
+                          <ArrowUpRight
+                            size={17}
+                            aria-hidden="true"
+                            className="blog-card-arrow rtl:rotate-180"
+                          />
+                        </span>
+                      </div>
+                    </Link>
+                  </MotionCard>
                 );
               })}
-            </div>
+            </MotionSection>
           )}
 
           {/* Pagination */}
@@ -296,7 +337,7 @@ export default async function BlogPage({
               <Link
                 href={hrefFor(Math.max(1, safePage - 1))}
                 aria-disabled={safePage === 1}
-                className={`rounded-full border border-[var(--blc-sand-200)] px-4 py-2 text-sm font-semibold focus-ring-light ${
+                className={`rounded-full border border-[var(--blc-sand-200)] px-4 py-2 text-sm font-semibold transition-transform active:scale-[0.98] focus-ring-light ${
                   safePage === 1
                     ? "pointer-events-none opacity-40"
                     : "hover:border-[var(--blc-gold-500)]"
@@ -312,7 +353,7 @@ export default async function BlogPage({
               <Link
                 href={hrefFor(Math.min(totalPages, safePage + 1))}
                 aria-disabled={safePage === totalPages}
-                className={`rounded-full border border-[var(--blc-sand-200)] px-4 py-2 text-sm font-semibold focus-ring-light ${
+                className={`rounded-full border border-[var(--blc-sand-200)] px-4 py-2 text-sm font-semibold transition-transform active:scale-[0.98] focus-ring-light ${
                   safePage === totalPages
                     ? "pointer-events-none opacity-40"
                     : "hover:border-[var(--blc-gold-500)]"

@@ -466,7 +466,7 @@ export default async function AboutPage({
 
           <div className="mt-12 grid items-stretch gap-7 lg:grid-cols-2 lg:gap-10">
             <Reveal>
-              <article className="group flex h-full flex-col overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white shadow-soft transition-shadow duration-500 hover:shadow-[0_16px_40px_rgb(2_56_48_/_0.14)]">
+              <article className="group flex h-full flex-col overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgb(2_56_48_/_0.14)]">
                 <div className="relative aspect-[16/10] overflow-hidden border-b border-[var(--blc-sand-200)] bg-[var(--blc-green-900)]">
                   {missionImageUrl ? (
                     <Image
@@ -476,10 +476,10 @@ export default async function AboutPage({
                       }
                       fill
                       sizes="(max-width: 1024px) 100vw, 50vw"
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="reveal-image object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                     />
                   ) : (
-                    <div className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_20%_20%,rgba(229,198,144,0.42),transparent_26%),linear-gradient(135deg,var(--blc-green-900),var(--blc-green-700))]">
+                    <div className="reveal-image absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_20%_20%,rgba(229,198,144,0.42),transparent_26%),linear-gradient(135deg,var(--blc-green-900),var(--blc-green-700))] transition-transform duration-300 group-hover:scale-[1.03]">
                       <div
                         className="absolute -end-12 -top-16 size-52 rounded-full border border-white/20"
                         aria-hidden="true"
@@ -530,8 +530,8 @@ export default async function AboutPage({
               </article>
             </Reveal>
 
-            <Reveal>
-              <article className="group flex h-full flex-col overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white shadow-soft transition-shadow duration-500 hover:shadow-[0_16px_40px_rgb(2_56_48_/_0.14)]">
+            <Reveal delay={120}>
+              <article className="group flex h-full flex-col overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgb(2_56_48_/_0.14)]">
                 <div className="relative aspect-[16/10] overflow-hidden border-b border-[var(--blc-sand-200)] bg-[var(--blc-green-700)]">
                   {visionImageUrl ? (
                     <Image
@@ -539,10 +539,10 @@ export default async function AboutPage({
                       alt={visionTitle || missionVisionPresentation.visionLabel}
                       fill
                       sizes="(max-width: 1024px) 100vw, 50vw"
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="reveal-image object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                     />
                   ) : (
-                    <div className="absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_80%_20%,rgba(229,198,144,0.42),transparent_26%),linear-gradient(135deg,var(--blc-green-700),var(--blc-green-900))]">
+                    <div className="reveal-image absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_80%_20%,rgba(229,198,144,0.42),transparent_26%),linear-gradient(135deg,var(--blc-green-700),var(--blc-green-900))] transition-transform duration-300 group-hover:scale-[1.03]">
                       <div
                         className="absolute -start-12 -top-16 size-52 rounded-full border border-white/20"
                         aria-hidden="true"
