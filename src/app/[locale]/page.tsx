@@ -1,35 +1,35 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Accessibility,
   ArrowUpRight,
+  BadgeCheck,
   BookOpen,
-  CheckCircle2,
   ClipboardCheck,
-  FlaskConical,
-  Footprints,
+  ClipboardList,
   GraduationCap,
-  Heart,
   HeartHandshake,
+  HeartPulse,
   MessageCircle,
   Phone,
   Quote,
-  RefreshCw,
   ShieldCheck,
-  Stethoscope,
-  Users,
+  Sparkles,
+  Sun,
+  Zap,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import type { LucideIcon, LucideProps } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { Accordion } from "@/components/ui/accordion";
 import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/reveal";
+import { MotionCard } from "@/components/motion/motion-card";
 import { MotionSection } from "@/components/motion/motion-section";
 import { HeroMotion, HeroTextLayer } from "@/components/sections/HeroMotion";
 import { Section } from "@/components/ui/section";
 import { Services } from "@/components/sections/Services";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { NewsletterSection } from "@/components/newsletter-section";
 import { createPageMetadata } from "@/lib/metadata";
 import {
   getFaqs,
@@ -42,16 +42,81 @@ import {
 import { getServicesFromERP } from "@/lib/erp/services";
 import type { Locale } from "@/i18n/routing";
 
-const serviceIcons: Record<string, LucideIcon> = {
-  heart: Heart,
-  stethoscope: Stethoscope,
-  refresh: RefreshCw,
-  accessibility: Accessibility,
-  flask: FlaskConical,
-  users: Users,
-  footprints: Footprints,
-};
 const trustIcons = [ShieldCheck, GraduationCap, ClipboardCheck, HeartHandshake];
+const whyChooseIcons = [ShieldCheck, Sparkles, HeartHandshake, Sun];
+const howItWorksSteps = [
+  {
+    icon: Phone,
+    titleKey: "how_step_1_title",
+    descriptionKey: "how_step_1_description",
+  },
+  {
+    icon: ClipboardList,
+    titleKey: "how_step_2_title",
+    descriptionKey: "how_step_2_description",
+  },
+  {
+    icon: HeartPulse,
+    titleKey: "how_step_3_title",
+    descriptionKey: "how_step_3_description",
+  },
+] as const;
+const whyChooseStatements = [
+  "why_choose_statement_1",
+  "why_choose_statement_2",
+  "why_choose_statement_3",
+  "why_choose_statement_4",
+] as const;
+const GermanQualityIcon = ({ className, ...props }: LucideProps) => (
+  <svg
+    {...props}
+    viewBox="0 0 24 24"
+    className={className}
+    fill="none"
+    aria-hidden="true"
+  >
+    <defs>
+      <clipPath id="german-quality-shield">
+        <path d="M5 4.5h14v6.5c0 4.2-2.4 7.1-7 9-4.6-1.9-7-4.8-7-9V4.5Z" />
+      </clipPath>
+    </defs>
+    <g clipPath="url(#german-quality-shield)" opacity="0.9">
+      <rect x="4" y="4" width="16" height="5.35" fill="#000000" />
+      <rect x="4" y="9.35" width="16" height="5.3" fill="#DD0000" />
+      <rect x="4" y="14.65" width="16" height="5.35" fill="#FFCE00" />
+    </g>
+    <path
+      d="M5 4.5h14v6.5c0 4.2-2.4 7.1-7 9-4.6-1.9-7-4.8-7-9V4.5Z"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="m8.5 12.2 2.1 2.1 4.9-5"
+      stroke="white"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+type TrustBadgeKey =
+  | "trust_badge_1"
+  | "trust_badge_3"
+  | "trust_badge_5"
+  | "germanQuality";
+
+const trustBadges: {
+  id: string;
+  icon: LucideIcon | typeof GermanQualityIcon;
+  labelKey: TrustBadgeKey;
+}[] = [
+  { id: "licensed", icon: BadgeCheck, labelKey: "trust_badge_1" },
+  { id: "response", icon: Zap, labelKey: "trust_badge_3" },
+  { id: "german-quality", icon: GermanQualityIcon, labelKey: "germanQuality" },
+  { id: "hygiene", icon: Sparkles, labelKey: "trust_badge_5" },
+];
 
 export async function generateMetadata({
   params,
@@ -250,126 +315,134 @@ export default async function HomePage({
             <h2 className="text-3xl font-bold text-[var(--blc-green-900)] sm:text-4xl">
               {t("why_choose_title")}
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--blc-green-700)]">
+            <p className="mx-auto mt-4 max-w-2xl text-base text-[var(--blc-green-700)]">
               {t("why_choose_subtitle")}
             </p>
           </Reveal>
 
-          <div className="mt-12 grid items-center gap-12 lg:grid-cols-2">
-            <MotionSection
-              variant="fade"
-              className="relative mx-auto w-full max-w-md lg:order-2 rtl:lg:order-1"
-            >
-              <div
-                className="pointer-events-none absolute -inset-4 rounded-[2rem] border-2 border-[var(--blc-gold-300)]/70 motion-safe:animate-[bounce_7s_ease-in-out_infinite] motion-reduce:animate-none"
-                aria-hidden="true"
-              />
-              <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-[var(--blc-green-900)] shadow-[0_24px_60px_rgb(2_56_48_/_0.18)]">
-                <Image
-                  src="/images/why-choose-us.jpg"
-                  alt={
-                    locale === "ar"
-                      ? "فريق بيتر لايف كير يقدم رعاية إنسانية في المنزل"
-                      : "Better Life Care team providing compassionate home care"
-                  }
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 42vw"
-                  className="object-cover transition-transform duration-700 hover:scale-105 motion-reduce:transition-none"
-                />
-              </div>
-            </MotionSection>
-
-            <MotionSection
-              variant="fade"
-              className="text-start lg:order-1 rtl:lg:order-2"
-            >
-              <div className="space-y-5 text-lg leading-8 text-[var(--blc-green-700)]">
-                <Reveal>{t("why_choose_paragraph_1")}</Reveal>
-                <Reveal delay={90}>{t("why_choose_paragraph_2")}</Reveal>
-                <Reveal
-                  delay={180}
-                  className="border-s-4 border-[var(--blc-gold-500)] ps-5 text-xl font-bold text-[var(--blc-green-900)]"
-                >
-                  {t("why_choose_highlight")}
-                </Reveal>
-                <Reveal delay={270}>{t("why_choose_paragraph_4")}</Reveal>
-              </div>
-
-              <Reveal delay={360}>
-                <h3 className="mt-8 text-2xl font-bold text-[var(--blc-green-900)]">
-                  {t("why_choose_more_title")}
-                </h3>
-                <p className="mt-3 text-lg leading-8 text-[var(--blc-green-700)]">
-                  {t("why_choose_more_text")}
-                </p>
-              </Reveal>
-
-              <Reveal delay={450}>
-                <blockquote className="mt-8 rounded-2xl border-s-4 border-[var(--blc-gold-500)] bg-white p-6 shadow-soft">
-                  <Quote
-                    size={34}
-                    strokeWidth={1.75}
-                    className="text-[var(--blc-gold-500)]"
-                    aria-hidden="true"
-                  />
-                  <p className="mt-4 text-xl font-semibold leading-8 text-[var(--blc-green-900)]">
-                    {t("why_choose_quote")}
-                  </p>
-                  <footer className="mt-5">
-                    <cite className="not-italic font-bold text-[var(--blc-green-900)]">
-                      {common("brand_name")}
-                    </cite>
-                    <p className="text-sm text-[var(--blc-green-700)]">
-                      {t("why_choose_quote_caption")}
-                    </p>
-                  </footer>
-                </blockquote>
-              </Reveal>
-
-              <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                {(
-                  [
-                    "why_choose_badge_1",
-                    "why_choose_badge_2",
-                    "why_choose_badge_3",
-                    "why_choose_badge_4",
-                  ] as const
-                ).map((key, index) => (
-                  <Reveal key={key} delay={540 + index * 90}>
-                    <div className="group flex h-full items-start gap-2 rounded-xl bg-white p-4 text-sm font-semibold text-[var(--blc-green-700)] shadow-soft transition-transform duration-300 hover:-translate-y-1 motion-reduce:transition-none">
-                      <CheckCircle2
-                        size={19}
-                        className="mt-0.5 shrink-0 text-emerald-600 transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none"
-                        aria-hidden="true"
-                      />
-                      <span>{t(key)}</span>
+          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {whyChooseStatements.map((key, index) => {
+              const Icon = whyChooseIcons[index];
+              return (
+                <Reveal key={key} delay={index * 120} className="h-full">
+                  <article className="group flex h-full flex-col rounded-2xl border-t-4 border-[var(--blc-green-700)] bg-white p-6 text-start shadow-soft transition duration-300 hover:-translate-y-2 hover:shadow-[0_20px_45px_var(--blc-green-900)] motion-reduce:transition-none lg:p-8">
+                    <div className="flex items-center justify-between">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--blc-cream-100)] text-[var(--blc-green-700)] transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none">
+                        <Icon size={24} strokeWidth={1.8} aria-hidden="true" />
+                      </span>
+                      <span className="text-sm font-semibold text-[var(--blc-green-700)]/50">
+                        0{index + 1}
+                      </span>
                     </div>
-                  </Reveal>
-                ))}
-              </div>
-            </MotionSection>
+                    <p className="mt-8 text-base leading-relaxed text-[var(--blc-green-900)]/80">
+                      {t(key)}
+                    </p>
+                  </article>
+                </Reveal>
+              );
+            })}
           </div>
+
+          <Reveal delay={600} className="mx-auto mt-12 max-w-3xl text-center">
+            <p className="text-lg leading-relaxed">
+              <span className="font-bold text-[var(--blc-green-700)]">
+                {t("why_choose_closing_title")}
+              </span>{" "}
+              <span className="text-[var(--blc-green-700)]/80">
+                {t("why_choose_closing_text")}
+              </span>
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      <section className="bg-white py-12 lg:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <Reveal className="text-center">
+            <h2 className="text-2xl font-bold text-[var(--blc-green-900)] sm:text-3xl"></h2>
+          </Reveal>
+
+          <MotionSection
+            variant="stagger"
+            className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          >
+            {trustBadges.map(({ id, icon: Icon, labelKey }) => (
+              <MotionCard
+                key={id}
+                withHoverShadow={false}
+                className="group flex items-center justify-center gap-3 text-center transition-transform duration-300 hover:-translate-y-1 motion-reduce:transition-none"
+              >
+                <div className="relative flex flex-col items-center gap-3">
+                  <span
+                    aria-label={t(labelKey)}
+                    className="relative flex h-16 w-16 items-center justify-center rounded-full border border-[var(--blc-green-700)] bg-[var(--blc-cream-100)] text-[var(--blc-green-700)] transition-colors duration-300 group-hover:bg-[var(--blc-green-700)] group-hover:text-white motion-reduce:transition-none lg:h-20 lg:w-20"
+                  >
+                    <span
+                      className="pointer-events-none absolute inset-0 rounded-full border border-[var(--blc-green-700)] motion-safe:animate-[ping_1s_ease-out_1] motion-reduce:animate-none"
+                      aria-hidden="true"
+                    />
+                    <Icon
+                      className="h-8 w-8 transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none"
+                      strokeWidth={1.75}
+                      aria-label={t(labelKey)}
+                      aria-hidden="true"
+                    />
+                  </span>
+                  <span className="text-sm font-semibold leading-snug text-[var(--blc-green-900)] transition-colors duration-300 group-hover:text-[var(--blc-green-700)]">
+                    {t(labelKey)}
+                  </span>
+                </div>
+              </MotionCard>
+            ))}
+          </MotionSection>
         </div>
       </section>
 
       <Section>
         <Container>
-          <Reveal>
-            <SectionHeading title={t("how_title")} />
-          </Reveal>
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {(["step_1", "step_2", "step_3"] as const).map((key, index) => (
-              <Reveal key={key}>
-                <article className="h-full border-s-2 border-[var(--blc-gold-300)] ps-6">
-                  <span className="text-4xl font-bold text-[var(--blc-gold-500)]">
-                    0{index + 1}
-                  </span>
-                  <p className="mt-4 text-lg text-[var(--blc-green-700)]">
-                    {t(key)}
-                  </p>
-                </article>
-              </Reveal>
-            ))}
+          <div className="mb-16 text-center">
+            <Reveal>
+              <h2 className="text-3xl font-bold leading-tight text-[var(--blc-green-900)] sm:text-4xl">
+                {t("how_title")}
+              </h2>
+              <p className="mx-auto mt-3 max-w-2xl text-lg text-[var(--blc-green-700)]">
+                {t("how_subtitle")}
+              </p>
+            </Reveal>
+          </div>
+          <div className="relative">
+            <Reveal className="pointer-events-none absolute start-0 top-1/2 hidden h-1 w-full -translate-y-1/2 md:block">
+              <span
+                className="block h-full w-full bg-[var(--blc-green-700)]/20"
+                aria-hidden="true"
+              />
+            </Reveal>
+            <div className="grid gap-12 md:grid-cols-3">
+              {howItWorksSteps.map(
+                ({ icon: Icon, titleKey, descriptionKey }, index) => (
+                  <Reveal key={titleKey} delay={index * 150}>
+                    <article className="relative text-center">
+                      <div className="relative z-10 mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-[var(--blc-green-700)] text-white shadow-lg ring-8 ring-white transition duration-300 hover:scale-105 hover:shadow-xl motion-reduce:transition-none">
+                        <Icon
+                          className="h-10 w-10"
+                          strokeWidth={2}
+                          aria-hidden="true"
+                        />
+                        <span className="absolute -end-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-[var(--blc-gold-500)] text-xs font-bold text-white">
+                          {index + 1}
+                        </span>
+                      </div>
+                      <h3 className="mb-2 mt-6 text-xl font-bold text-[var(--blc-green-900)]">
+                        {t(titleKey)}
+                      </h3>
+                      <p className="text-[var(--blc-green-700)] leading-relaxed">
+                        {t(descriptionKey)}
+                      </p>
+                    </article>
+                  </Reveal>
+                ),
+              )}
+            </div>
           </div>
         </Container>
       </Section>
@@ -524,6 +597,8 @@ export default async function HomePage({
           </Reveal>
         </Container>
       </Section>
+
+      <NewsletterSection />
     </>
   );
 }
