@@ -4,6 +4,7 @@ import {
   Accessibility,
   ArrowUpRight,
   BookOpen,
+  CheckCircle2,
   ClipboardCheck,
   FlaskConical,
   Footprints,
@@ -22,9 +23,9 @@ import type { LucideIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { Accordion } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
 import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/reveal";
+import { MotionSection } from "@/components/motion/motion-section";
 import { HeroMotion, HeroTextLayer } from "@/components/sections/HeroMotion";
 import { Section } from "@/components/ui/section";
 import { Services } from "@/components/sections/Services";
@@ -243,33 +244,113 @@ export default async function HomePage({
 
       <Services services={services} locale={locale} />
 
-      <Section variant="sand">
-        <Container>
-          <div className="relative overflow-hidden">
-            <Image
-              src="/brand/logo.png"
-              alt=""
-              width={280}
-              height={280}
-              className="pointer-events-none absolute -end-12 -top-16 z-0 w-64 opacity-[0.07] grayscale"
-              aria-hidden="true"
-            />
-            <div className="relative z-10 grid items-center gap-10 lg:grid-cols-2">
-              <Reveal>
-                <SectionHeading
-                  title={t("standards_title")}
-                  subtitle={t("standards_text")}
+      <section className="overflow-hidden bg-[var(--blc-sand-200)] py-16 lg:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <Reveal className="text-center">
+            <h2 className="text-3xl font-bold text-[var(--blc-green-900)] sm:text-4xl">
+              {t("why_choose_title")}
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--blc-green-700)]">
+              {t("why_choose_subtitle")}
+            </p>
+          </Reveal>
+
+          <div className="mt-12 grid items-center gap-12 lg:grid-cols-2">
+            <MotionSection
+              variant="fade"
+              className="relative mx-auto w-full max-w-md lg:order-2 rtl:lg:order-1"
+            >
+              <div
+                className="pointer-events-none absolute -inset-4 rounded-[2rem] border-2 border-[var(--blc-gold-300)]/70 motion-safe:animate-[bounce_7s_ease-in-out_infinite] motion-reduce:animate-none"
+                aria-hidden="true"
+              />
+              <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-[var(--blc-green-900)] shadow-[0_24px_60px_rgb(2_56_48_/_0.18)]">
+                <Image
+                  src="/images/why-choose-us.jpg"
+                  alt={
+                    locale === "ar"
+                      ? "فريق بيتر لايف كير يقدم رعاية إنسانية في المنزل"
+                      : "Better Life Care team providing compassionate home care"
+                  }
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 42vw"
+                  className="object-cover transition-transform duration-700 hover:scale-105 motion-reduce:transition-none"
                 />
+              </div>
+            </MotionSection>
+
+            <MotionSection
+              variant="fade"
+              className="text-start lg:order-1 rtl:lg:order-2"
+            >
+              <div className="space-y-5 text-lg leading-8 text-[var(--blc-green-700)]">
+                <Reveal>{t("why_choose_paragraph_1")}</Reveal>
+                <Reveal delay={90}>{t("why_choose_paragraph_2")}</Reveal>
+                <Reveal
+                  delay={180}
+                  className="border-s-4 border-[var(--blc-gold-500)] ps-5 text-xl font-bold text-[var(--blc-green-900)]"
+                >
+                  {t("why_choose_highlight")}
+                </Reveal>
+                <Reveal delay={270}>{t("why_choose_paragraph_4")}</Reveal>
+              </div>
+
+              <Reveal delay={360}>
+                <h3 className="mt-8 text-2xl font-bold text-[var(--blc-green-900)]">
+                  {t("why_choose_more_title")}
+                </h3>
+                <p className="mt-3 text-lg leading-8 text-[var(--blc-green-700)]">
+                  {t("why_choose_more_text")}
+                </p>
               </Reveal>
-              <Reveal className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-                <Badge>{t("standards_badge_1")}</Badge>
-                <Badge>{t("standards_badge_2")}</Badge>
-                <Badge>{t("standards_badge_3")}</Badge>
+
+              <Reveal delay={450}>
+                <blockquote className="mt-8 rounded-2xl border-s-4 border-[var(--blc-gold-500)] bg-white p-6 shadow-soft">
+                  <Quote
+                    size={34}
+                    strokeWidth={1.75}
+                    className="text-[var(--blc-gold-500)]"
+                    aria-hidden="true"
+                  />
+                  <p className="mt-4 text-xl font-semibold leading-8 text-[var(--blc-green-900)]">
+                    {t("why_choose_quote")}
+                  </p>
+                  <footer className="mt-5">
+                    <cite className="not-italic font-bold text-[var(--blc-green-900)]">
+                      {common("brand_name")}
+                    </cite>
+                    <p className="text-sm text-[var(--blc-green-700)]">
+                      {t("why_choose_quote_caption")}
+                    </p>
+                  </footer>
+                </blockquote>
               </Reveal>
-            </div>
+
+              <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                {(
+                  [
+                    "why_choose_badge_1",
+                    "why_choose_badge_2",
+                    "why_choose_badge_3",
+                    "why_choose_badge_4",
+                  ] as const
+                ).map((key, index) => (
+                  <Reveal key={key} delay={540 + index * 90}>
+                    <div className="group flex h-full items-start gap-2 rounded-xl bg-white p-4 text-sm font-semibold text-[var(--blc-green-700)] shadow-soft transition-transform duration-300 hover:-translate-y-1 motion-reduce:transition-none">
+                      <CheckCircle2
+                        size={19}
+                        className="mt-0.5 shrink-0 text-emerald-600 transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none"
+                        aria-hidden="true"
+                      />
+                      <span>{t(key)}</span>
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+            </MotionSection>
           </div>
-        </Container>
-      </Section>
+        </div>
+      </section>
 
       <Section>
         <Container>
