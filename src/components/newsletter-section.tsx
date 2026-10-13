@@ -14,7 +14,10 @@ const contentItem = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
   },
 };
 
@@ -22,34 +25,48 @@ export function NewsletterSection() {
   const t = useTranslations("home");
   const locale = useLocale();
   const shouldReduceMotion = useReducedMotion();
+
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    // Ignore bot submissions that fill the hidden honeypot.
     if (company) return;
 
-    if (!emailPattern.test(email.trim())) {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!emailPattern.test(normalizedEmail)) {
       setSubmitState("error");
       return;
     }
 
     setSubmitState("loading");
+
     try {
-      const response = await fetch("/api/newsletter", {
+      const response = await fetch("/api/newsletter/subscribe", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), locale }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          subscriber_email: normalizedEmail,
+          locale,
+        }),
       });
 
+      const result = await response.json().catch(() => null);
+
       if (!response.ok) {
-        throw new Error("Newsletter subscription failed.");
+        throw new Error(result?.error || "Newsletter subscription failed.");
       }
 
       setEmail("");
       setSubmitState("success");
-    } catch {
+    } catch (error) {
+      console.error("Newsletter subscription error:", error);
       setSubmitState("error");
     }
   }
@@ -57,6 +74,7 @@ export function NewsletterSection() {
   const reveal = shouldReduceMotion
     ? undefined
     : { once: true, margin: "-80px" };
+
   const revealInitial = shouldReduceMotion ? false : "hidden";
 
   return (
@@ -69,20 +87,31 @@ export function NewsletterSection() {
       viewport={reveal}
       variants={{
         hidden: {},
-        visible: { transition: { staggerChildren: 0.1 } },
+        visible: {
+          transition: { staggerChildren: 0.1 },
+        },
       }}
     >
       <motion.div
         aria-hidden="true"
         className="pointer-events-none absolute -end-24 -top-24 size-72 rounded-full bg-[var(--blc-gold-300)]/10 blur-3xl"
         animate={shouldReduceMotion ? undefined : { y: [0, -12, 0] }}
-        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+        transition={{
+          duration: 9,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
       />
+
       <motion.div
         aria-hidden="true"
         className="pointer-events-none absolute -bottom-28 -start-24 size-80 rounded-full bg-[var(--blc-gold-300)]/10 blur-3xl"
         animate={shouldReduceMotion ? undefined : { y: [0, 12, 0] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
       />
 
       <div className="relative mx-auto w-full max-w-3xl px-5 text-center lg:px-8">
@@ -92,6 +121,7 @@ export function NewsletterSection() {
         >
           {t("newsletter_label")}
         </motion.p>
+
         <motion.h2
           id="newsletter-title"
           variants={contentItem}
@@ -99,18 +129,26 @@ export function NewsletterSection() {
         >
           {t("newsletter_title")}
         </motion.h2>
+
         <motion.p variants={contentItem} className="mt-3 text-lg text-white/80">
           {t("newsletter_subtitle")}
         </motion.p>
 
         <motion.form
           variants={{
-            hidden: { opacity: 0, y: 16, scale: 0.98 },
+            hidden: {
+              opacity: 0,
+              y: 16,
+              scale: 0.98,
+            },
             visible: {
               opacity: 1,
               y: 0,
               scale: 1,
-              transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
+              transition: {
+                duration: 0.6,
+                ease: [0.22, 1, 0.36, 1] as const,
+              },
             },
           }}
           onSubmit={handleSubmit}
@@ -120,22 +158,29 @@ export function NewsletterSection() {
           <label htmlFor="newsletter-email" className="sr-only">
             {t("newsletter_email_label")}
           </label>
+
           <input
             id="newsletter-email"
             type="email"
-            name="email"
+            name="subscriber_email"
             value={email}
             onChange={(event) => {
               setEmail(event.target.value);
-              if (submitState === "error") setSubmitState("idle");
+
+              if (submitState === "error" || submitState === "success") {
+                setSubmitState("idle");
+              }
             }}
             autoComplete="email"
             required
             placeholder={t("newsletter_email_placeholder")}
             aria-invalid={submitState === "error"}
             aria-describedby="newsletter-message"
-            className="h-14 min-w-0 flex-1 rounded-xl bg-white px-5 text-base text-[var(--blc-green-900)] placeholder:text-[var(--blc-green-700)]/55 focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--blc-gold-300)]/60 sm:rounded-s-xl sm:rounded-e-none"
+            disabled={submitState === "loading"}
+            className="h-14 min-w-0 flex-1 rounded-xl bg-white px-5 text-base text-[var(--blc-green-900)] placeholder:text-[var(--blc-green-700)]/55 focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--blc-gold-300)]/60 disabled:opacity-70 sm:rounded-s-xl sm:rounded-e-none"
           />
+
+          {/* Hidden honeypot field for basic bot detection */}
           <input
             type="text"
             name="company"
@@ -146,6 +191,7 @@ export function NewsletterSection() {
             autoComplete="off"
             className="sr-only"
           />
+
           <button
             type="submit"
             disabled={submitState === "loading"}
@@ -157,9 +203,11 @@ export function NewsletterSection() {
                 aria-hidden="true"
               />
             )}
+
             {submitState === "success" && (
               <Check className="h-5 w-5" aria-hidden="true" />
             )}
+
             <span className={submitState === "loading" ? "sr-only" : ""}>
               {t("newsletter_submit")}
             </span>
@@ -167,9 +215,11 @@ export function NewsletterSection() {
         </motion.form>
 
         <p className="mt-4 text-sm text-white/60">{t("newsletter_privacy")}</p>
+
         <AnimatePresence mode="wait">
           {submitState === "success" && (
             <motion.p
+              key="success"
               id="newsletter-message"
               role="status"
               aria-live="polite"
@@ -183,8 +233,10 @@ export function NewsletterSection() {
               {t("newsletter_success")}
             </motion.p>
           )}
+
           {submitState === "error" && (
             <motion.p
+              key="error"
               id="newsletter-message"
               role="alert"
               initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
