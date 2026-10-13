@@ -7,10 +7,12 @@ export function Reveal({
   children,
   className = "",
   delay = 0,
+  variant = "fade",
 }: {
   children: React.ReactNode;
   className?: string;
   delay?: number;
+  variant?: "fade" | "zoom";
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -26,7 +28,9 @@ export function Reveal({
       return;
     }
 
-    element.classList.add("reveal-pending");
+    element.classList.add(
+      variant === "zoom" ? "reveal-zoom-pending" : "reveal-pending",
+    );
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -38,12 +42,18 @@ export function Reveal({
     );
     observer.observe(element);
     return () => observer.disconnect();
-  }, []);
+  }, [variant]);
 
   return (
     <div
       ref={ref}
-      className={`reveal ${visible ? "reveal-visible" : ""} ${className}`}
+      className={`reveal ${
+        visible
+          ? variant === "zoom"
+            ? "reveal-zoom-visible"
+            : "reveal-visible"
+          : ""
+      } ${className}`}
       style={
         delay > 0
           ? ({ "--reveal-delay": `${delay}ms` } as CSSProperties)

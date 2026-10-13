@@ -1,13 +1,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
+  ArrowUpRight,
+  CheckCircle2,
   Eye,
   Globe2,
   GraduationCap,
   HeartHandshake,
+  HeartPulse,
+  ImageIcon,
+  Lightbulb,
   MessageCircle,
   Phone,
+  ShieldCheck,
+  Target,
   TrendingUp,
+  Users,
 } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -20,6 +28,43 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
 import type { Locale } from "@/i18n/routing";
 import { getMissionVisionFromERP } from "@/lib/erp/mission-vision";
+
+const standardsGlassImageSrc: string | undefined = undefined;
+const standardsMainImageSrc: string | undefined = undefined;
+const standardsSmallImageSrc: string | undefined = undefined;
+
+function ImagePlaceholder({
+  src,
+  alt,
+  className = "",
+}: {
+  src?: string;
+  alt?: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`relative overflow-hidden bg-gradient-to-br from-[var(--blc-cream-100)] to-[var(--blc-sand-200)] ${className}`}
+      aria-hidden={src ? undefined : true}
+    >
+      {src ? (
+        <Image
+          src={src}
+          alt={alt ?? ""}
+          fill
+          sizes="(max-width: 1024px) 100vw, 50vw"
+          className="object-cover"
+        />
+      ) : (
+        <ImageIcon
+          className="absolute left-1/2 top-1/2 size-10 -translate-x-1/2 -translate-y-1/2 text-[var(--blc-green-900)] opacity-30"
+          strokeWidth={1.25}
+          aria-hidden="true"
+        />
+      )}
+    </div>
+  );
+}
 
 export async function generateMetadata({
   params,
@@ -223,6 +268,22 @@ export default async function AboutPage({
         ],
       };
 
+  const values = [
+    { key: "value_1", icon: ShieldCheck },
+    { key: "value_2", icon: Lightbulb },
+    { key: "value_3", icon: Users },
+    { key: "value_5", icon: Target },
+    { key: "value_6", icon: HeartHandshake },
+    { key: "value_8", icon: GraduationCap },
+  ] as const;
+
+  const standardsPoints = [
+    { key: "standards_point_1", icon: HeartPulse },
+    { key: "standards_point_2", icon: CheckCircle2 },
+    { key: "standards_point_3", icon: ShieldCheck },
+    { key: "standards_point_4", icon: Users },
+  ] as const;
+
   return (
     <main>
       {/* Page Header */}
@@ -307,7 +368,11 @@ export default async function AboutPage({
       </Section>
 
       {/* Standards */}
-      <Section variant="sand">
+      <Section
+        variant="sand"
+        dir={isArabic ? "rtl" : "ltr"}
+        className="relative overflow-hidden"
+      >
         <Container>
           <div className="relative overflow-hidden">
             <Image
@@ -319,38 +384,150 @@ export default async function AboutPage({
               aria-hidden="true"
             />
 
-            <div className="relative z-10 grid gap-10 lg:grid-cols-[1.3fr_0.7fr] lg:items-center">
-              <Reveal>
-                <SectionHeading
-                  title={t("standards_title")}
-                  subtitle={t("standards_text")}
-                />
-              </Reveal>
+            <div className="relative z-10 grid gap-14 lg:grid-cols-2 lg:items-center lg:gap-20">
+              <div>
+                <Reveal delay={0}>
+                  <p className="flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--blc-gold-500)]">
+                    <span
+                      className="size-2 rounded-full bg-[var(--blc-gold-300)]"
+                      aria-hidden="true"
+                    />
+                    {t("standards_eyebrow")}
+                  </p>
+                </Reveal>
+
+                <Reveal delay={100}>
+                  <h2 className="mt-5 max-w-2xl text-4xl font-bold leading-tight text-[var(--blc-green-900)] sm:text-5xl lg:text-6xl">
+                    {t("standards_title")}
+                  </h2>
+                </Reveal>
+
+                <Reveal delay={200}>
+                  <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--blc-green-700)]">
+                    {t("standards_text")}
+                  </p>
+                </Reveal>
+
+                <ul className="mt-9 grid gap-4 sm:grid-cols-2">
+                  {standardsPoints.map(({ key, icon: Icon }, index) => (
+                    <Reveal key={key} delay={300 + index * 100}>
+                      <li className="group flex h-full items-center gap-4 rounded-card border border-[var(--blc-sand-200)] bg-white p-5 shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-lg motion-reduce:transform-none motion-reduce:transition-none">
+                        <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--blc-cream-100)] text-[var(--blc-green-900)] transition-colors duration-300 group-hover:bg-[var(--blc-gold-300)] motion-reduce:transition-none">
+                          <Icon size={22} strokeWidth={1.6} aria-hidden="true" />
+                        </span>
+                        <span className="font-bold leading-snug text-[var(--blc-green-900)]">
+                          {t(key)}
+                        </span>
+                      </li>
+                    </Reveal>
+                  ))}
+                </ul>
+
+                <Reveal delay={700}>
+                  <Link
+                    href={`/${locale}/contact`}
+                    className="group mt-9 inline-flex min-h-12 items-center gap-3 rounded-full bg-[var(--blc-green-900)] px-6 font-semibold text-white transition-colors duration-300 hover:bg-[var(--blc-green-700)] focus-ring-dark motion-reduce:transition-none"
+                  >
+                    {t("standards_cta")}
+                    <ArrowUpRight
+                      size={19}
+                      className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 rtl:-scale-x-100 rtl:group-hover:-translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
+                      aria-hidden="true"
+                    />
+                  </Link>
+                </Reveal>
+              </div>
 
               {consultant && (
-                <Reveal>
-                  <article className="rounded-card bg-white p-7 shadow-soft">
-                    <Image
-                      src={consultant.photo_url}
-                      alt={isArabic ? consultant.name_ar : consultant.name_en}
-                      width={120}
-                      height={120}
-                      className="size-24 rounded-full object-cover"
-                    />
+                <div className="relative mx-auto w-full max-w-xl lg:mx-0">
+                  <Reveal delay={100}>
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-card bg-[var(--blc-green-900)] shadow-soft sm:aspect-[4/3] lg:aspect-[4/5]">
+                      <Image
+                        src={consultant.photo_url}
+                        alt={isArabic ? consultant.name_ar : consultant.name_en}
+                        fill
+                        sizes="(max-width: 1024px) 100vw, 50vw"
+                        className="object-cover"
+                      />
+                    </div>
+                  </Reveal>
 
-                    <p className="mt-5 text-sm font-semibold text-[var(--blc-gold-500)]">
-                      {t("consultant_label")}
-                    </p>
+                  <Reveal delay={500}>
+                    <article className="absolute -bottom-6 end-4 max-w-[calc(100%-2rem)] rounded-card border border-white/30 bg-white/90 p-5 shadow-soft backdrop-blur-md sm:end-8 sm:max-w-sm sm:p-6">
+                      <p className="text-sm font-semibold text-[var(--blc-gold-500)]">
+                        {t("consultant_label")}
+                      </p>
+                      <h3 className="mt-2 text-xl font-bold text-[var(--blc-green-900)]">
+                        {isArabic ? consultant.name_ar : consultant.name_en}
+                      </h3>
+                      <p className="mt-2 line-clamp-3 text-sm leading-6 text-[var(--blc-green-700)]">
+                        {isArabic ? consultant.bio_ar : consultant.bio_en}
+                      </p>
+                    </article>
+                  </Reveal>
 
-                    <h2 className="mt-2 text-2xl font-bold text-[var(--blc-green-900)]">
-                      {isArabic ? consultant.name_ar : consultant.name_en}
-                    </h2>
+                  <Reveal delay={600}>
+                    <div className="absolute -bottom-10 -start-6 hidden rotate-[-4deg] rounded-card bg-white p-3 shadow-soft transition-transform duration-500 hover:rotate-0 lg:block motion-reduce:transition-none">
+                      <Image
+                        src="/brand/logo.png"
+                        alt=""
+                        width={88}
+                        height={88}
+                        className="reveal-image size-20 object-contain"
+                        aria-hidden="true"
+                      />
+                    </div>
+                  </Reveal>
 
-                    <p className="mt-3 text-[var(--blc-green-700)]">
-                      {isArabic ? consultant.bio_ar : consultant.bio_en}
-                    </p>
-                  </article>
-                </Reveal>
+                  <div className="relative mt-16 min-h-[22rem] overflow-visible">
+                    {/* PLACEHOLDER 1: glass card */}
+                    <Reveal
+                      delay={150}
+                      className="absolute -start-4 top-6 z-20 sm:-start-6"
+                    >
+                      <article
+                        className="w-56 rounded-card border border-white/40 bg-white/60 p-5 shadow-soft backdrop-blur-md motion-reduce:transform-none motion-reduce:transition-none"
+                        aria-hidden={standardsGlassImageSrc ? undefined : true}
+                      >
+                        <ImagePlaceholder
+                          src={standardsGlassImageSrc}
+                          alt="Standards glass card image"
+                          className="size-12 rounded-lg"
+                        />
+                        <div
+                          className="mt-4 h-3 w-1/2 rounded-full bg-[var(--blc-green-900)]/15"
+                          aria-hidden="true"
+                        />
+                        <div className="mt-3 space-y-2" aria-hidden="true">
+                          <div className="h-2 w-full rounded-full bg-[var(--blc-green-900)]/10" />
+                          <div className="h-2 w-4/5 rounded-full bg-[var(--blc-green-900)]/10" />
+                        </div>
+                      </article>
+                    </Reveal>
+
+                    {/* PLACEHOLDER 2: main image */}
+                    <Reveal delay={0} className="h-full">
+                      <ImagePlaceholder
+                        src={standardsMainImageSrc}
+                        alt="Standards main image"
+                        className="aspect-[4/3] w-full rounded-card shadow-soft motion-reduce:transform-none motion-reduce:transition-none"
+                      />
+                    </Reveal>
+
+                    {/* PLACEHOLDER 3: small floating image */}
+                    <Reveal
+                      variant="zoom"
+                      delay={300}
+                      className="absolute -bottom-8 -start-8 z-20 hidden lg:block"
+                    >
+                      <ImagePlaceholder
+                        src={standardsSmallImageSrc}
+                        alt="Standards secondary image"
+                        className="size-32 rotate-[-4deg] rounded-card border-4 border-white shadow-soft transition-transform duration-500 hover:rotate-0 motion-reduce:transform-none motion-reduce:transition-none sm:size-40"
+                      />
+                    </Reveal>
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -594,38 +771,71 @@ export default async function AboutPage({
 
       {/* Mission & Vision */}
 
-      {/* Promise */}
-      <Section variant="cream" dir={isArabic ? "rtl" : "ltr"}>
-        <Container>
-          <Reveal>
-            <SectionHeading
-              eyebrow={common("tagline")}
-              title={t("promise_title")}
-              className="max-w-2xl"
-            />
+      {/* Our Values */}
+      <Section
+        variant="cream"
+        dir={isArabic ? "rtl" : "ltr"}
+        className="relative overflow-hidden pb-16 lg:pb-24"
+      >
+        <div className="relative overflow-hidden bg-[var(--blc-green-900)] py-20 text-white lg:py-28">
+          <div
+            className="pointer-events-none absolute -end-20 -top-24 size-80 rounded-full border-[32px] border-[var(--blc-gold-300)]/15"
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute -start-24 bottom-[-10rem] size-96 rotate-12 rounded-[28%] bg-[var(--blc-green-700)]/50"
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute end-8 top-8 size-32 opacity-60 sm:end-16 sm:top-12"
+            style={{
+              backgroundImage:
+                "radial-gradient(var(--blc-gold-300) 1.5px, transparent 1.5px)",
+              backgroundSize: "12px 12px",
+            }}
+            aria-hidden="true"
+          />
 
-            <div className="mt-10 grid gap-4 md:grid-cols-3">
-              {(["promise_1", "promise_2", "promise_3"] as const).map(
-                (key, index) => (
-                  <article
-                    key={key}
-                    className="group relative min-h-40 overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white p-7 shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-lg"
-                  >
-                    <span className="text-4xl font-bold text-[var(--blc-gold-300)]">
-                      0{index + 1}
+          <Container className="relative">
+            <Reveal className="max-w-4xl">
+              <p className="mb-5 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--blc-gold-300)]">
+                {common("tagline")}
+              </p>
+              <h2 className="max-w-3xl text-5xl font-bold leading-[0.95] text-white sm:text-7xl lg:text-8xl">
+                {t("values_title")}
+              </h2>
+              <p className="mt-7 max-w-2xl text-lg leading-8 text-[var(--blc-cream-100)] sm:text-xl">
+                {t("values_subtitle")}
+              </p>
+            </Reveal>
+          </Container>
+        </div>
+
+        <Container className="relative z-10 -mt-10 lg:-mt-16">
+          <div className="grid gap-5 md:grid-cols-2">
+            {values.map(({ key, icon: Icon }, index) => (
+              <Reveal key={key} delay={index * 80}>
+                <article className="group grid min-h-52 grid-cols-[auto_1fr] gap-5 rounded-card border border-[var(--blc-sand-200)] bg-white p-6 shadow-[0_18px_45px_rgb(2_56_48_/_0.12)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_55px_rgb(2_56_48_/_0.18)] sm:p-7">
+                  <div className="flex flex-col items-start gap-5">
+                    <span className="text-sm font-bold tracking-[0.16em] text-[var(--blc-gold-300)]">
+                      {String(index + 1).padStart(2, "0")}
                     </span>
-                    <p className="relative z-10 mt-7 text-xl font-bold leading-snug text-[var(--blc-green-900)]">
-                      {t(key)}
+                    <span className="flex size-12 items-center justify-center rounded-2xl bg-[var(--blc-cream-100)] text-[var(--blc-green-900)] transition-colors duration-300 group-hover:bg-[var(--blc-gold-300)]">
+                      <Icon size={24} strokeWidth={1.5} aria-hidden="true" />
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold leading-snug text-[var(--blc-green-900)] sm:text-2xl">
+                      {t(`${key}_title`)}
+                    </h3>
+                    <p className="mt-4 leading-7 text-[var(--blc-green-700)]">
+                      {t(`${key}_desc`)}
                     </p>
-                    <span
-                      className="absolute -bottom-12 -end-8 size-32 rounded-full border-[16px] border-[var(--blc-green-900)]/5 transition-transform duration-500 group-hover:scale-110"
-                      aria-hidden="true"
-                    />
-                  </article>
-                ),
-              )}
-            </div>
-          </Reveal>
+                  </div>
+                </article>
+              </Reveal>
+            ))}
+          </div>
         </Container>
       </Section>
 
