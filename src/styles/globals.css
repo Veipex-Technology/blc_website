@@ -121,6 +121,86 @@ a {
   );
   animation: motion-image-shimmer 1.6s ease-in-out infinite;
 }
+.mission-vision-large {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-visible .mission-vision-large {
+  clip-path: inset(0);
+}
+.mission-vision-image {
+  transform: scale(1.08);
+  transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-visible .mission-vision-image {
+  transform: scale(1);
+}
+.mission-vision-small {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 800ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-visible .mission-vision-small {
+  opacity: 1;
+  transform: translateY(0);
+}
+.mission-vision-placeholder::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgb(255 255 255 / 0.5) 50%,
+    transparent 70%
+  );
+  animation: motion-image-shimmer 2.2s ease-in-out infinite;
+}
+.mission-vision-accent {
+  animation: mission-vision-float 6s ease-in-out infinite;
+}
+.mission-vision-point {
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mission-vision-check {
+  transition:
+    color 300ms ease,
+    transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (hover: hover) {
+  .mission-vision-collage:hover .mission-vision-image {
+    transform: scale(1.02);
+  }
+  [dir="ltr"] .mission-vision-point:hover {
+    transform: translateX(4px);
+  }
+  [dir="rtl"] .mission-vision-point:hover {
+    transform: translateX(-4px);
+  }
+  .mission-vision-point:hover .mission-vision-check {
+    color: var(--blc-gold-500);
+    transform: scale(1.12);
+  }
+}
+@keyframes mission-vision-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@media (min-width: 1024px) {
+  [dir="rtl"] .mission-vision-large {
+    clip-path: inset(0 0 0 100%);
+  }
+  [dir="rtl"] .reveal-visible .mission-vision-large {
+    clip-path: inset(0);
+  }
+}
 .blog-card-title::after {
   display: block;
   width: 2.5rem;
@@ -236,5 +316,19 @@ select {
     opacity: 1;
     filter: none;
     transform: none;
+  }
+  .mission-vision-large {
+    clip-path: inset(0);
+  }
+  .mission-vision-image,
+  .mission-vision-small,
+  .mission-vision-accent,
+  .mission-vision-point,
+  .mission-vision-check {
+    opacity: 1;
+    transform: none;
+  }
+  .mission-vision-placeholder::after {
+    animation: none;
   }
 }

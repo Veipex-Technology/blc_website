@@ -3,7 +3,6 @@ import Link from "next/link";
 import {
   ArrowUpRight,
   CheckCircle2,
-  Eye,
   Globe2,
   GraduationCap,
   HeartHandshake,
@@ -21,6 +20,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import sanitizeHtml from "sanitize-html";
 
+import { MissionVisionCollage } from "@/components/motion/mission-vision-collage";
 import { Reveal } from "@/components/reveal";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
@@ -284,6 +284,43 @@ export default async function AboutPage({
     { key: "standards_point_4", icon: Users },
   ] as const;
 
+  function splitDescriptionPoints(description?: string): string[] {
+    if (!description?.trim()) return [];
+
+    // Convert common HTML block endings into line breaks.
+    const plainText = description
+      .replace(/<\s*br\s*\/?\s*>/gi, "\n")
+      .replace(/<\/\s*(p|div|li|h[1-6])\s*>/gi, "\n")
+      .replace(/<\s*li\b[^>]*>/gi, "• ")
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/gi, " ")
+      .replace(/&amp;/gi, "&")
+      .replace(/&lt;/gi, "<")
+      .replace(/&gt;/gi, ">")
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;|&apos;/gi, "'")
+      .trim();
+
+    return plainText
+      .split(/\n+|(?<=[.!?؟。؛])\s+|;/)
+      .map((point) => point.trim())
+      .map((point) => point.replace(/^[•\-–—]\s*/, ""))
+      .map((point) => point.replace(/[.!?؟؛。]+$/, "").trim())
+      .filter(Boolean);
+  }
+
+  const missionPoints = splitDescriptionPoints(
+    isArabic
+      ? missionVision?.ar_mission_description
+      : missionVision?.description,
+  );
+
+  const visionPoints = splitDescriptionPoints(
+    isArabic
+      ? missionVision?.ar_vission_description
+      : missionVision?.vission_description,
+  );
+
   return (
     <main>
       {/* Page Header */}
@@ -413,7 +450,11 @@ export default async function AboutPage({
                     <Reveal key={key} delay={300 + index * 100}>
                       <li className="group flex h-full items-center gap-4 rounded-card border border-[var(--blc-sand-200)] bg-white p-5 shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-lg motion-reduce:transform-none motion-reduce:transition-none">
                         <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--blc-cream-100)] text-[var(--blc-green-900)] transition-colors duration-300 group-hover:bg-[var(--blc-gold-300)] motion-reduce:transition-none">
-                          <Icon size={22} strokeWidth={1.6} aria-hidden="true" />
+                          <Icon
+                            size={22}
+                            strokeWidth={1.6}
+                            aria-hidden="true"
+                          />
                         </span>
                         <span className="font-bold leading-snug text-[var(--blc-green-900)]">
                           {t(key)}
@@ -630,7 +671,7 @@ export default async function AboutPage({
       </Section>
 
       {/* Dynamic Mission & Vision Presentation */}
-      <Section variant="sand" dir={isArabic ? "rtl" : "ltr"}>
+      <Section variant="cream" dir={isArabic ? "rtl" : "ltr"}>
         <Container>
           <Reveal>
             <SectionHeading
@@ -641,130 +682,91 @@ export default async function AboutPage({
             />
           </Reveal>
 
-          <div className="mt-12 grid items-stretch gap-7 lg:grid-cols-2 lg:gap-10">
-            <Reveal>
-              <article className="group flex h-full flex-col overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgb(2_56_48_/_0.14)]">
-                <div className="relative aspect-[16/10] overflow-hidden border-b border-[var(--blc-sand-200)] bg-[var(--blc-green-900)]">
-                  {missionImageUrl ? (
-                    <Image
-                      src={missionImageUrl}
-                      alt={
-                        missionTitle || missionVisionPresentation.missionLabel
-                      }
-                      fill
-                      sizes="(max-width: 1024px) 100vw, 50vw"
-                      className="reveal-image object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                    />
-                  ) : (
-                    <div className="reveal-image absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_20%_20%,rgba(229,198,144,0.42),transparent_26%),linear-gradient(135deg,var(--blc-green-900),var(--blc-green-700))] transition-transform duration-300 group-hover:scale-[1.03]">
-                      <div
-                        className="absolute -end-12 -top-16 size-52 rounded-full border border-white/20"
-                        aria-hidden="true"
-                      />
-                      <div
-                        className="absolute -bottom-20 -start-10 size-56 rounded-full border-[18px] border-[var(--blc-gold-300)]/15"
-                        aria-hidden="true"
-                      />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
-                        <div className="flex size-16 items-center justify-center rounded-full border border-white/40 bg-white/10 backdrop-blur-sm">
-                          <HeartHandshake
-                            size={30}
-                            strokeWidth={1.5}
-                            aria-hidden="true"
-                          />
-                        </div>
-                        <span className="mt-4 text-sm font-semibold tracking-[0.16em] text-[var(--blc-gold-300)]">
-                          {missionVisionPresentation.missionFallback}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
+          <div className="mt-8 divide-y divide-[var(--blc-sand-200)]">
+            <article className="mission-vision-row grid items-center gap-12 overflow-hidden py-16 lg:grid-cols-2 lg:gap-20 lg:py-24">
+              <Reveal className="relative min-w-0 px-3 sm:px-6 lg:order-1 lg:px-0">
+                <MissionVisionCollage
+                  imageUrl={missionImageUrl}
+                  title={missionTitle || t("mission_title")}
+                  imageLabel={t("mission_image_label")}
+                  secondaryImageLabel={t("secondary_image_label")}
+                />
+              </Reveal>
 
-                <div className="relative flex-1 p-7 sm:p-9">
-                  <div
-                    className="absolute start-7 top-0 h-1 w-12 -translate-y-1/2 rounded-full bg-[var(--blc-gold-500)] sm:start-9"
-                    aria-hidden="true"
-                  />
-                  <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--blc-gold-500)]">
-                    <HeartHandshake size={17} aria-hidden="true" />
+              <div className="max-w-xl lg:order-2 lg:ps-4">
+                <Reveal>
+                  <p className="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--blc-gold-500)]">
                     {missionVisionPresentation.missionLabel}
                   </p>
-                  <h3 className="mt-4 text-2xl font-bold leading-tight text-[var(--blc-green-900)] sm:text-3xl">
+                  <h3 className="text-4xl font-bold leading-tight text-[var(--blc-green-900)] sm:text-5xl">
                     {missionTitle || t("mission_title")}
                   </h3>
-                  {missionHtml ? (
-                    <div
-                      className="prose mt-4 max-w-none text-[var(--blc-green-700)]"
-                      dangerouslySetInnerHTML={{ __html: missionHtml }}
-                    />
-                  ) : (
-                    <p className="mt-4 leading-7 text-[var(--blc-green-700)]">
-                      {t("mission")}
-                    </p>
-                  )}
-                </div>
-              </article>
-            </Reveal>
+                </Reveal>
 
-            <Reveal delay={120}>
-              <article className="group flex h-full flex-col overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgb(2_56_48_/_0.14)]">
-                <div className="relative aspect-[16/10] overflow-hidden border-b border-[var(--blc-sand-200)] bg-[var(--blc-green-700)]">
-                  {visionImageUrl ? (
-                    <Image
-                      src={visionImageUrl}
-                      alt={visionTitle || missionVisionPresentation.visionLabel}
-                      fill
-                      sizes="(max-width: 1024px) 100vw, 50vw"
-                      className="reveal-image object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                    />
-                  ) : (
-                    <div className="reveal-image absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_80%_20%,rgba(229,198,144,0.42),transparent_26%),linear-gradient(135deg,var(--blc-green-700),var(--blc-green-900))] transition-transform duration-300 group-hover:scale-[1.03]">
-                      <div
-                        className="absolute -start-12 -top-16 size-52 rounded-full border border-white/20"
-                        aria-hidden="true"
-                      />
-                      <div
-                        className="absolute -bottom-20 -end-10 size-56 rounded-full border-[18px] border-[var(--blc-gold-300)]/15"
-                        aria-hidden="true"
-                      />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
-                        <div className="flex size-16 items-center justify-center rounded-full border border-white/40 bg-white/10 backdrop-blur-sm">
-                          <Eye size={30} strokeWidth={1.5} aria-hidden="true" />
-                        </div>
-                        <span className="mt-4 text-sm font-semibold tracking-[0.16em] text-[var(--blc-gold-300)]">
-                          {missionVisionPresentation.visionFallback}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                {missionPoints.length > 0 && (
+                  <ul className="mt-7 space-y-3">
+                    {missionPoints.map((point, index) => (
+                      <Reveal
+                        key={`${point}-${index}`}
+                        delay={180 + index * 100}
+                      >
+                        <li className="mission-vision-point group flex items-center gap-3 text-[var(--blc-green-700)]">
+                          <CheckCircle2
+                            className="mission-vision-check size-5 shrink-0 text-[var(--blc-green-900)]"
+                            strokeWidth={2.2}
+                            aria-hidden="true"
+                          />
+                          <span className="font-medium">{point}</span>
+                        </li>
+                      </Reveal>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </article>
 
-                <div className="relative flex-1 p-7 sm:p-9">
-                  <div
-                    className="absolute start-7 top-0 h-1 w-12 -translate-y-1/2 rounded-full bg-[var(--blc-gold-500)] sm:start-9"
-                    aria-hidden="true"
-                  />
-                  <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--blc-gold-500)]">
-                    <Eye size={17} aria-hidden="true" />
+            <article className="mission-vision-row grid items-center gap-12 overflow-hidden py-16 lg:grid-cols-2 lg:gap-20 lg:py-24">
+              <div className="max-w-xl lg:order-1 lg:pe-4">
+                <Reveal>
+                  <p className="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--blc-gold-500)]">
                     {missionVisionPresentation.visionLabel}
                   </p>
-                  <h3 className="mt-4 text-2xl font-bold leading-tight text-[var(--blc-green-900)] sm:text-3xl">
+                  <h3 className="text-4xl font-bold leading-tight text-[var(--blc-green-900)] sm:text-5xl">
                     {visionTitle || t("vision_title")}
                   </h3>
-                  {visionHtml ? (
-                    <div
-                      className="prose mt-4 max-w-none text-[var(--blc-green-700)]"
-                      dangerouslySetInnerHTML={{ __html: visionHtml }}
-                    />
-                  ) : (
-                    <p className="mt-4 leading-7 text-[var(--blc-green-700)]">
-                      {t("vision")}
-                    </p>
-                  )}
-                </div>
-              </article>
-            </Reveal>
+                </Reveal>
+
+                {visionPoints.length > 0 && (
+                  <ul className="mt-7 space-y-3">
+                    {visionPoints.map((point, index) => (
+                      <Reveal
+                        key={`${point}-${index}`}
+                        delay={180 + index * 100}
+                      >
+                        <li className="mission-vision-point group flex items-center gap-3 text-[var(--blc-green-700)]">
+                          <CheckCircle2
+                            className="mission-vision-check size-5 shrink-0 text-[var(--blc-green-900)]"
+                            strokeWidth={2.2}
+                            aria-hidden="true"
+                          />
+                          <span className="font-medium">{point}</span>
+                        </li>
+                      </Reveal>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              <Reveal className="relative min-w-0 px-3 sm:px-6 lg:order-2 lg:px-0">
+                <MissionVisionCollage
+                  imageUrl={visionImageUrl}
+                  title={visionTitle || t("vision_title")}
+                  imageLabel={t("vision_image_label")}
+                  secondaryImageLabel={t("secondary_image_label")}
+                  mirrored
+                />
+              </Reveal>
+            </article>
           </div>
         </Container>
       </Section>
