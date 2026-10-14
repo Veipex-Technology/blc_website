@@ -619,7 +619,7 @@ export default async function AboutPage({
       </Section>
 
       {/* More About BLC */}
-      <Section variant="cream">
+      <Section variant="sand">
         <Container>
           <Reveal>
             <SectionHeading
