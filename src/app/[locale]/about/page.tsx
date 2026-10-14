@@ -29,23 +29,21 @@ import { createPageMetadata } from "@/lib/metadata";
 import type { Locale } from "@/i18n/routing";
 import { getMissionVisionFromERP } from "@/lib/erp/mission-vision";
 
-const standardsGlassImageSrc: string | undefined = undefined;
-const standardsMainImageSrc: string | undefined = undefined;
-const standardsSmallImageSrc: string | undefined = undefined;
-
 function ImagePlaceholder({
   src,
   alt,
+  label,
   className = "",
 }: {
   src?: string;
   alt?: string;
+  label?: string;
   className?: string;
 }) {
   return (
     <div
       className={`relative overflow-hidden bg-gradient-to-br from-[var(--blc-cream-100)] to-[var(--blc-sand-200)] ${className}`}
-      aria-hidden={src ? undefined : true}
+      aria-hidden={src || label ? undefined : true}
     >
       {src ? (
         <Image
@@ -56,11 +54,12 @@ function ImagePlaceholder({
           className="object-cover"
         />
       ) : (
-        <ImageIcon
-          className="absolute left-1/2 top-1/2 size-10 -translate-x-1/2 -translate-y-1/2 text-[var(--blc-green-900)] opacity-30"
-          strokeWidth={1.25}
-          aria-hidden="true"
-        />
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4 text-center text-[var(--blc-green-900)]">
+          <span className="flex size-14 items-center justify-center rounded-full border border-[var(--blc-sand-200)] bg-white/70 shadow-sm">
+            <ImageIcon size={28} strokeWidth={1.25} aria-hidden="true" />
+          </span>
+          {label && <span className="text-sm font-semibold">{label}</span>}
+        </div>
       )}
     </div>
   );
@@ -479,97 +478,59 @@ export default async function AboutPage({
                 </Reveal>
               </div>
 
-              {consultant && (
-                <div className="relative mx-auto w-full max-w-xl lg:mx-0">
-                  <Reveal delay={100}>
-                    <div className="relative aspect-[4/5] overflow-hidden rounded-card bg-[var(--blc-green-900)] shadow-soft sm:aspect-[4/3] lg:aspect-[4/5]">
-                      <Image
-                        src={consultant.photo_url}
-                        alt={isArabic ? consultant.name_ar : consultant.name_en}
-                        fill
-                        sizes="(max-width: 1024px) 100vw, 50vw"
-                        className="object-cover"
-                      />
-                    </div>
-                  </Reveal>
+              <div className="standards-composition relative mx-auto min-h-[32rem] w-full max-w-xl lg:mx-0 lg:min-h-[38rem]">
+                <div
+                  className="pointer-events-none absolute -end-4 top-3 size-28 rounded-full border-[18px] border-[var(--blc-gold-300)]/30 sm:-end-8 sm:size-40"
+                  aria-hidden="true"
+                />
 
-                  <Reveal delay={500}>
-                    <article className="absolute -bottom-6 end-4 max-w-[calc(100%-2rem)] rounded-card border border-white/30 bg-white/90 p-5 shadow-soft backdrop-blur-md sm:end-8 sm:max-w-sm sm:p-6">
-                      <p className="text-sm font-semibold text-[var(--blc-gold-500)]">
-                        {t("consultant_label")}
-                      </p>
-                      <h3 className="mt-2 text-xl font-bold text-[var(--blc-green-900)]">
-                        {isArabic ? consultant.name_ar : consultant.name_en}
-                      </h3>
-                      <p className="mt-2 line-clamp-3 text-sm leading-6 text-[var(--blc-green-700)]">
-                        {isArabic ? consultant.bio_ar : consultant.bio_en}
-                      </p>
-                    </article>
-                  </Reveal>
-
-                  <Reveal delay={600}>
-                    <div className="absolute -bottom-10 -start-6 hidden rotate-[-4deg] rounded-card bg-white p-3 shadow-soft transition-transform duration-500 hover:rotate-0 lg:block motion-reduce:transition-none">
-                      <Image
-                        src="/brand/logo.png"
-                        alt=""
-                        width={88}
-                        height={88}
-                        className="reveal-image size-20 object-contain"
-                        aria-hidden="true"
-                      />
-                    </div>
-                  </Reveal>
-
-                  <div className="relative mt-16 min-h-[22rem] overflow-visible">
-                    {/* PLACEHOLDER 1: glass card */}
-                    <Reveal
-                      delay={150}
-                      className="absolute -start-4 top-6 z-20 sm:-start-6"
-                    >
-                      <article
-                        className="w-56 rounded-card border border-white/40 bg-white/60 p-5 shadow-soft backdrop-blur-md motion-reduce:transform-none motion-reduce:transition-none"
-                        aria-hidden={standardsGlassImageSrc ? undefined : true}
-                      >
-                        <ImagePlaceholder
-                          src={standardsGlassImageSrc}
-                          alt="Standards glass card image"
-                          className="size-12 rounded-lg"
-                        />
-                        <div
-                          className="mt-4 h-3 w-1/2 rounded-full bg-[var(--blc-green-900)]/15"
-                          aria-hidden="true"
-                        />
-                        <div className="mt-3 space-y-2" aria-hidden="true">
-                          <div className="h-2 w-full rounded-full bg-[var(--blc-green-900)]/10" />
-                          <div className="h-2 w-4/5 rounded-full bg-[var(--blc-green-900)]/10" />
-                        </div>
-                      </article>
-                    </Reveal>
-
-                    {/* PLACEHOLDER 2: main image */}
-                    <Reveal delay={0} className="h-full">
-                      <ImagePlaceholder
-                        src={standardsMainImageSrc}
-                        alt="Standards main image"
-                        className="aspect-[4/3] w-full rounded-card shadow-soft motion-reduce:transform-none motion-reduce:transition-none"
-                      />
-                    </Reveal>
-
-                    {/* PLACEHOLDER 3: small floating image */}
-                    <Reveal
-                      variant="zoom"
-                      delay={300}
-                      className="absolute -bottom-8 -start-8 z-20 hidden lg:block"
-                    >
-                      <ImagePlaceholder
-                        src={standardsSmallImageSrc}
-                        alt="Standards secondary image"
-                        className="size-32 rotate-[-4deg] rounded-card border-4 border-white shadow-soft transition-transform duration-500 hover:rotate-0 motion-reduce:transform-none motion-reduce:transition-none sm:size-40"
-                      />
-                    </Reveal>
+                <Reveal
+                  delay={100}
+                  className="absolute end-3 top-10 z-10 w-[76%] sm:end-8 lg:end-0"
+                >
+                  <div className="standards-main-image group relative aspect-[4/5] overflow-hidden rounded-card bg-[var(--blc-cream-100)] shadow-[0_22px_55px_rgb(2_56_48_/_0.16)] sm:aspect-[4/3] lg:aspect-[4/5]">
+                    <ImagePlaceholder
+                      src={consultant?.photo_url}
+                      alt={t("standards_main_image_alt")}
+                      label={t("standards_main_image_label")}
+                      className="absolute inset-0"
+                    />
                   </div>
-                </div>
-              )}
+                </Reveal>
+
+                <Reveal
+                  delay={300}
+                  className="absolute start-0 top-0 z-20 w-[58%] sm:start-2 sm:w-[52%]"
+                >
+                  <article className="standards-feature-card overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white p-3 shadow-[0_18px_45px_rgb(2_56_48_/_0.14)] sm:p-4">
+                    <ImagePlaceholder
+                      alt={t("standards_feature_image_alt")}
+                      label={t("standards_feature_image_label")}
+                      className="standards-feature-image aspect-[4/3] rounded-[0.75rem]"
+                    />
+                    <p className="mt-3 text-sm font-semibold text-[var(--blc-gold-500)]">
+                      {t("standards_feature_title")}
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-[var(--blc-green-700)] sm:text-sm">
+                      {t("standards_feature_text")}
+                    </p>
+                  </article>
+                </Reveal>
+
+                <Reveal
+                  variant="zoom"
+                  delay={500}
+                  className="absolute bottom-3 start-2 z-20 w-[35%] sm:bottom-0 sm:start-6 sm:w-[38%]"
+                >
+                  <div className="standards-decorative-image rounded-card border-[6px] border-white bg-white p-1 shadow-[0_16px_35px_rgb(2_56_48_/_0.18)]">
+                    <ImagePlaceholder
+                      alt={t("standards_decorative_image_alt")}
+                      label={t("standards_decorative_image_label")}
+                      className="aspect-square rounded-[0.65rem]"
+                    />
+                  </div>
+                </Reveal>
+              </div>
             </div>
           </div>
         </Container>
