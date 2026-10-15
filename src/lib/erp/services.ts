@@ -22,6 +22,17 @@ export type Service = {
   ar_service_feature?: ServiceFeature[];
 };
 
+export type ServiceNavigationItem = Pick<
+  Service,
+  | "name"
+  | "service_name"
+  | "service_sub_title"
+  | "en_slug"
+  | "service_name_ar"
+  | "service_sub_title_ar"
+  | "ar_slug"
+>;
+
 function getErpConfig() {
   const baseUrl = process.env.ERP_BASE_URL;
   const apiKey = process.env.ERP_API_KEY;
@@ -42,27 +53,20 @@ function getErpConfig() {
   };
 }
 
-export async function getServicesFromERP(): Promise<Service[]> {
+const serviceListFields = [
+  "name",
+  "service_name",
+  "service_sub_title",
+  "en_slug",
+  "service_name_ar",
+  "service_sub_title_ar",
+  "ar_slug",
+];
+
+async function fetchServiceList(): Promise<ServiceNavigationItem[]> {
   const { baseUrl, headers } = getErpConfig();
-
-  // Child tables are NOT returned by the list endpoint, so only request
-  // scalar fields here and load child tables from the full document below.
-  const fields = [
-    "name",
-    "service_name",
-    "service_sub_title",
-    "image_en",
-    "en_slug",
-    "service_description",
-    "service_name_ar",
-    "service_sub_title_ar",
-    "image_ar",
-    "ar_slug",
-    "ar_service_description",
-  ];
-
   const params = new URLSearchParams({
-    fields: JSON.stringify(fields),
+    fields: JSON.stringify(serviceListFields),
     limit_page_length: "100",
   });
 
@@ -76,8 +80,20 @@ export async function getServicesFromERP(): Promise<Service[]> {
     throw new Error(`Services BLC could not be loaded: ${errorText}`);
   }
 
-  const result = (await response.json()) as { data?: Service[] };
-  const services = Array.isArray(result.data) ? result.data : [];
+  const result = (await response.json()) as {
+    data?: ServiceNavigationItem[];
+  };
+
+  return Array.isArray(result.data) ? result.data : [];
+}
+
+export async function getServicesForNavigationFromERP() {
+  return fetchServiceList();
+}
+
+export async function getServicesFromERP(): Promise<Service[]> {
+  const { baseUrl, headers } = getErpConfig();
+  const services = await fetchServiceList();
 
   return Promise.all(
     services.map(async (service): Promise<Service> => {
