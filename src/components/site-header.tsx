@@ -2,14 +2,21 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronDown, Menu, MessageCircle, Phone, X } from "lucide-react";
+import {
+  ChevronDown,
+  Menu,
+  MessageCircle,
+  Phone,
+  Stethoscope,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { LanguageSwitcher } from "./language-switcher";
 import type { Locale } from "@/i18n/routing";
 import type { SiteSettings } from "@/lib/erp/types";
 
 type HeaderLink = { href: string; label: string };
-type HeaderService = { title: string; subtitle?: string; href: string };
+type HeaderService = { title: string; href: string };
 
 export function SiteHeader({
   locale,
@@ -178,16 +185,16 @@ export function SiteHeader({
                           href={service.href}
                           role="menuitem"
                           onClick={closeNavigation}
-                          className="block rounded-xl px-4 py-3 transition-colors hover:bg-[var(--blc-cream-100)] focus-ring-light"
+                          className="flex items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-[var(--blc-cream-100)] focus-ring-light"
                         >
-                          <span className="block text-sm font-semibold text-[var(--blc-green-900)]">
+                          <Stethoscope
+                            size={18}
+                            aria-hidden="true"
+                            className="shrink-0 text-[var(--blc-gold-500)]"
+                          />
+                          <span className="text-sm font-semibold text-[var(--blc-green-900)]">
                             {service.title}
                           </span>
-                          {service.subtitle && (
-                            <span className="mt-1 block text-xs leading-5 text-[var(--blc-green-700)]">
-                              {service.subtitle}
-                            </span>
-                          )}
                         </Link>
                       ))}
                     </div>
@@ -296,8 +303,13 @@ export function SiteHeader({
                           key={service.href}
                           href={service.href}
                           onClick={closeNavigation}
-                          className="rounded-xl px-4 py-3 text-base font-semibold text-[var(--blc-green-700)] transition-colors hover:bg-white focus-ring-light"
+                          className="flex items-center gap-3 rounded-xl px-4 py-3 text-base font-semibold text-[var(--blc-green-700)] transition-colors hover:bg-white focus-ring-light"
                         >
+                          <Stethoscope
+                            size={18}
+                            aria-hidden="true"
+                            className="shrink-0 text-[var(--blc-gold-500)]"
+                          />
                           {service.title}
                         </Link>
                       ))}
