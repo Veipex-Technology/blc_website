@@ -619,15 +619,25 @@ export default async function AboutPage({
       </Section>
 
       {/* More About BLC */}
-      <Section variant="sand">
+      <Section variant="sand" className="relative overflow-hidden text-center">
         <Container>
-          <Reveal>
-            <SectionHeading
-              eyebrow={t("more_title")}
-              title={t("more_title")}
-              subtitle={t("more_text")}
-            />
-          </Reveal>
+          <header className="mx-auto max-w-3xl">
+            <Reveal>
+              <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--blc-gold-500)]">
+                {t("more_title")}
+              </p>
+            </Reveal>
+            <Reveal delay={150}>
+              <h2 className="text-3xl font-bold leading-tight text-[var(--blc-green-900)] sm:text-4xl">
+                {t("more_title")}
+              </h2>
+            </Reveal>
+            <Reveal delay={300}>
+              <p className="mt-4 text-lg text-[var(--blc-green-700)]">
+                {t("more_text")}
+              </p>
+            </Reveal>
+          </header>
         </Container>
       </Section>
 

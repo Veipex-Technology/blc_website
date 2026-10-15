@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { getSiteSettings } from "@/lib/erp/api";
+import { getServicesForNavigationFromERP } from "@/lib/erp/services";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
 import type { Locale } from "@/i18n/routing";
@@ -16,6 +17,7 @@ export async function SiteShell({
   const footer = await getTranslations({ locale, namespace: "footer" });
   const services = await getTranslations({ locale, namespace: "services" });
   const settings = await getSiteSettings(locale);
+  const erpServices = await getServicesForNavigationFromERP().catch(() => []);
   const headerLinks = [
     { href: `/${locale}`, label: nav("home") },
     { href: `/${locale}/about`, label: nav("about") },
@@ -26,11 +28,46 @@ export async function SiteShell({
   const phoneHref = `tel:${settings.phone.replace(/[^+\d]/g, "")}`;
   const whatsappHref = `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(common("whatsapp_prefill"))}`;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const organizationJsonLd = {"@context": "https://schema.org", "@type": "Organization", name: common("brand_name"), url: siteUrl, logo: `${siteUrl}${settings.logo_url}`, telephone: settings.phone, sameAs: Object.values(settings.social).filter(Boolean)};
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: common("brand_name"),
+    url: siteUrl,
+    logo: `${siteUrl}${settings.logo_url}`,
+    telephone: settings.phone,
+    sameAs: Object.values(settings.social).filter(Boolean),
+  };
+  const headerServices = erpServices.flatMap((service) => {
+    const title =
+      locale === "ar"
+        ? service.service_name_ar || service.service_name
+        : service.service_name;
+    const subtitle =
+      locale === "ar"
+        ? service.service_sub_title_ar || service.service_sub_title
+        : service.service_sub_title;
+    const slug =
+      locale === "ar"
+        ? service.ar_slug || service.en_slug
+        : service.en_slug || service.ar_slug;
+
+    return title && slug
+      ? [
+          {
+            title,
+            subtitle,
+            href: `/${locale}/services/${encodeURIComponent(slug)}`,
+          },
+        ]
+      : [];
+  });
 
   return (
     <div className="flex min-h-screen flex-col">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(organizationJsonLd)}} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
       <a
         href="#main-content"
         className="sr-only z-50 rounded-md bg-[var(--blc-green-900)] px-4 py-3 text-white focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus-ring-dark"
@@ -41,6 +78,7 @@ export async function SiteShell({
         locale={locale}
         settings={settings}
         links={headerLinks}
+        services={headerServices}
         labels={{
           menu: common("menu_open"),
           close: common("menu_close"),
@@ -50,6 +88,7 @@ export async function SiteShell({
           prefill: common("whatsapp_prefill"),
           navLabel: nav("label"),
           language: common("lang_switch"),
+          contact: nav("contact"),
         }}
       />
       <main id="main-content" className="flex-1">
