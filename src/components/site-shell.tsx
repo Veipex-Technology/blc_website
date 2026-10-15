@@ -42,10 +42,6 @@ export async function SiteShell({
       locale === "ar"
         ? service.service_name_ar || service.service_name
         : service.service_name;
-    const subtitle =
-      locale === "ar"
-        ? service.service_sub_title_ar || service.service_sub_title
-        : service.service_sub_title;
     const slug =
       locale === "ar"
         ? service.ar_slug || service.en_slug
@@ -55,7 +51,6 @@ export async function SiteShell({
       ? [
           {
             title,
-            subtitle,
             href: `/${locale}/services/${encodeURIComponent(slug)}`,
           },
         ]
