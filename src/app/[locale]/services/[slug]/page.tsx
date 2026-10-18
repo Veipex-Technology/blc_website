@@ -1,11 +1,18 @@
 import Link from "next/link";
-import { ArrowUpRight, Heart, MessageCircle, Phone } from "lucide-react";
+import {
+  ArrowUpRight,
+  ChevronRight,
+  Heart,
+  MessageCircle,
+  Phone,
+} from "lucide-react";
 import sanitizeHtml from "sanitize-html";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { Reveal } from "@/components/reveal";
+import { BlogHeroImage } from "@/components/blog-hero-image";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -101,6 +108,7 @@ export default async function ServicePage({ params }: PageProps) {
     getServicesFromERP(),
     getSiteSettings(locale),
   ]);
+  const nav = await getTranslations({ locale, namespace: "nav" });
 
   const service = findService(services, slug);
 
@@ -119,6 +127,10 @@ export default async function ServicePage({ params }: PageProps) {
   const description = isArabic
     ? service.ar_service_description || service.service_description || ""
     : service.service_description || "";
+
+  const serviceImage = isArabic
+    ? service.image_ar || service.image_en
+    : service.image_en || service.image_ar;
 
   const features = isArabic
     ? service.ar_service_feature?.length
@@ -163,43 +175,92 @@ export default async function ServicePage({ params }: PageProps) {
 
   return (
     <main>
+      <Section variant="cream" dir={isArabic ? "rtl" : "ltr"}>
+        <Container>
+          <Reveal variant="zoom">
+            <div className="mx-auto max-w-5xl">
+              <nav
+                aria-label={t("title")}
+                className="mb-7 flex items-center gap-2 overflow-hidden text-sm text-[var(--blc-green-700)]"
+              >
+                <Link
+                  href={`/${locale}`}
+                  className="shrink-0 font-semibold hover:text-[var(--blc-green-900)] focus-ring-light"
+                >
+                  {nav("home")}
+                </Link>
+                <ChevronRight
+                  size={15}
+                  aria-hidden="true"
+                  className="shrink-0 text-[var(--blc-gold-500)] rtl:rotate-180"
+                />
+                <Link
+                  href={`/${locale}/${servicesSegment}`}
+                  className="shrink-0 font-semibold hover:text-[var(--blc-green-900)] focus-ring-light"
+                >
+                  {nav("services")}
+                </Link>
+                <ChevronRight
+                  size={15}
+                  aria-hidden="true"
+                  className="shrink-0 text-[var(--blc-gold-500)] rtl:rotate-180"
+                />
+                <span className="truncate" aria-current="page">
+                  {title}
+                </span>
+              </nav>
+
+              <BlogHeroImage src={serviceImage} alt={t("hero_image_alt")} />
+            </div>
+          </Reveal>
+
+          <Reveal delay={100}>
+            <header className="mx-auto mt-10 max-w-4xl text-center">
+              <div className="mx-auto inline-flex rounded-2xl bg-[var(--blc-white)] p-4 text-[var(--blc-gold-500)] shadow-sm">
+                <Icon size={34} aria-hidden="true" />
+              </div>
+
+              {tagline && (
+                <p className="mt-5 text-lg font-semibold text-[var(--blc-gold-500)]">
+                  {tagline}
+                </p>
+              )}
+
+              <h1 className="mt-3 text-4xl font-bold leading-[1.1] text-[var(--blc-green-900)] sm:text-6xl">
+                {title}
+              </h1>
+
+              {safeDescription && (
+                <div
+                  className="mx-auto mt-7 max-w-3xl text-lg leading-8 text-[var(--blc-green-700)] [&_p+p]:mt-5"
+                  dangerouslySetInnerHTML={{ __html: safeDescription }}
+                />
+              )}
+
+              <div className="mx-auto mt-8 h-px w-20 bg-[var(--blc-gold-500)]" />
+
+              <Link
+                href={requestHref}
+                className="mt-8 inline-flex min-h-12 items-center gap-2 rounded-full bg-[var(--blc-green-900)] px-6 font-semibold text-white hover:bg-[var(--blc-green-700)] focus-ring-dark"
+              >
+                {common("cta_request")}
+                <ArrowUpRight
+                  size={17}
+                  aria-hidden="true"
+                  className="rtl:rotate-180"
+                />
+              </Link>
+            </header>
+          </Reveal>
+        </Container>
+      </Section>
+
       <Section>
         <Container>
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
             <div>
-              <Reveal>
-                <div className="flex items-start gap-4">
-                  <div className="rounded-2xl bg-[var(--blc-cream-100)] p-4">
-                    <Icon
-                      size={34}
-                      aria-hidden="true"
-                      className="text-[var(--blc-gold-500)]"
-                    />
-                  </div>
-
-                  <div>
-                    {tagline && (
-                      <p className="text-lg font-semibold text-[var(--blc-gold-500)]">
-                        {tagline}
-                      </p>
-                    )}
-
-                    <h1 className="mt-2 text-4xl font-bold leading-tight text-[var(--blc-green-900)] sm:text-5xl">
-                      {title}
-                    </h1>
-                  </div>
-                </div>
-
-                {safeDescription && (
-                  <div
-                    className="mt-10 max-w-3xl text-lg leading-relaxed text-[var(--blc-green-700)] [&_p+p]:mt-5"
-                    dangerouslySetInnerHTML={{ __html: safeDescription }}
-                  />
-                )}
-              </Reveal>
-
               {features.length > 0 && (
-                <Reveal className="mt-14">
+                <Reveal>
                   <SectionHeading title={t("included")} />
 
                   <ul className="mt-7 grid gap-4 sm:grid-cols-2">

@@ -254,6 +254,8 @@
     "breadcrumb_label": "Breadcrumb",
     "breadcrumb_home": "Home",
     "breadcrumb_blog": "Blog",
+    "image_alt": "Blog article cover",
+    "read_time": "min read",
     "empty": "New articles are coming soon.",
     "empty_description": "We are preparing helpful guidance for families and caregivers. Please check back soon.",
     "disclaimer": "This article is for general information and does not replace medical advice.",
@@ -300,6 +302,14 @@
     "privacy_link": "Privacy Policy",
     "submit_loading": "Sending..."
   },
+  "joinFamily": {
+    "title": "Join Our Family",
+    "subtitle": "Be Part of Something Meaningful",
+    "description": "Join the Better Life Care family and help us make a meaningful difference through compassionate care and a commitment to improving people's lives.",
+    "cta": "Interested in joining our family? We would love to hear from you.",
+    "emailLabel": "Get in touch with our team",
+    "emailPlaceholderNote": "This is a placeholder recruitment address until the official email is confirmed."
+  },
   "privacy": {
     "title": "Privacy Policy",
     "heading": "Better Life Care – Senior & Home Care Services, Egypt",
@@ -334,6 +344,7 @@
     "follow": "Follow us",
     "services": "Services",
     "quick_links": "Quick links",
+    "join_family": "Join Our Family",
     "contact": "Contact",
     "phone": "Phone",
     "email": "Email",

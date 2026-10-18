@@ -2,6 +2,7 @@ import Image from "next/image";
 import {
   ArrowUpRight,
   Clock3,
+  HeartHandshake,
   Link2,
   Mail,
   MapPin,
@@ -63,9 +64,9 @@ export default async function ContactPage({
     namespace: "common",
   });
 
-  const footer = await getTranslations({
+  const joinFamily = await getTranslations({
     locale,
-    namespace: "footer",
+    namespace: "joinFamily",
   });
 
   /*
@@ -104,6 +105,10 @@ export default async function ContactPage({
   const whatsappNumber = contactInfo?.whats_app_number?.trim() || "";
   const email = contactInfo?.email?.trim() || "";
   const address = contactInfo?.address?.trim() || "";
+  const configuredRecruitmentEmail = process.env.RECRUITMENT_EMAIL?.trim();
+  const recruitmentEmail =
+    configuredRecruitmentEmail || email || "careers@better-life-care.com";
+  const isRecruitmentEmailPlaceholder = !configuredRecruitmentEmail && !email;
 
   /*
    * Remove spaces, brackets, dashes, etc. from WhatsApp number.
@@ -226,190 +231,242 @@ export default async function ContactPage({
             </Reveal>
           </div>
 
-          <div className="mt-12 grid gap-8 lg:grid-cols-2 lg:items-start">
-            {/* CONTACT INFORMATION */}
-            <aside className="rounded-card bg-[var(--blc-white)] p-7 shadow-soft">
-              <h2 className="text-2xl font-bold text-[var(--blc-green-900)]">
-                {t("details")}
-              </h2>
+          <div className="mt-12 grid gap-8 lg:grid-cols-2 lg:items-stretch">
+            <div className="grid gap-6 lg:order-2 lg:flex lg:h-full lg:flex-col lg:gap-6">
+              {/* CONTACT INFORMATION */}
+              <aside className="rounded-card bg-[var(--blc-white)] p-7 shadow-soft">
+                <h2 className="text-2xl font-bold text-[var(--blc-green-900)]">
+                  {t("details")}
+                </h2>
 
-              <div className="mt-7 grid gap-5 text-[var(--blc-green-700)]">
-                {/* PHONE */}
-                {phone && (
-                  <a
-                    href={phoneHref}
-                    className="flex items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
-                  >
-                    <Phone
-                      size={20}
-                      className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
-                      aria-hidden="true"
-                    />
+                <div className="mt-7 grid gap-5 text-[var(--blc-green-700)]">
+                  {/* PHONE */}
+                  {phone && (
+                    <a
+                      href={phoneHref}
+                      className="flex items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
+                    >
+                      <Phone
+                        size={20}
+                        className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
+                        aria-hidden="true"
+                      />
 
-                    <span>
-                      <strong className="block text-[var(--blc-green-900)]">
-                        {t("phone")}
-                      </strong>
+                      <span>
+                        <strong className="block text-[var(--blc-green-900)]">
+                          {t("phone")}
+                        </strong>
 
-                      {phone}
-                    </span>
-                  </a>
-                )}
+                        {phone}
+                      </span>
+                    </a>
+                  )}
 
-                {/* WHATSAPP */}
-                {whatsappNumber && (
-                  <a
-                    href={whatsappHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
-                  >
-                    <MessageCircle
-                      size={20}
-                      className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
-                      aria-hidden="true"
-                    />
+                  {/* WHATSAPP */}
+                  {whatsappNumber && (
+                    <a
+                      href={whatsappHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
+                    >
+                      <MessageCircle
+                        size={20}
+                        className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
+                        aria-hidden="true"
+                      />
 
-                    <span>
-                      <strong className="block text-[var(--blc-green-900)]">
-                        {t("whatsapp")}
-                      </strong>
+                      <span>
+                        <strong className="block text-[var(--blc-green-900)]">
+                          {t("whatsapp")}
+                        </strong>
 
-                      {whatsappNumber}
-                    </span>
-                  </a>
-                )}
+                        {whatsappNumber}
+                      </span>
+                    </a>
+                  )}
 
-                {/* EMAIL */}
-                {email && (
-                  <a
-                    href={`mailto:${email}`}
-                    className="flex items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
-                  >
-                    <Mail
-                      size={20}
-                      className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
-                      aria-hidden="true"
-                    />
+                  {/* EMAIL */}
+                  {email && (
+                    <a
+                      href={`mailto:${email}`}
+                      className="flex items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
+                    >
+                      <Mail
+                        size={20}
+                        className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
+                        aria-hidden="true"
+                      />
 
-                    <span>
-                      <strong className="block text-[var(--blc-green-900)]">
-                        {t("email")}
-                      </strong>
+                      <span>
+                        <strong className="block text-[var(--blc-green-900)]">
+                          {t("email")}
+                        </strong>
 
-                      {email}
-                    </span>
-                  </a>
-                )}
+                        {email}
+                      </span>
+                    </a>
+                  )}
 
-                {/* ADDRESS */}
-                {address && (
-                  <div className="flex items-start gap-3">
-                    <MapPin
-                      size={20}
-                      className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
-                      aria-hidden="true"
-                    />
+                  {/* ADDRESS */}
+                  {address && (
+                    <div className="flex items-start gap-3">
+                      <MapPin
+                        size={20}
+                        className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
+                        aria-hidden="true"
+                      />
 
-                    <span>
-                      <strong className="block text-[var(--blc-green-900)]">
-                        {t("address")}
-                      </strong>
+                      <span>
+                        <strong className="block text-[var(--blc-green-900)]">
+                          {t("address")}
+                        </strong>
 
-                      {address}
-                    </span>
-                  </div>
-                )}
-              </div>
+                        {address}
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-              {/* DYNAMIC TIMETABLE */}
-              {timetable.length > 0 && (
-                <div className="mt-8 border-t border-[var(--blc-sand-200)] pt-6">
-                  <div className="flex items-start gap-3">
-                    <Clock3
-                      size={20}
-                      className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
-                      aria-hidden="true"
-                    />
+                {/* DYNAMIC TIMETABLE */}
+                {timetable.length > 0 && (
+                  <div className="mt-8 border-t border-[var(--blc-sand-200)] pt-6">
+                    <div className="flex items-start gap-3">
+                      <Clock3
+                        size={20}
+                        className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
+                        aria-hidden="true"
+                      />
 
-                    <div className="w-full">
-                      <h3 className="font-semibold text-[var(--blc-green-900)]">
-                        {t("working_hours")}
-                      </h3>
+                      <div className="w-full">
+                        <h3 className="font-semibold text-[var(--blc-green-900)]">
+                          {t("working_hours")}
+                        </h3>
 
-                      <div className="mt-3 grid gap-2">
-                        {timetable.map((item) => (
-                          <div
-                            key={item.name}
-                            className="flex items-center justify-between gap-4 text-sm text-[var(--blc-green-700)]"
-                          >
-                            <span>{item.day || item.name}</span>
+                        <div className="mt-3 grid gap-2">
+                          {timetable.map((item) => (
+                            <div
+                              key={item.name}
+                              className="flex items-center justify-between gap-4 text-sm text-[var(--blc-green-700)]"
+                            >
+                              <span>{item.day || item.name}</span>
 
-                            <span className="font-medium text-[var(--blc-green-900)]">
-                              {item.start_time && item.end_time
-                                ? `${item.start_time} - ${item.end_time}`
-                                : item.start_time || item.end_time || ""}
-                            </span>
-                          </div>
-                        ))}
+                              <span className="font-medium text-[var(--blc-green-900)]">
+                                {item.start_time && item.end_time
+                                  ? `${item.start_time} - ${item.end_time}`
+                                  : item.start_time || item.end_time || ""}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* SOCIAL LINKS */}
-              {socialLinks.length > 0 && (
-                <div className="mt-8 border-t border-[var(--blc-sand-200)] pt-6">
-                  <h3 className="font-semibold text-[var(--blc-green-900)]">
-                    {t("social")}
-                  </h3>
+                {/* SOCIAL LINKS */}
+                {socialLinks.length > 0 && (
+                  <div className="mt-8 border-t border-[var(--blc-sand-200)] pt-6">
+                    <h3 className="font-semibold text-[var(--blc-green-900)]">
+                      {t("social")}
+                    </h3>
 
-                  <div className="mt-3 flex flex-wrap gap-3">
-                    {socialLinks.map((social) => (
-                      <a
-                        key={social.name}
-                        href={social.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        aria-label={social.platformName}
-                        title={social.platformName}
-                        className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-full border border-[var(--blc-green-700)] text-[var(--blc-green-900)] hover:border-[var(--blc-gold-500)] focus-ring-light"
-                      >
-                        {social.icon ? (
-                          <img
-                            src={social.icon}
-                            alt={social.platformName}
-                            className="h-5 w-5 object-contain"
-                          />
-                        ) : (
-                          <Link2 size={18} aria-hidden="true" />
-                        )}
-                      </a>
-                    ))}
+                    <div className="mt-3 flex flex-wrap gap-3">
+                      {socialLinks.map((social) => (
+                        <a
+                          key={social.name}
+                          href={social.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label={social.platformName}
+                          title={social.platformName}
+                          className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-full border border-[var(--blc-green-700)] text-[var(--blc-green-900)] hover:border-[var(--blc-gold-500)] focus-ring-light"
+                        >
+                          {social.icon ? (
+                            <img
+                              src={social.icon}
+                              alt={social.platformName}
+                              className="h-5 w-5 object-contain"
+                            />
+                          ) : (
+                            <Link2 size={18} aria-hidden="true" />
+                          )}
+                        </a>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-              {/* MAP */}
-              {settings.map_embed_url && (
-                <div className="mt-8">
-                  <h3 className="mb-3 font-semibold text-[var(--blc-green-900)]">
-                    {t("map")}
-                  </h3>
+                )}
+                {/* MAP */}
+                {settings.map_embed_url && (
+                  <div className="mt-8">
+                    <h3 className="mb-3 font-semibold text-[var(--blc-green-900)]">
+                      {t("map")}
+                    </h3>
 
-                  <iframe
-                    title={t("map")}
-                    src={settings.map_embed_url}
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    className="h-56 w-full rounded-xl border-0"
-                  />
-                </div>
-              )}
-            </aside>
+                    <iframe
+                      title={t("map")}
+                      src={settings.map_embed_url}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      className="h-56 w-full rounded-xl border-0"
+                    />
+                  </div>
+                )}
+              </aside>
+
+              {/* JOIN OUR FAMILY */}
+              <section className="rounded-card bg-[var(--blc-white)] p-7 shadow-soft lg:h-full lg:flex-1">
+                <Reveal>
+                  <div className="relative overflow-hidden">
+                    <div
+                      className="pointer-events-none absolute -end-8 -top-8 text-[var(--blc-gold-500)]/10"
+                      aria-hidden="true"
+                    >
+                      <HeartHandshake size={140} strokeWidth={1} />
+                    </div>
+
+                    <div className="relative">
+                      <HeartHandshake
+                        size={30}
+                        className="text-[var(--blc-gold-500)]"
+                        aria-hidden="true"
+                      />
+                      <SectionHeading
+                        title={joinFamily("title")}
+                        subtitle={joinFamily("subtitle")}
+                        className="mt-4"
+                      />
+
+                      <div className="mt-6 text-[var(--blc-green-700)]">
+                        <p className="leading-8">{joinFamily("description")}</p>
+                        <p className="mt-5 font-semibold text-[var(--blc-green-900)]">
+                          {joinFamily("cta")}
+                        </p>
+                        <div className="mt-6 border-s-4 border-[var(--blc-gold-500)] ps-4">
+                          <span className="block text-sm font-semibold text-[var(--blc-green-900)]">
+                            {joinFamily("emailLabel")}
+                          </span>
+                          <a
+                            href={`mailto:${recruitmentEmail}`}
+                            className="mt-1 inline-block break-all text-lg font-semibold text-[var(--blc-green-900)] underline decoration-[var(--blc-gold-500)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--blc-gold-500)] focus-ring-light"
+                          >
+                            {recruitmentEmail}
+                          </a>
+                          {isRecruitmentEmailPlaceholder && (
+                            <p className="mt-2 text-sm text-[var(--blc-green-700)]">
+                              {joinFamily("emailPlaceholderNote")}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Reveal>
+              </section>
+            </div>
 
             {/* CONTACT FORM */}
-            <section className="rounded-card border border-[var(--blc-sand-200)] bg-white p-7 shadow-soft">
+            <section className="rounded-card border border-[var(--blc-sand-200)] bg-white p-7 shadow-soft lg:order-1 lg:h-full">
               <h2 className="text-2xl font-bold text-[var(--blc-green-900)]">
                 {t("form_title")}
               </h2>

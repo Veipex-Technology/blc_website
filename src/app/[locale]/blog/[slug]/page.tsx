@@ -1,17 +1,27 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Link2, MessageCircle, Phone } from "lucide-react";
+import {
+  ArrowUpRight,
+  CalendarDays,
+  ChevronRight,
+  Clock3,
+  Link2,
+  MessageCircle,
+  Phone,
+  UserRound,
+} from "lucide-react";
 import sanitizeHtml from "sanitize-html";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { Reveal } from "@/components/reveal";
+import { BlogHeroImage } from "@/components/blog-hero-image";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
-import { getBlogPostsFromERP, normalizeBlogRoute } from "@/lib/erp/blog";
+import { getBlogPostsFromERP } from "@/lib/erp/blog";
 import type { BlogPost } from "@/lib/erp/blog";
 import type { Locale } from "@/i18n/routing";
 
@@ -101,7 +111,7 @@ export async function generateMetadata({
   if (!post || !post.title?.trim()) return {};
 
   const title = post.meta_title?.trim() || post.title;
-  const description = post.meta_description?.trim() || post.blog_intro;
+  const description = post.meta_description?.trim() || post.blog_intro || title;
 
   return createPageMetadata({
     locale,
@@ -204,77 +214,142 @@ export default async function BlogPostPage({
 
   return (
     <main>
-      <Section>
+      <Section variant="cream" dir={locale === "ar" ? "rtl" : "ltr"}>
         <Container>
           <article>
-            <Reveal>
-              <div className="mx-auto max-w-4xl">
-                {post.meta_image && (
-                  <div className="relative aspect-[16/8] overflow-hidden rounded-card bg-[var(--blc-sand-200)]">
-                    <Image
-                      src={post.meta_image}
-                      alt={post.title ?? "Blog post cover"}
-                      fill
-                      priority
-                      sizes="(max-width: 1024px) 100vw, 900px"
-                      className="object-cover"
-                    />
-                  </div>
+            <Reveal variant="zoom">
+              <div className="mx-auto max-w-5xl">
+                <nav
+                  aria-label={t("breadcrumb_label")}
+                  className="mb-7 flex items-center gap-2 overflow-hidden text-sm text-[var(--blc-green-700)]"
+                >
+                  <Link
+                    href={`/${locale}`}
+                    className="shrink-0 font-semibold hover:text-[var(--blc-green-900)] focus-ring-light"
+                  >
+                    {t("breadcrumb_home")}
+                  </Link>
+                  <ChevronRight
+                    size={15}
+                    aria-hidden="true"
+                    className="shrink-0 text-[var(--blc-gold-500)] rtl:rotate-180"
+                  />
+                  <Link
+                    href={`/${locale}/blog`}
+                    className="shrink-0 font-semibold hover:text-[var(--blc-green-900)] focus-ring-light"
+                  >
+                    {t("breadcrumb_blog")}
+                  </Link>
+                  <ChevronRight
+                    size={15}
+                    aria-hidden="true"
+                    className="shrink-0 text-[var(--blc-gold-500)] rtl:rotate-180"
+                  />
+                  <span className="truncate" aria-current="page">
+                    {post.title}
+                  </span>
+                </nav>
+
+                <BlogHeroImage
+                  src={post.meta_image}
+                  alt={post.title ?? t("image_alt")}
+                />
+              </div>
+            </Reveal>
+
+            <Reveal delay={100}>
+              <header className="mx-auto mt-10 max-w-4xl text-center">
+                {post.blog_category && (
+                  <span className="inline-flex rounded-full border border-[var(--blc-gold-500)]/40 bg-[var(--blc-white)] px-4 py-2 text-sm font-semibold uppercase tracking-wide text-[var(--blc-gold-500)] shadow-sm">
+                    {post.blog_category}
+                  </span>
                 )}
-                <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[var(--blc-green-700)]">
-                  {post.blog_category && (
-                    <span className="font-semibold text-[var(--blc-gold-500)]">
-                      {post.blog_category}
-                    </span>
-                  )}
-                  {post.published_on && (
-                    <time dateTime={post.published_on}>
-                      {dateLabel(post.published_on, locale)}
-                    </time>
-                  )}
-                  {post.read_time && <span>{post.read_time} min read</span>}
-                </div>
-                <h1 className="mt-5 text-4xl font-bold leading-tight text-[var(--blc-green-900)] sm:text-6xl">
+
+                <h1 className="mt-6 text-4xl font-bold leading-[1.1] text-[var(--blc-green-900)] sm:text-6xl">
                   {post.title}
                 </h1>
 
-                {safeBody ? (
-                  <div
-                    className="article-body mt-10 text-[var(--blc-green-700)] [&>h2]:mt-8 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-[var(--blc-green-900)] [&>h3]:mt-6 [&>h3]:text-xl [&>h3]:font-bold [&>h3]:text-[var(--blc-green-900)] [&>p]:mt-4 [&>ul]:mt-4 [&>ul]:list-disc [&>ul]:ps-6 [&>ol]:mt-4 [&>ol]:list-decimal [&>ol]:ps-6"
-                    dangerouslySetInnerHTML={{ __html: safeBody }}
-                  />
-                ) : (
-                  post.blog_intro && (
-                    <p className="mt-6 text-lg text-[var(--blc-green-700)]">
-                      {post.blog_intro}
-                    </p>
-                  )
+                {post.blog_intro && (
+                  <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-[var(--blc-green-700)] sm:text-xl">
+                    {post.blog_intro}
+                  </p>
                 )}
 
-                <div className="mt-10 rounded-xl border-s-4 border-[var(--blc-gold-500)] bg-[var(--blc-cream-100)] p-5 text-sm text-[var(--blc-green-700)]">
-                  {t("disclaimer")}
-                </div>
-
-                <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-[var(--blc-sand-200)] pt-6">
-                  <span className="font-semibold text-[var(--blc-green-900)]">
-                    {t("share")}
-                  </span>
-                  {shareLinks.map((share) => (
-                    <a
-                      key={share.label}
-                      href={share.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={share.label}
-                      className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--blc-sand-200)] px-4 text-sm font-semibold text-[var(--blc-green-900)] hover:border-[var(--blc-gold-500)] focus-ring-light"
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-sm text-[var(--blc-green-700)]">
+                  {post.published_on && (
+                    <time
+                      dateTime={post.published_on}
+                      className="inline-flex items-center gap-2"
                     >
-                      <Link2 size={16} aria-hidden="true" />
-                      {share.label}
-                    </a>
-                  ))}
+                      <CalendarDays
+                        size={17}
+                        className="text-[var(--blc-gold-500)]"
+                        aria-hidden="true"
+                      />
+                      {dateLabel(post.published_on, locale)}
+                    </time>
+                  )}
+                  {post.read_time !== undefined && (
+                    <span className="inline-flex items-center gap-2">
+                      <Clock3
+                        size={17}
+                        className="text-[var(--blc-gold-500)]"
+                        aria-hidden="true"
+                      />
+                      {post.read_time} {t("read_time")}
+                    </span>
+                  )}
+                  {post.blogger && (
+                    <span className="inline-flex items-center gap-2">
+                      <UserRound
+                        size={17}
+                        className="text-[var(--blc-gold-500)]"
+                        aria-hidden="true"
+                      />
+                      {post.blogger}
+                    </span>
+                  )}
                 </div>
-              </div>
+              </header>
             </Reveal>
+
+            <div className="mx-auto mt-14 max-w-4xl">
+              {safeBody ? (
+                <div
+                  className="article-body mt-10 text-[var(--blc-green-700)] [&>h2]:mt-8 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-[var(--blc-green-900)] [&>h3]:mt-6 [&>h3]:text-xl [&>h3]:font-bold [&>h3]:text-[var(--blc-green-900)] [&>p]:mt-4 [&>ul]:mt-4 [&>ul]:list-disc [&>ul]:ps-6 [&>ol]:mt-4 [&>ol]:list-decimal [&>ol]:ps-6"
+                  dangerouslySetInnerHTML={{ __html: safeBody }}
+                />
+              ) : (
+                post.blog_intro && (
+                  <p className="mt-6 text-lg text-[var(--blc-green-700)]">
+                    {post.blog_intro}
+                  </p>
+                )
+              )}
+
+              <div className="mt-10 rounded-xl border-s-4 border-[var(--blc-gold-500)] bg-[var(--blc-cream-100)] p-5 text-sm text-[var(--blc-green-700)]">
+                {t("disclaimer")}
+              </div>
+
+              <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-[var(--blc-sand-200)] pt-6">
+                <span className="font-semibold text-[var(--blc-green-900)]">
+                  {t("share")}
+                </span>
+                {shareLinks.map((share) => (
+                  <a
+                    key={share.label}
+                    href={share.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={share.label}
+                    className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--blc-sand-200)] px-4 text-sm font-semibold text-[var(--blc-green-900)] hover:border-[var(--blc-gold-500)] focus-ring-light"
+                  >
+                    <Link2 size={16} aria-hidden="true" />
+                    {share.label}
+                  </a>
+                ))}
+              </div>
+            </div>
           </article>
         </Container>
       </Section>

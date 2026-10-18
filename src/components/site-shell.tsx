@@ -98,6 +98,7 @@ export async function SiteShell({
           privacy: common("privacy"),
           services: footer("services"),
           quickLinks: footer("quick_links"),
+          joinFamily: footer("join_family"),
           contact: footer("contact"),
           follow: footer("follow"),
           logoAlt: footer("logo_alt"),
