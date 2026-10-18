@@ -22,6 +22,7 @@ export async function SiteFooter({
     privacy: string;
     services: string;
     quickLinks: string;
+    joinFamily: string;
     contact: string;
     follow: string;
     logoAlt: string;
@@ -242,9 +243,18 @@ export async function SiteFooter({
             <li>
               <Link
                 href={`/${locale}/privacy-policy`}
-                className="hover:text-white focus-ring-dark"
+                className="transition-colors hover:text-[var(--blc-gold-300)] focus-ring-dark"
               >
                 {labels.privacy}
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href={`/${locale}/contact`}
+                className="transition-colors hover:text-[var(--blc-gold-300)] focus-ring-dark"
+              >
+                {labels.joinFamily}
               </Link>
             </li>
           </ul>
