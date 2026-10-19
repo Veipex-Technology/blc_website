@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
+  ArrowRight,
   ArrowUpRight,
   BadgeCheck,
   BookOpen,
@@ -20,6 +21,7 @@ import {
 import type { LucideIcon, LucideProps } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
+import { Link as LocaleLink } from "@/i18n/navigation";
 import { Accordion } from "@/components/ui/accordion";
 import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/reveal";
@@ -356,6 +358,57 @@ export default async function HomePage({
         </div>
       </section>
 
+      <Section variant="dark" className="text-center">
+        <Container>
+          <Reveal>
+            <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--blc-gold-300)]">
+                {t("final_eyebrow")}
+              </p>
+              <h2 className="mt-4 max-w-3xl text-balance text-3xl font-bold sm:text-4xl">
+                {t("final_title")}
+              </h2>
+              <p className="mt-5 max-w-2xl text-[var(--blc-cream-100)]">
+                {t("final_text")}
+              </p>
+              <div className="mt-8 flex flex-col items-center gap-3">
+                <LocaleLink
+                  href="/contact"
+                  className="group relative inline-flex min-h-14 items-center justify-center gap-3 rounded-full bg-[var(--blc-cream-100)] px-10 py-4 text-base font-semibold text-[var(--blc-green-900)] shadow-soft transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-[0_16px_35px_rgb(2_56_48/0.25)] focus-visible:ring-2 focus-visible:ring-[var(--blc-gold-300)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--blc-green-900)] motion-reduce:transition-none"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -inset-1 rounded-full border border-[var(--blc-gold-300)]/60 motion-safe:animate-[ping_2.4s_ease-out_infinite] motion-reduce:animate-none"
+                  />
+                  <span className="relative z-10 inline-flex items-center gap-3">
+                    {t("final_contact_cta")}
+                    <ArrowRight
+                      size={20}
+                      aria-hidden="true"
+                      className={`transition-transform duration-300 motion-reduce:transition-none ${
+                        locale === "ar"
+                          ? "rotate-180 group-hover:-translate-x-1"
+                          : "group-hover:translate-x-1"
+                      }`}
+                    />
+                  </span>
+                </LocaleLink>
+                <a
+                  href={whatsapp}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/50 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-ring-dark"
+                >
+                  <MessageCircle size={17} aria-hidden="true" />
+                  {common("cta_whatsapp")}
+                </a>
+              </div>
+              <p className="mt-5 text-sm text-[var(--blc-cream-100)]/80">
+                {t("final_reassurance")}
+              </p>
+            </div>
+          </Reveal>
+        </Container>
+      </Section>
+
       <section className="bg-white py-12 lg:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <Reveal className="text-center">
@@ -569,34 +622,6 @@ export default async function HomePage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-
-      <Section variant="dark" className="text-center">
-        <Container>
-          <Reveal>
-            <h2 className="mx-auto max-w-3xl text-3xl font-bold sm:text-4xl">
-              {t("final_title")}
-            </h2>
-            <p className="mx-auto mt-5 max-w-2xl text-[var(--blc-cream-100)]">
-              {t("final_text")}
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <a
-                href={phone}
-                className="inline-flex min-h-12 items-center gap-2 rounded-full bg-white px-6 font-semibold text-[var(--blc-green-900)] hover:bg-[var(--blc-cream-100)] focus-ring-light"
-              >
-                <Phone size={18} aria-hidden="true" />
-                {common("cta_call")}
-              </a>
-              <Link
-                href={`/${locale}/contact`}
-                className="inline-flex min-h-12 items-center rounded-full border-2 border-[var(--blc-gold-300)] px-6 font-semibold text-white hover:bg-[var(--blc-green-700)] focus-ring-dark"
-              >
-                {t("request_care")}
-              </Link>
-            </div>
-          </Reveal>
-        </Container>
-      </Section>
 
       <NewsletterSection />
     </>

@@ -4,23 +4,11 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useTranslations } from "next-intl";
 
 import { Container } from "@/components/ui/container";
-import {
-  ServiceCard,
-  type ServiceCardData,
-} from "@/components/sections/ServiceCard";
+import { ServicesSwiper } from "@/components/sections/ServicesSwiper";
 import type { Service } from "@/lib/erp/services";
 import type { Locale } from "@/i18n/routing";
 
 const easing = [0.22, 1, 0.36, 1] as const;
-
-const gridVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.12,
-    },
-  },
-};
 
 const headerVariants = {
   hidden: { opacity: 0, y: 24 },
@@ -55,7 +43,7 @@ export function Services({
   const t = useTranslations("home");
   const shouldReduceMotion = useReducedMotion();
   const isRtl = locale === "ar";
-  const serviceItems: ServiceCardData[] = services.flatMap((service, index) => {
+  const serviceItems = services.flatMap((service, index) => {
     const title = isRtl
       ? service.service_name_ar || service.service_name
       : service.service_name;
@@ -65,7 +53,7 @@ export function Services({
     const slug = isRtl
       ? service.ar_slug || service.en_slug
       : service.en_slug || service.ar_slug;
-    const icon = isRtl
+    const image = isRtl
       ? service.image_ar || service.image_en
       : service.image_en || service.image_ar;
     const plainDescription = description ? toPlainText(description) : "";
@@ -76,8 +64,9 @@ export function Services({
 
     return [
       {
+        key: service.name,
         number: String(index + 1).padStart(2, "0"),
-        icon: icon || "/brand/logo.png",
+        image,
         title,
         description: plainDescription || title,
         href: `/${locale}/services/${encodeURIComponent(slug)}`,
@@ -88,6 +77,7 @@ export function Services({
   return (
     <section
       aria-labelledby="services-showcase-title"
+      dir={isRtl ? "rtl" : "ltr"}
       className="relative isolate overflow-hidden bg-[var(--blc-cream-100)] py-16 lg:py-24"
     >
       <div
@@ -122,25 +112,27 @@ export function Services({
           </p>
         </motion.div>
 
-        <motion.div
-          initial={shouldReduceMotion ? false : "hidden"}
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.12 }}
-          variants={gridVariants}
-          className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3"
-        >
-          {serviceItems.map((service) => (
-            <ServiceCard
-              key={service.number}
-              service={service}
-              label={t("services_showcase_label")}
-              title={service.title}
-              description={service.description}
-              href={service.href}
-              isRtl={isRtl}
-            />
-          ))}
-        </motion.div>
+        <ServicesSwiper
+          services={serviceItems}
+          isRtl={isRtl}
+          label={t("services_showcase_label")}
+          exploreLabel={t("services_showcase_explore")}
+          previousLabel={t("services_showcase_previous")}
+          nextLabel={t("services_showcase_next")}
+          paginationLabel={t("services_showcase_pagination_label")}
+          paginationStatusLabel={(current, total) =>
+            t("services_showcase_pagination_status", { current, total })
+          }
+          carouselRole={t("services_showcase_carousel_role")}
+          slideRole={t("services_showcase_slide_role")}
+          slideStatusLabel={(current, total, title) =>
+            t("services_showcase_slide_status", { current, total, title })
+          }
+          goToSlideLabel={(number) =>
+            t("services_showcase_go_to_slide", { number })
+          }
+          className={shouldReduceMotion ? "motion-reduce:transition-none" : ""}
+        />
       </Container>
     </section>
   );

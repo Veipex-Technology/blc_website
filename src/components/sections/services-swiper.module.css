@@ -1,0 +1,19 @@
+.servicesSwiper :global(.swiper) {
+  width: 100%;
+  overflow: hidden;
+}
+
+.servicesSwiper :global(.swiper-wrapper) {
+  align-items: stretch;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.servicesSwiper :global(.swiper-slide) {
+  height: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .servicesSwiper :global(.swiper-wrapper) {
+    transition-duration: 0.01ms !important;
+  }
+}
