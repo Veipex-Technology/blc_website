@@ -2,19 +2,24 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowUpRight,
+  Activity,
+  Brain,
   CheckCircle2,
+  Compass,
   Globe2,
   GraduationCap,
   HeartHandshake,
   HeartPulse,
   ImageIcon,
-  Lightbulb,
   MessageCircle,
+  PersonStanding,
   Phone,
   ShieldCheck,
-  Target,
+  ShieldPlus,
   TrendingUp,
   Users,
+  UsersRound,
+  UserRound,
 } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -268,12 +273,15 @@ export default async function AboutPage({
       };
 
   const values = [
-    { key: "value_1", icon: ShieldCheck },
-    { key: "value_2", icon: Lightbulb },
-    { key: "value_3", icon: Users },
-    { key: "value_5", icon: Target },
-    { key: "value_6", icon: HeartHandshake },
-    { key: "value_8", icon: GraduationCap },
+    { key: "value_1", termKey: "value_1_term", icon: HeartHandshake },
+    { key: "value_2", termKey: "value_2_term", icon: Compass },
+    { key: "value_3", termKey: "value_3_term", icon: PersonStanding },
+    { key: "value_4", termKey: "value_4_term", icon: UserRound },
+    { key: "value_5", termKey: "value_5_term", icon: ShieldCheck },
+    { key: "value_6", termKey: "value_6_term", icon: ShieldPlus },
+    { key: "value_7", termKey: "value_7_term", icon: UsersRound },
+    { key: "value_8", termKey: "value_8_term", icon: Activity },
+    { key: "value_9", termKey: undefined, icon: Brain },
   ] as const;
 
   const promiseCards = [
@@ -817,34 +825,47 @@ export default async function AboutPage({
           <Container className="relative">
             <Reveal className="max-w-4xl">
               <p className="mb-5 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--blc-gold-300)]">
-                {common("tagline")}
+                {t("values_eyebrow")}
               </p>
               <h2 className="max-w-3xl text-5xl font-bold leading-[0.95] text-white sm:text-7xl lg:text-8xl">
                 {t("values_title")}
               </h2>
               <p className="mt-7 max-w-2xl text-lg leading-8 text-[var(--blc-cream-100)] sm:text-xl">
-                {t("values_subtitle")}
+                {t.rich("values_subtitle", {
+                  charter: (chunks) => <em>{chunks}</em>,
+                })}
               </p>
             </Reveal>
           </Container>
         </div>
 
         <Container className="relative z-10 -mt-10 lg:-mt-16">
-          <div className="grid gap-5 md:grid-cols-2">
-            {values.map(({ key, icon: Icon }, index) => (
-              <Reveal key={key} delay={index * 80}>
-                <article className="group grid min-h-52 grid-cols-[auto_1fr] gap-5 rounded-card border border-[var(--blc-sand-200)] bg-white p-6 shadow-[0_18px_45px_rgb(2_56_48_/_0.12)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_55px_rgb(2_56_48_/_0.18)] sm:p-7">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {values.map(({ key, termKey, icon: Icon }, index) => (
+              <Reveal key={key} delay={index * 80} className="h-full">
+                <article className="group grid h-full min-h-52 grid-cols-[auto_1fr] gap-5 rounded-card border border-[var(--blc-sand-200)] bg-white p-6 shadow-[0_18px_45px_rgb(2_56_48_/_0.12)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_55px_rgb(2_56_48_/_0.18)] motion-reduce:transition-none sm:p-7">
                   <div className="flex flex-col items-start gap-5">
-                    <span className="text-sm font-bold tracking-[0.16em] text-[var(--blc-gold-300)]">
+                    <span
+                      className="text-sm font-bold tracking-[0.16em] text-[var(--blc-gold-300)]"
+                      aria-hidden="true"
+                    >
                       {String(index + 1).padStart(2, "0")}
                     </span>
-                    <span className="flex size-12 items-center justify-center rounded-2xl bg-[var(--blc-cream-100)] text-[var(--blc-green-900)] transition-colors duration-300 group-hover:bg-[var(--blc-gold-300)]">
+                    <span className="flex size-12 items-center justify-center rounded-2xl bg-[var(--blc-cream-100)] text-[var(--blc-green-900)] transition-colors duration-300 group-hover:bg-[var(--blc-gold-300)] motion-reduce:transition-none">
                       <Icon size={24} strokeWidth={1.5} aria-hidden="true" />
                     </span>
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold leading-snug text-[var(--blc-green-900)] sm:text-2xl">
+                    <h3 className="text-lg font-bold leading-snug text-[var(--blc-green-900)] sm:text-xl">
                       {t(`${key}_title`)}
+                      {termKey && (
+                        <span
+                          dir="ltr"
+                          className="ms-1 inline-block text-base font-medium italic text-[var(--blc-green-700)]"
+                        >
+                          ({t(termKey)})
+                        </span>
+                      )}
                     </h3>
                     <p className="mt-4 leading-7 text-[var(--blc-green-700)]">
                       {t(`${key}_desc`)}
