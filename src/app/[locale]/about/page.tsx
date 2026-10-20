@@ -276,6 +276,12 @@ export default async function AboutPage({
     { key: "value_8", icon: GraduationCap },
   ] as const;
 
+  const promiseCards = [
+    { key: "promise_1", icon: ShieldCheck },
+    { key: "promise_2", icon: HeartHandshake },
+    { key: "promise_3", icon: HeartPulse },
+  ] as const;
+
   const standardsPoints = [
     { key: "standards_point_1", icon: HeartPulse },
     { key: "standards_point_2", icon: CheckCircle2 },
@@ -743,6 +749,45 @@ export default async function AboutPage({
       </Section>
 
       {/* Mission & Vision */}
+
+      <section
+        className="relative overflow-hidden bg-[var(--blc-sand-200)] py-16 lg:py-24"
+        dir={isArabic ? "rtl" : "ltr"}
+      >
+        <Container>
+          <Reveal className="text-center">
+            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--blc-gold-500)]">
+              {t("promise_eyebrow")}
+            </p>
+            <h2 className="text-3xl font-bold text-[var(--blc-green-900)] sm:text-4xl lg:text-5xl">
+              {t("promise_title")}
+            </h2>
+          </Reveal>
+
+          <div className="mt-10 grid gap-5 md:grid-cols-3 lg:mt-14 lg:gap-6">
+            {promiseCards.map(({ key, icon: Icon }, index) => (
+              <Reveal key={key} delay={index * 120} className="h-full">
+                <article className="group flex h-full flex-col rounded-[1.75rem] border border-white/80 bg-white/90 p-7 shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_45px_rgb(2_56_48_/_0.12)] motion-reduce:transition-none sm:p-8">
+                  <div className="mb-8 flex items-center justify-between">
+                    <span
+                      className="text-sm font-bold tracking-[0.16em] text-[var(--blc-gold-500)]"
+                      aria-hidden="true"
+                    >
+                      0{index + 1}
+                    </span>
+                    <span className="flex size-12 items-center justify-center rounded-2xl bg-[var(--blc-cream-100)] text-[var(--blc-green-900)] transition-colors duration-300 group-hover:bg-[var(--blc-green-900)] group-hover:text-[var(--blc-cream-100)] motion-reduce:transition-none">
+                      <Icon size={23} strokeWidth={1.6} aria-hidden="true" />
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-semibold leading-snug text-[var(--blc-green-900)] sm:text-2xl">
+                    {t(`${key}_text`)}
+                  </h3>
+                </article>
+              </Reveal>
+            ))}
+          </div>
+        </Container>
+      </section>
 
       {/* Our Values */}
       <Section
