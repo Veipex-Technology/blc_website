@@ -14,9 +14,7 @@ import {
   Phone,
   Quote,
   ShieldCheck,
-  Sparkles,
   Stethoscope,
-  Sun,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
@@ -45,7 +43,23 @@ import { getServicesFromERP } from "@/lib/erp/services";
 import type { Locale } from "@/i18n/routing";
 
 const trustIcons = [ShieldCheck, GraduationCap, ClipboardCheck, HeartHandshake];
-const whyChooseIcons = [ShieldCheck, Sparkles, HeartHandshake, Sun];
+const whyChooseCards = [
+  {
+    titleKey: "why_choose_card_1_title",
+    descriptionKey: "why_choose_card_1_description",
+    icon: ShieldCheck,
+  },
+  {
+    titleKey: "why_choose_card_2_title",
+    descriptionKey: "why_choose_card_2_description",
+    icon: HeartHandshake,
+  },
+  {
+    titleKey: "why_choose_card_3_title",
+    descriptionKey: "why_choose_card_3_description",
+    icon: HeartPulse,
+  },
+] as const;
 const howItWorksSteps = [
   {
     icon: Phone,
@@ -62,12 +76,6 @@ const howItWorksSteps = [
     titleKey: "how_step_3_title",
     descriptionKey: "how_step_3_description",
   },
-] as const;
-const whyChooseStatements = [
-  "why_choose_statement_1",
-  "why_choose_statement_2",
-  "why_choose_statement_3",
-  "why_choose_statement_4",
 ] as const;
 type TrustBadgeKey =
   | "trust_german_standards"
@@ -300,11 +308,10 @@ export default async function HomePage({
             </p>
           </Reveal>
 
-          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {whyChooseStatements.map((key, index) => {
-              const Icon = whyChooseIcons[index];
+          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {whyChooseCards.map(({ titleKey, descriptionKey, icon: Icon }, index) => {
               return (
-                <Reveal key={key} delay={index * 120} className="h-full">
+                <Reveal key={titleKey} delay={index * 120} className="h-full">
                   <article className="group flex h-full flex-col rounded-2xl border-t-4 border-[var(--blc-green-700)] bg-white p-6 text-start shadow-soft transition duration-300 hover:-translate-y-2 hover:shadow-[0_20px_45px_var(--blc-green-900)] motion-reduce:transition-none lg:p-8">
                     <div className="flex items-center justify-between">
                       <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--blc-cream-100)] text-[var(--blc-green-700)] transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none">
@@ -314,8 +321,11 @@ export default async function HomePage({
                         0{index + 1}
                       </span>
                     </div>
-                    <p className="mt-8 text-base leading-relaxed text-[var(--blc-green-900)]/80">
-                      {t(key)}
+                    <h3 className="mt-6 text-lg font-semibold leading-snug text-[var(--blc-green-900)]">
+                      {t(titleKey)}
+                    </h3>
+                    <p className="mt-3 text-base leading-relaxed text-[var(--blc-green-900)]/80">
+                      {t(descriptionKey)}
                     </p>
                   </article>
                 </Reveal>
@@ -323,7 +333,7 @@ export default async function HomePage({
             })}
           </div>
 
-          <Reveal delay={600} className="mx-auto mt-12 max-w-3xl text-center">
+          <Reveal delay={360} className="mx-auto mt-12 max-w-3xl text-center">
             <p className="text-lg leading-relaxed">
               <span className="font-bold text-[var(--blc-green-700)]">
                 {t("why_choose_closing_title")}
