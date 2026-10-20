@@ -12,6 +12,8 @@
   --blc-yellow-400: #f9d549;
   --background: var(--blc-white);
   --foreground: var(--blc-green-900);
+  --font-body:
+    var(--font-fira-sans), var(--font-arabic-sans), Arial, sans-serif;
 }
 
 @theme inline {
@@ -23,8 +25,10 @@
   --color-blc-gold-300: var(--blc-gold-300);
   --color-blc-gold-500: var(--blc-gold-500);
   --color-blc-yellow-400: var(--blc-yellow-400);
-  --font-ar: var(--font-ar);
-  --font-en: var(--font-en);
+  --font-ar: var(--font-body);
+  --font-en: var(--font-body);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-body);
 }
 
 * {
@@ -39,13 +43,13 @@ body {
   color: var(--foreground);
 }
 html[lang="ar"] body {
-  font-family: var(--font-ar), var(--font-en), system-ui, sans-serif;
+  font-family: var(--font-body);
   font-size: 17px;
   line-height: 1.9;
   letter-spacing: normal;
 }
 html[lang="en"] body {
-  font-family: var(--font-en), var(--font-ar), system-ui, sans-serif;
+  font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.7;
 }

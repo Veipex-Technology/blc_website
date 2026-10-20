@@ -1,17 +1,24 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { Fira_Sans, Noto_Sans_Arabic } from "next/font/google";
+import {
+  Fira_Sans,
+  Noto_Sans_Arabic,
+} from "next/font/google";
 import "../styles/globals.css";
 
 const arabicFont = Noto_Sans_Arabic({
-  variable: "--font-ar",
+  variable: "--font-arabic-sans",
   subsets: ["arabic"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 const englishFont = Fira_Sans({
-  variable: "--font-en",
+  variable: "--font-fira-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
+  fallback: ["Arial"],
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = {
