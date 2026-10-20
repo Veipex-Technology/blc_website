@@ -33,6 +33,15 @@ export type ServiceNavigationItem = Pick<
   | "ar_slug"
 >;
 
+/**
+ * The actual ERPNext document name is required by
+ * Service-child.service, which links to Services BLC.
+ */
+export type ContactServiceOption = Pick<
+  Service,
+  "name" | "service_name" | "service_name_ar"
+>;
+
 function getErpConfig() {
   const baseUrl = process.env.ERP_BASE_URL;
   const apiKey = process.env.ERP_API_KEY;
@@ -45,10 +54,11 @@ function getErpConfig() {
   }
 
   return {
-    baseUrl,
+    baseUrl: baseUrl.replace(/\/+$/, ""),
     headers: {
       Authorization: `token ${apiKey}:${apiSecret}`,
       Accept: "application/json",
+      "Content-Type": "application/json",
     },
   };
 }
@@ -63,16 +73,26 @@ const serviceListFields = [
   "ar_slug",
 ];
 
+const contactServiceFields = ["name", "service_name", "service_name_ar"];
+
+/**
+ * Fetch the lightweight service list for navigation.
+ */
 async function fetchServiceList(): Promise<ServiceNavigationItem[]> {
   const { baseUrl, headers } = getErpConfig();
+
   const params = new URLSearchParams({
     fields: JSON.stringify(serviceListFields),
     limit_page_length: "100",
+    order_by: "service_name asc",
   });
 
   const response = await fetch(
     `${baseUrl}/api/resource/Services%20BLC?${params.toString()}`,
-    { headers, cache: "no-store" },
+    {
+      headers,
+      cache: "no-store",
+    },
   );
 
   if (!response.ok) {
@@ -87,10 +107,51 @@ async function fetchServiceList(): Promise<ServiceNavigationItem[]> {
   return Array.isArray(result.data) ? result.data : [];
 }
 
+/**
+ * Fetch options for the Contact Us dropdown directly from Services BLC.
+ */
+export async function getContactServiceOptionsFromERP(): Promise<
+  ContactServiceOption[]
+> {
+  const { baseUrl, headers } = getErpConfig();
+
+  const params = new URLSearchParams({
+    fields: JSON.stringify(contactServiceFields),
+    limit_page_length: "100",
+    order_by: "service_name asc",
+  });
+
+  const response = await fetch(
+    `${baseUrl}/api/resource/Services%20BLC?${params.toString()}`,
+    {
+      headers,
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Contact service options could not be loaded: ${errorText}`,
+    );
+  }
+
+  const result = (await response.json()) as {
+    data?: ContactServiceOption[];
+  };
+
+  return (Array.isArray(result.data) ? result.data : []).filter((service) =>
+    Boolean(service.name),
+  );
+}
+
 export async function getServicesForNavigationFromERP() {
   return fetchServiceList();
 }
 
+/**
+ * Fetch complete service documents, including feature child tables.
+ */
 export async function getServicesFromERP(): Promise<Service[]> {
   const { baseUrl, headers } = getErpConfig();
   const services = await fetchServiceList();
@@ -98,16 +159,29 @@ export async function getServicesFromERP(): Promise<Service[]> {
   return Promise.all(
     services.map(async (service): Promise<Service> => {
       try {
-        const res = await fetch(
-          `${baseUrl}/api/resource/Services%20BLC/${encodeURIComponent(service.name)}`,
-          { headers, cache: "no-store" },
+        const response = await fetch(
+          `${baseUrl}/api/resource/Services%20BLC/${encodeURIComponent(
+            service.name,
+          )}`,
+          {
+            headers,
+            cache: "no-store",
+          },
         );
 
-        if (!res.ok) {
-          return { ...service, service_feature: [], ar_service_feature: [] };
+        if (!response.ok) {
+          return {
+            ...service,
+            service_feature: [],
+            ar_service_feature: [],
+          };
         }
 
-        const full = ((await res.json()) as { data?: Service }).data;
+        const result = (await response.json()) as {
+          data?: Service;
+        };
+
+        const full = result.data;
 
         return {
           ...service,
@@ -116,7 +190,11 @@ export async function getServicesFromERP(): Promise<Service[]> {
           ar_service_feature: full?.ar_service_feature ?? [],
         };
       } catch {
-        return { ...service, service_feature: [], ar_service_feature: [] };
+        return {
+          ...service,
+          service_feature: [],
+          ar_service_feature: [],
+        };
       }
     }),
   );

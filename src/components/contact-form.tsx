@@ -73,6 +73,7 @@ export function ContactForm({ locale, initialService }: ContactFormProps) {
    * GET needed_services FROM ERP
    * ---------------------------------------------------------
    */
+
   useEffect(() => {
     let cancelled = false;
 
@@ -80,7 +81,7 @@ export function ContactForm({ locale, initialService }: ContactFormProps) {
       try {
         setLoadingServices(true);
 
-        const response = await fetch("/api/contact-us-form", {
+        const response = await fetch(`/api/contact-us-form?locale=${locale}`, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -89,39 +90,19 @@ export function ContactForm({ locale, initialService }: ContactFormProps) {
         });
 
         if (!response.ok) {
-          throw new Error("Contact-us BLC Form could not be loaded.");
+          throw new Error("Services could not be loaded.");
         }
 
         const result = (await response.json()) as {
-          forms?: ContactUsBLCForm[];
+          services?: ServiceOption[];
+          error?: string;
         };
 
-        if (cancelled) {
-          return;
-        }
+        if (cancelled) return;
 
-        const serviceMap = new Map<string, ServiceOption>();
-
-        for (const form of result.forms ?? []) {
-          for (const item of form.needed_services ?? []) {
-            if (!item.service) {
-              continue;
-            }
-
-            serviceMap.set(item.service, {
-              slug: item.service,
-              title: item.service,
-            });
-          }
-        }
-
-        const extractedServices = Array.from(serviceMap.values());
-
-        console.log("ERP needed_services:", extractedServices);
-
-        setServices(extractedServices);
+        setServices(result.services ?? []);
       } catch (error) {
-        console.error("Failed to load needed_services:", error);
+        console.error("Failed to load services:", error);
 
         if (!cancelled) {
           setServices([]);
@@ -138,7 +119,7 @@ export function ContactForm({ locale, initialService }: ContactFormProps) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [locale]);
 
   /*
    * ---------------------------------------------------------

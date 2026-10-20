@@ -1,34 +1,41 @@
-import { NextResponse } from "next/server";
-import {
-  createContactUsFormInERP,
-  getContactUsFormsFromERP,
-} from "@/lib/erp/contact";
+import { NextRequest, NextResponse } from "next/server";
+import { createContactUsFormInERP } from "@/lib/erp/contact";
+import { getContactServiceOptionsFromERP } from "@/lib/erp/services";
 
 /**
  * GET
  *
- * Get Contact-us BLC Form records from ERP.
+ * Fetch service options directly from Services BLC.
+ * The dropdown displays localized service names but uses the
+ * actual ERPNext document name as its value.
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const forms = await getContactUsFormsFromERP();
+    const locale =
+      new URL(request.url).searchParams.get("locale") === "ar" ? "ar" : "en";
+
+    const services = await getContactServiceOptionsFromERP();
 
     return NextResponse.json({
-      forms,
+      services: services.map((service) => ({
+        slug: service.name,
+        title:
+          locale === "ar"
+            ? service.service_name_ar || service.service_name || service.name
+            : service.service_name || service.name,
+      })),
     });
   } catch (error) {
-    console.error("Contact-us BLC Form GET error:", error);
+    console.error("Contact-us form services GET error:", error);
 
     return NextResponse.json(
       {
         error:
           error instanceof Error
             ? error.message
-            : "Contact-us BLC Form could not be loaded.",
+            : "Services could not be loaded.",
       },
-      {
-        status: 502,
-      },
+      { status: 502 },
     );
   }
 }
@@ -36,51 +43,28 @@ export async function GET() {
 /**
  * POST
  *
- * Create a new Contact-us BLC Form in ERP.
+ * Create a new Contact-us BLC Form in ERPNext.
  */
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    /*
-     * Validate required fields.
-     */
     if (!body || typeof body.full_name !== "string" || !body.full_name.trim()) {
       return NextResponse.json(
-        {
-          error: "Full name is required.",
-        },
-        {
-          status: 400,
-        },
+        { error: "Full name is required." },
+        { status: 400 },
       );
     }
 
     if (typeof body.phone_number !== "string" || !body.phone_number.trim()) {
       return NextResponse.json(
-        {
-          error: "Phone number is required.",
-        },
-        {
-          status: 400,
-        },
+        { error: "Phone number is required." },
+        { status: 400 },
       );
     }
 
-    /*
-     * Validate needed_services.
-     *
-     * It should be:
-     *
-     * [
-     *   {
-     *     service: "services1"
-     *   }
-     * ]
-     */
-    let neededServices: {
-      service: string;
-    }[] = [];
+    // Keep only valid child rows with a non-empty service document name.
+    let neededServices: { service: string }[] = [];
 
     if (Array.isArray(body.needed_services)) {
       neededServices = body.needed_services
@@ -92,14 +76,11 @@ export async function POST(request: Request) {
             typeof (item as { service?: unknown }).service === "string" &&
             Boolean((item as { service: string }).service.trim()),
         )
-        .map((item) => ({
+        .map((item: { service: string }) => ({
           service: item.service.trim(),
         }));
     }
 
-    /*
-     * Build ERP payload.
-     */
     const form = await createContactUsFormInERP({
       full_name: body.full_name.trim(),
       phone_number: body.phone_number.trim(),
@@ -118,9 +99,7 @@ export async function POST(request: Request) {
         success: true,
         form,
       },
-      {
-        status: 201,
-      },
+      { status: 201 },
     );
   } catch (error) {
     console.error("Contact-us BLC Form POST error:", error);
@@ -132,9 +111,7 @@ export async function POST(request: Request) {
             ? error.message
             : "Contact-us BLC Form could not be created.",
       },
-      {
-        status: 502,
-      },
+      { status: 502 },
     );
   }
 }
