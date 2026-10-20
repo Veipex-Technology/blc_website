@@ -17,7 +17,8 @@ export async function SiteFooter({
   locale: Locale;
   settings: SiteSettings;
   labels: {
-    tagline: string;
+    brandName: string;
+    description: string;
     rights: string;
     privacy: string;
     services: string;
@@ -149,8 +150,11 @@ export async function SiteFooter({
             />
           </div>
 
-          <p className="mt-4 max-w-xs text-sm text-[var(--blc-cream-100)]">
-            {labels.tagline}
+          <h2 className="mt-4 text-lg font-semibold text-white">
+            {labels.brandName}
+          </h2>
+          <p className="mt-2 max-w-xs text-sm leading-relaxed text-[var(--blc-cream-100)]">
+            {labels.description}
           </p>
 
           {/* Dynamic ERP Social Platforms */}

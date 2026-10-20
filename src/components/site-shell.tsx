@@ -15,7 +15,6 @@ export async function SiteShell({
   const common = await getTranslations({ locale, namespace: "common" });
   const nav = await getTranslations({ locale, namespace: "nav" });
   const footer = await getTranslations({ locale, namespace: "footer" });
-  const services = await getTranslations({ locale, namespace: "services" });
   const settings = await getSiteSettings(locale);
   const erpServices = await getServicesForNavigationFromERP().catch(() => []);
   const headerLinks = [
@@ -93,7 +92,8 @@ export async function SiteShell({
         locale={locale}
         settings={settings}
         labels={{
-          tagline: common("tagline"),
+          brandName: common("brand_name"),
+          description: common("footer_description"),
           rights: common("footer_rights"),
           privacy: common("privacy"),
           services: footer("services"),
@@ -118,15 +118,6 @@ export async function SiteShell({
           services: nav("services"),
           blog: nav("blog"),
           contact: nav("contact"),
-        }}
-        services={{
-          elderly_care: services("elderly_care.title"),
-          home_nursing: services("home_nursing.title"),
-          post_hospital: services("post_hospital.title"),
-          rehabilitation: services("rehabilitation.title"),
-          diagnostics: services("diagnostics.title"),
-          caregiver: services("caregiver.title"),
-          foot_care: services("foot_care.title"),
         }}
       />
       <div
