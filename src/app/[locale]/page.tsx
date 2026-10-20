@@ -3,10 +3,10 @@ import Link from "next/link";
 import {
   ArrowRight,
   ArrowUpRight,
-  BadgeCheck,
   BookOpen,
   ClipboardCheck,
   ClipboardList,
+  Clock3,
   GraduationCap,
   HeartHandshake,
   HeartPulse,
@@ -15,10 +15,10 @@ import {
   Quote,
   ShieldCheck,
   Sparkles,
+  Stethoscope,
   Sun,
-  Zap,
 } from "lucide-react";
-import type { LucideIcon, LucideProps } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { Link as LocaleLink } from "@/i18n/navigation";
@@ -69,55 +69,33 @@ const whyChooseStatements = [
   "why_choose_statement_3",
   "why_choose_statement_4",
 ] as const;
-const GermanQualityIcon = ({ className, ...props }: LucideProps) => (
-  <svg
-    {...props}
-    viewBox="0 0 24 24"
-    className={className}
-    fill="none"
-    aria-hidden="true"
-  >
-    <defs>
-      <clipPath id="german-quality-shield">
-        <path d="M5 4.5h14v6.5c0 4.2-2.4 7.1-7 9-4.6-1.9-7-4.8-7-9V4.5Z" />
-      </clipPath>
-    </defs>
-    <g clipPath="url(#german-quality-shield)" opacity="0.9">
-      <rect x="4" y="4" width="16" height="5.35" fill="#000000" />
-      <rect x="4" y="9.35" width="16" height="5.3" fill="#DD0000" />
-      <rect x="4" y="14.65" width="16" height="5.35" fill="#FFCE00" />
-    </g>
-    <path
-      d="M5 4.5h14v6.5c0 4.2-2.4 7.1-7 9-4.6-1.9-7-4.8-7-9V4.5Z"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="m8.5 12.2 2.1 2.1 4.9-5"
-      stroke="white"
-      strokeWidth="1.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 type TrustBadgeKey =
-  | "trust_badge_1"
-  | "trust_badge_3"
-  | "trust_badge_5"
-  | "germanQuality";
+  | "trust_german_standards"
+  | "trust_certified_nursing"
+  | "trust_24_7_support"
+  | "trust_personalized_care";
 
 const trustBadges: {
   id: string;
-  icon: LucideIcon | typeof GermanQualityIcon;
+  icon: LucideIcon;
   labelKey: TrustBadgeKey;
 }[] = [
-  { id: "licensed", icon: BadgeCheck, labelKey: "trust_badge_1" },
-  { id: "response", icon: Zap, labelKey: "trust_badge_3" },
-  { id: "german-quality", icon: GermanQualityIcon, labelKey: "germanQuality" },
-  { id: "hygiene", icon: Sparkles, labelKey: "trust_badge_5" },
+  {
+    id: "german-standards",
+    icon: ShieldCheck,
+    labelKey: "trust_german_standards",
+  },
+  {
+    id: "certified-nursing",
+    icon: Stethoscope,
+    labelKey: "trust_certified_nursing",
+  },
+  { id: "24-7-support", icon: Clock3, labelKey: "trust_24_7_support" },
+  {
+    id: "personalized-care",
+    icon: HeartHandshake,
+    labelKey: "trust_personalized_care",
+  },
 ];
 
 export async function generateMetadata({
@@ -427,7 +405,7 @@ export default async function HomePage({
               >
                 <div className="relative flex flex-col items-center gap-3">
                   <span
-                    aria-label={t(labelKey)}
+                    aria-hidden="true"
                     className="relative flex h-16 w-16 items-center justify-center rounded-full border border-[var(--blc-green-700)] bg-[var(--blc-cream-100)] text-[var(--blc-green-700)] transition-colors duration-300 group-hover:bg-[var(--blc-green-700)] group-hover:text-white motion-reduce:transition-none lg:h-20 lg:w-20"
                   >
                     <span
@@ -437,7 +415,6 @@ export default async function HomePage({
                     <Icon
                       className="h-8 w-8 transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none"
                       strokeWidth={1.75}
-                      aria-label={t(labelKey)}
                       aria-hidden="true"
                     />
                   </span>

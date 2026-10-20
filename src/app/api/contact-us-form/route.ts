@@ -90,8 +90,6 @@ export async function POST(request: Request) {
           ? body.how_we_help_you.trim()
           : "",
       needed_services: neededServices,
-      reciver_mail:
-        typeof body.reciver_mail === "string" ? body.reciver_mail.trim() : "",
     });
 
     return NextResponse.json(

@@ -12,7 +12,8 @@ import {
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-import { getServices, getSiteSettings } from "@/lib/erp/api";
+import { getSiteSettings } from "@/lib/erp/api";
+import { getServicesFromERP } from "@/lib/erp/services";
 import { getBLCContactUsInfoFromERP } from "@/lib/erp/contact-info";
 import { getSocialPlatformsFromERP } from "@/lib/erp/social-platforms";
 
@@ -89,7 +90,7 @@ export default async function ContactPage({
   const [contactInfoRecords, services, settings, socialPlatforms] =
     await Promise.all([
       getBLCContactUsInfoFromERP(),
-      getServices(locale),
+      getServicesFromERP(),
       getSiteSettings(locale),
       getSocialPlatformsFromERP(),
     ]);
@@ -133,22 +134,23 @@ export default async function ContactPage({
    *
    * /contact?service=some-service
    */
-  const initialService = services.some(
-    (service) => service.slug === query.service,
-  )
-    ? query.service
-    : undefined;
+  // Select the service requested in the URL.
+  // Supports ERP document names and both localized slugs.
+  const initialService = services.find(
+    (service) =>
+      service.name === query.service ||
+      service.en_slug === query.service ||
+      service.ar_slug === query.service,
+  )?.name;
 
-  /*
-   * Dynamic services for ContactForm.
-   */
-  const serviceOptions = services
-    .filter((service) => service.published)
-    .sort((a, b) => a.sort_order - b.sort_order)
-    .map((service) => ({
-      slug: service.slug,
-      title: service.title,
-    }));
+  // Prepare the actual Services BLC records for ContactForm.
+  const serviceOptions = services.map((service) => ({
+    name: service.name,
+    service_name: service.service_name,
+    service_name_ar: service.service_name_ar,
+    en_slug: service.en_slug,
+    ar_slug: service.ar_slug,
+  }));
 
   /*
    * Social links can continue coming from Website Info /
