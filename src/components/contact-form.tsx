@@ -23,7 +23,6 @@ type ContactUsBLCForm = {
   email_id?: string;
   how_we_help_you?: string;
   needed_services?: ServiceChild[];
-  reciver_mail?: string;
 };
 
 type FormValues = Omit<InquiryPayload, "consent"> & {

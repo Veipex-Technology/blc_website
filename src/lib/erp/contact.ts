@@ -12,8 +12,6 @@ export type ContactUsBLCForm = {
   how_we_help_you?: string;
 
   needed_services?: ServiceChild[];
-
-  reciver_mail?: string;
 };
 
 export type CreateContactUsBLCFormInput = {
@@ -21,10 +19,10 @@ export type CreateContactUsBLCFormInput = {
   phone_number: string;
   email_id?: string;
   how_we_help_you?: string;
+
   needed_services?: {
     service: string;
   }[];
-  reciver_mail?: string;
 };
 
 function getErpConfig() {
@@ -39,7 +37,7 @@ function getErpConfig() {
   }
 
   return {
-    baseUrl,
+    baseUrl: baseUrl.replace(/\/+$/, ""),
     headers: {
       Authorization: `token ${apiKey}:${apiSecret}`,
       Accept: "application/json",
@@ -89,13 +87,12 @@ export async function getContactUsFormsFromERP(): Promise<ContactUsBLCForm[]> {
   const forms = Array.isArray(result.data) ? result.data : [];
 
   /*
-   * Load the complete document for each form
-   * because needed_services is a child table.
+   * Fetch each complete document to retrieve child-table rows.
    */
   return Promise.all(
     forms.map(async (form): Promise<ContactUsBLCForm> => {
       try {
-        const response = await fetch(
+        const documentResponse = await fetch(
           `${baseUrl}/api/resource/Contact-us%20BLC%20Form/${encodeURIComponent(
             form.name,
           )}`,
@@ -105,18 +102,18 @@ export async function getContactUsFormsFromERP(): Promise<ContactUsBLCForm[]> {
           },
         );
 
-        if (!response.ok) {
+        if (!documentResponse.ok) {
           return {
             ...form,
             needed_services: [],
           };
         }
 
-        const result = (await response.json()) as {
+        const documentResult = (await documentResponse.json()) as {
           data?: ContactUsBLCForm;
         };
 
-        const full = result.data;
+        const full = documentResult.data;
 
         return {
           ...form,
@@ -142,24 +139,35 @@ export async function createContactUsFormInERP(
   const { baseUrl, headers } = getErpConfig();
 
   /*
-   * ERPNext expects the child table field to contain
-   * an array of child-row objects.
-   *
-   * Example:
+   * Normalize receiver mail using the same logic as the API route:
+   * - Accept a string.
+   * - Trim surrounding whitespace.
+   * - Use an empty string when omitted.
+   */
+
+  /*
+   * ERPNext expects child-table rows in this format:
    *
    * needed_services: [
-   *   {
-   *     service: "services1"
-   *   }
+   *   { service: "services1" }
    * ]
    */
   const payload = {
-    full_name: input.full_name,
-    phone_number: input.phone_number,
-    email_id: input.email_id ?? "",
-    how_we_help_you: input.how_we_help_you ?? "",
-    needed_services: input.needed_services ?? [],
-    reciver_mail: input.reciver_mail ?? "",
+    full_name: input.full_name.trim(),
+    phone_number: input.phone_number.trim(),
+    email_id: typeof input.email_id === "string" ? input.email_id.trim() : "",
+    how_we_help_you:
+      typeof input.how_we_help_you === "string"
+        ? input.how_we_help_you.trim()
+        : "",
+    needed_services: (input.needed_services ?? [])
+      .filter(
+        (item) =>
+          typeof item.service === "string" && Boolean(item.service.trim()),
+      )
+      .map((item) => ({
+        service: item.service.trim(),
+      })),
   };
 
   const response = await fetch(
