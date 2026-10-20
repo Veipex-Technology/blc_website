@@ -1,18 +1,15 @@
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  ChevronRight,
-  Heart,
-  MessageCircle,
-  Phone,
-} from "lucide-react";
+import { ArrowUpRight, MessageCircle, Phone } from "lucide-react";
 import sanitizeHtml from "sanitize-html";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { Reveal } from "@/components/reveal";
-import { BlogHeroImage } from "@/components/blog-hero-image";
+import {
+  ServiceOverview,
+  type ServiceOverviewBlock,
+} from "@/components/services/ServiceOverview";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -48,6 +45,135 @@ function findService(services: Service[], slug: string) {
 
 function stripHtml(html: string) {
   return sanitizeHtml(html, { allowedTags: [], allowedAttributes: {} });
+}
+
+function sanitizeServiceHtml(html: string) {
+  return sanitizeHtml(html, {
+    allowedTags: ["p", "br", "strong", "em", "ul", "ol", "li"],
+    allowedAttributes: {},
+  });
+}
+
+function decodeTextEntities(value: string) {
+  return value
+    .replaceAll("&nbsp;", " ")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#39;", "'")
+    .replaceAll("&#x27;", "'")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&amp;", "&");
+}
+
+function removeNumbering(title: string) {
+  let index = 0;
+  while (index < title.length && title[index].trim() === "") {
+    index += 1;
+  }
+
+  const numberStart = index;
+  while (index < title.length && title[index] >= "0" && title[index] <= "9") {
+    index += 1;
+  }
+  if (index === numberStart) return null;
+
+  while (index < title.length && title[index].trim() === "") {
+    index += 1;
+  }
+  if (title[index] !== "." && title[index] !== ")") return null;
+
+  index += 1;
+  while (index < title.length && title[index].trim() === "") {
+    index += 1;
+  }
+
+  const cleanTitle = decodeTextEntities(title.slice(index)).trim();
+  return cleanTitle || null;
+}
+
+function paragraphBoundary(html: string, headingStart: number) {
+  const paragraphStart = html.lastIndexOf("<p>", headingStart);
+  const paragraphEnd = html.lastIndexOf("</p>", headingStart);
+  return paragraphStart > paragraphEnd ? paragraphStart : headingStart;
+}
+
+function getShortBlockLabel(title: string) {
+  return title.split(" ").filter(Boolean).slice(0, 2).join(" ");
+}
+
+function parseServiceDescription(html: string): {
+  introHtml: string;
+  blocks: ServiceOverviewBlock[];
+} {
+  const safeHtml = sanitizeServiceHtml(html);
+  const headings: Array<{
+    start: number;
+    bodyStart: number;
+    end: number;
+    title: string;
+  }> = [];
+  let searchFrom = 0;
+
+  while (searchFrom < safeHtml.length) {
+    const headingStart = safeHtml.indexOf("<strong", searchFrom);
+    if (headingStart === -1) break;
+
+    const openingEnd = safeHtml.indexOf(">", headingStart);
+    const closingStart = safeHtml.indexOf("</strong>", openingEnd + 1);
+    if (openingEnd === -1 || closingStart === -1) break;
+
+    const headingContent = safeHtml.slice(openingEnd + 1, closingStart);
+    const title = removeNumbering(stripHtml(headingContent));
+    const headingEnd = closingStart + "</strong>".length;
+
+    if (title) {
+      const blockStart = paragraphBoundary(safeHtml, headingStart);
+      const titleParagraphEnd = safeHtml.indexOf("</p>", headingEnd);
+      const titleParagraphContent =
+        titleParagraphEnd === -1
+          ? ""
+          : stripHtml(safeHtml.slice(headingEnd, titleParagraphEnd)).trim();
+
+      headings.push({
+        start: blockStart,
+        bodyStart:
+          titleParagraphEnd !== -1 && !titleParagraphContent
+            ? titleParagraphEnd + "</p>".length
+            : headingEnd,
+        end: headingEnd,
+        title,
+      });
+    }
+
+    searchFrom = headingEnd;
+  }
+
+  if (headings.length === 0) {
+    return {
+      introHtml: "",
+      blocks: safeHtml.trim()
+        ? [{ title: "", label: "", body: safeHtml.trim() }]
+        : [],
+    };
+  }
+
+  const introHtml = sanitizeServiceHtml(
+    safeHtml.slice(0, headings[0].start),
+  ).trim();
+  const blocks = headings.map((heading, index) => {
+    const bodyEnd = headings[index + 1]?.start ?? safeHtml.length;
+    const body = sanitizeServiceHtml(
+      safeHtml.slice(heading.bodyStart, bodyEnd),
+    ).trim();
+
+    return {
+      title: heading.title,
+      label: getShortBlockLabel(heading.title),
+      body,
+    };
+  });
+
+  return { introHtml, blocks };
 }
 
 export async function generateStaticParams() {
@@ -138,12 +264,7 @@ export default async function ServicePage({ params }: PageProps) {
       : service.service_feature || []
     : service.service_feature || [];
 
-  const Icon = Heart;
-
-  const safeDescription = sanitizeHtml(description, {
-    allowedTags: ["p", "br", "strong", "em", "ul", "ol", "li"],
-    allowedAttributes: {},
-  });
+  const { introHtml, blocks } = parseServiceDescription(description);
 
   const related = services
     .filter((candidate) => candidate.name !== service.name)
@@ -175,115 +296,66 @@ export default async function ServicePage({ params }: PageProps) {
 
   return (
     <main>
-      <Section variant="cream" dir={isArabic ? "rtl" : "ltr"}>
+      <ServiceOverview
+        key={service.name}
+        locale={locale}
+        title={title || ""}
+        tagline={tagline || ""}
+        introHtml={introHtml}
+        blocks={blocks}
+        image={serviceImage}
+        ctaHref={requestHref}
+        labels={{
+          home: nav("home"),
+          services: nav("services"),
+          breadcrumb: t("title"),
+          imageAlt: t("hero_image_alt"),
+          requestCare: common("cta_request"),
+        }}
+      />
+
+      <Section dir={isArabic ? "rtl" : "ltr"}>
         <Container>
-          <Reveal variant="zoom">
-            <div className="mx-auto max-w-5xl">
-              <nav
-                aria-label={t("title")}
-                className="mb-7 flex items-center gap-2 overflow-hidden text-sm text-[var(--blc-green-700)]"
-              >
-                <Link
-                  href={`/${locale}`}
-                  className="shrink-0 font-semibold hover:text-[var(--blc-green-900)] focus-ring-light"
-                >
-                  {nav("home")}
-                </Link>
-                <ChevronRight
-                  size={15}
-                  aria-hidden="true"
-                  className="shrink-0 text-[var(--blc-gold-500)] rtl:rotate-180"
-                />
-                <Link
-                  href={`/${locale}/${servicesSegment}`}
-                  className="shrink-0 font-semibold hover:text-[var(--blc-green-900)] focus-ring-light"
-                >
-                  {nav("services")}
-                </Link>
-                <ChevronRight
-                  size={15}
-                  aria-hidden="true"
-                  className="shrink-0 text-[var(--blc-gold-500)] rtl:rotate-180"
-                />
-                <span className="truncate" aria-current="page">
-                  {title}
-                </span>
-              </nav>
-
-              <BlogHeroImage src={serviceImage} alt={t("hero_image_alt")} />
-            </div>
-          </Reveal>
-
-          <Reveal delay={100}>
-            <header className="mx-auto mt-10 max-w-4xl text-center">
-              <div className="mx-auto inline-flex rounded-2xl bg-[var(--blc-white)] p-4 text-[var(--blc-gold-500)] shadow-sm">
-                <Icon size={34} aria-hidden="true" />
-              </div>
-
-              {tagline && (
-                <p className="mt-5 text-lg font-semibold text-[var(--blc-gold-500)]">
-                  {tagline}
-                </p>
-              )}
-
-              <h1 className="mt-3 text-4xl font-bold leading-[1.1] text-[var(--blc-green-900)] sm:text-6xl">
-                {title}
-              </h1>
-
-              {safeDescription && (
-                <div
-                  className="mx-auto mt-7 max-w-3xl text-lg leading-8 text-[var(--blc-green-700)] [&_p+p]:mt-5"
-                  dangerouslySetInnerHTML={{ __html: safeDescription }}
-                />
-              )}
-
-              <div className="mx-auto mt-8 h-px w-20 bg-[var(--blc-gold-500)]" />
-
-              <Link
-                href={requestHref}
-                className="mt-8 inline-flex min-h-12 items-center gap-2 rounded-full bg-[var(--blc-green-900)] px-6 font-semibold text-white hover:bg-[var(--blc-green-700)] focus-ring-dark"
-              >
-                {common("cta_request")}
-                <ArrowUpRight
-                  size={17}
-                  aria-hidden="true"
-                  className="rtl:rotate-180"
-                />
-              </Link>
-            </header>
-          </Reveal>
-        </Container>
-      </Section>
-
-      <Section>
-        <Container>
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
-            <div>
-              {features.length > 0 && (
+          <div
+            className={
+              features.length > 0
+                ? "grid gap-12 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start"
+                : "grid gap-12"
+            }
+          >
+            {features.length > 0 && (
+              <div>
                 <Reveal>
                   <SectionHeading title={t("included")} />
-
-                  <ul className="mt-7 grid gap-4 sm:grid-cols-2">
-                    {features.map((feature) => (
-                      <li
-                        key={feature.name}
-                        className="flex gap-3 rounded-xl bg-[var(--blc-cream-100)] p-4 text-[var(--blc-green-700)]"
-                      >
-                        <span
-                          className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
-                          aria-hidden="true"
-                        >
-                          ✓
-                        </span>
-                        <span>{feature.feature}</span>
-                      </li>
-                    ))}
-                  </ul>
                 </Reveal>
-              )}
-            </div>
 
-            <Reveal className="lg:sticky lg:top-28">
+                <ul className="mt-7 grid gap-4 sm:grid-cols-2">
+                  {features.map((feature, index) => (
+                    <li key={feature.name} className="h-full">
+                      <Reveal delay={index * 80} className="h-full">
+                        <div className="flex h-full gap-3 rounded-xl bg-[var(--blc-cream-100)] p-4 text-[var(--blc-green-700)]">
+                          <span
+                            className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
+                            aria-hidden="true"
+                          >
+                            ✓
+                          </span>
+                          <span>{feature.feature}</span>
+                        </div>
+                      </Reveal>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <Reveal
+              className={
+                features.length > 0
+                  ? "lg:sticky lg:top-28"
+                  : "mx-auto w-full max-w-xl"
+              }
+            >
               <aside className="rounded-card bg-[var(--blc-green-900)] p-6 text-white shadow-soft">
                 <h2 className="text-xl font-bold">{common("cta_request")}</h2>
 
@@ -322,14 +394,14 @@ export default async function ServicePage({ params }: PageProps) {
       </Section>
 
       {related.length > 0 && (
-        <Section variant="cream">
+        <Section variant="cream" dir={isArabic ? "rtl" : "ltr"}>
           <Container>
             <Reveal>
               <SectionHeading title={t("related")} />
             </Reveal>
 
             <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {related.map((relatedService) => {
+              {related.map((relatedService, index) => {
                 const relatedSlug = isArabic
                   ? relatedService.ar_slug || relatedService.en_slug
                   : relatedService.en_slug;
@@ -347,10 +419,10 @@ export default async function ServicePage({ params }: PageProps) {
                 if (!relatedSlug || !relatedTitle) return null;
 
                 return (
-                  <Reveal key={relatedService.name}>
+                  <Reveal key={relatedService.name} delay={index * 100}>
                     <Link
                       href={`/${locale}/${servicesSegment}/${encodeURIComponent(relatedSlug)}`}
-                      className="group block h-full rounded-card bg-white p-6 shadow-soft hover:-translate-y-1 focus-ring-light"
+                      className="group block h-full rounded-card bg-white p-6 shadow-soft transition duration-300 hover:-translate-y-1 focus-ring-light motion-reduce:transition-none"
                     >
                       <h2 className="text-xl font-bold text-[var(--blc-green-900)]">
                         {relatedTitle}

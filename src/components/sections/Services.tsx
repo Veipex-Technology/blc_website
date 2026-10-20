@@ -47,16 +47,21 @@ export function Services({
     const title = isRtl
       ? service.service_name_ar || service.service_name
       : service.service_name;
-    const description = isRtl
-      ? service.ar_service_description || service.service_sub_title
-      : service.service_description || service.service_sub_title;
+    const subtitle = isRtl
+      ? service.service_sub_title_ar
+      : service.service_sub_title;
+    const localizedDescription = isRtl
+      ? service.ar_service_description
+      : service.service_description;
     const slug = isRtl
       ? service.ar_slug || service.en_slug
       : service.en_slug || service.ar_slug;
     const image = isRtl
       ? service.image_ar || service.image_en
       : service.image_en || service.image_ar;
-    const plainDescription = description ? toPlainText(description) : "";
+    const plainDescription =
+      (subtitle ? toPlainText(subtitle) : "") ||
+      (localizedDescription ? toPlainText(localizedDescription) : "");
 
     if (!title || !slug) {
       return [];

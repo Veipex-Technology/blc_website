@@ -14,8 +14,9 @@ const config: Config = {
         "blc-yellow-400": "#f9d549",
       },
       fontFamily: {
-        ar: ["var(--font-ar)", "var(--font-en)", "system-ui", "sans-serif"],
-        en: ["var(--font-en)", "var(--font-ar)", "system-ui", "sans-serif"],
+        ar: ["var(--font-body)"],
+        en: ["var(--font-body)"],
+        sans: ["var(--font-body)"],
       },
       borderRadius: { card: "16px" },
       boxShadow: { soft: "0 8px 24px rgb(2 56 48 / 0.08)" },
