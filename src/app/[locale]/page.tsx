@@ -28,6 +28,7 @@ import { MotionSection } from "@/components/motion/motion-section";
 import { HeroMotion, HeroTextLayer } from "@/components/sections/HeroMotion";
 import { Section } from "@/components/ui/section";
 import { Services } from "@/components/sections/Services";
+import { AboutIntro } from "@/components/about-intro";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { NewsletterSection } from "@/components/newsletter-section";
 import { createPageMetadata } from "@/lib/metadata";
@@ -292,18 +293,14 @@ export default async function HomePage({
       </Section>
 
       <Section>
-        <Container>
-          <Reveal>
-            <SectionHeading
-              eyebrow={t("trust_heading")}
-              title={t("intro_title")}
-              subtitle={t.rich("intro_text", {
-                strong: (chunks) => <strong>{chunks}</strong>,
-                break: () => <span className="mt-4 block" />,
-              })}
-            />
-          </Reveal>
-        </Container>
+        <AboutIntro
+          eyebrow={t("trust_heading")}
+          title={t("intro_title")}
+          description={t.rich("intro_text", {
+            strong: (chunks) => <strong>{chunks}</strong>,
+            break: () => <span className="mt-4 block" />,
+          })}
+        />
       </Section>
 
       <Services services={services} locale={locale} />
