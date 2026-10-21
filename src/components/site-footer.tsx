@@ -140,13 +140,17 @@ export async function SiteFooter({
       <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-2 lg:grid-cols-4">
         {/* Brand */}
         <div>
-          <div className="inline-flex rounded-xl bg-white p-2">
+          {/* Slightly tighter padding keeps the smaller logo balanced across breakpoints. */}
+          <div className="inline-flex rounded-xl bg-white p-1 md:p-1.5">
+            {/* Responsive width preserves the logo ratio while keeping the footer visually balanced. */}
             <Image
               src={settings.logo_url}
               alt={labels.logoAlt}
               width={156}
               height={52}
-              className="h-12 w-auto object-contain"
+              sizes="(max-width: 767px) 64px, 80px"
+              loading="lazy"
+              className="h-auto w-[64px] max-w-full object-contain md:w-[80px]"
             />
           </div>
 
