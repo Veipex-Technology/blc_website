@@ -220,6 +220,8 @@ export default async function AboutPage({
         eyebrow: "التعليم التمريضي المهني",
         title: "مستشار تمريض ألماني",
         subtitle: "التعلم من الخبرة الدولية",
+        consultantName: "",
+        bio: "",
         intro:
           "يقدم مستشارنا الألماني خبرة مهنية في التمريض إلى فريقنا، ويساعد ممرضينا على التعلم والتطور والالتزام بالممارسات التمريضية المهنية لتقديم مستوى أعلى من الرعاية.",
         body: "يعمل مستشارنا الألماني عن قرب مع فريق التمريض لتعزيز المعرفة المهنية والممارسات السريرية والتواصل ومعايير الجودة. ومن خلال التوجيه المنظم والتعلم العملي، يواصل ممرضونا تطوير المهارات اللازمة لتقديم رعاية آمنة وحانية ومهنية.",
@@ -245,11 +247,12 @@ export default async function AboutPage({
       }
     : {
         eyebrow: "Professional Nursing Education",
-        title: "German Nursing Consultant",
-        subtitle: "Learning from international expertise",
-        intro:
-          "Our German consultant brings professional German nursing expertise to our team, helping our nurses learn, improve, and follow professional nursing practices to deliver a higher standard of care.",
-        body: "Our German consultant works closely with our nursing team to strengthen professional knowledge, clinical practices, communication, and quality standards. Through structured guidance and practical learning, our nurses continue developing the skills needed to provide safe, compassionate, and professional care.",
+        title: "Learning from German Expertise",
+        subtitle: "",
+        consultantName: "Frau Alexandra Dinspel",
+        intro: "",
+        bio: "Is a highly motivated, people-oriented professional with a strong commitment to integrity, collaboration, and excellence. She excels at building meaningful relationships, fostering trust, and creating a positive, supportive environment. Guided by empathy, professionalism, and mutual respect, she strives to deliver lasting value and make a meaningful impact in every interaction.",
+        body: "Working closely with our nursing team, Frau Alexandra Dinspel supports the continuous improvement of clinical practices, professional communication, and quality standards through practical guidance and structured learning. Her expertise and collaborative approach help our nurses grow professionally while ensuring that every individual receives care that upholds their dignity, independence, safety, and well-being.",
         badge: "German Nursing Expertise",
         imageAlt:
           "German nursing consultant in a clinical training environment",
@@ -591,15 +594,31 @@ export default async function AboutPage({
                   <h2 className="mt-3 text-3xl font-bold leading-tight text-[var(--blc-green-900)] sm:text-4xl lg:text-5xl">
                     {consultantSection.title}
                   </h2>
-                  <p className="mt-4 text-lg font-semibold text-[var(--blc-green-700)]">
-                    {consultantSection.subtitle}
-                  </p>
-                  <p className="mt-5 text-lg leading-8 text-[var(--blc-green-700)]">
-                    {consultantSection.intro}
-                  </p>
-                  <p className="mt-4 leading-7 text-[var(--blc-green-700)]">
-                    {consultantSection.body}
-                  </p>
+                  {isArabic ? (
+                    <>
+                      <p className="mt-4 text-lg font-semibold text-[var(--blc-green-700)]">
+                        {consultantSection.subtitle}
+                      </p>
+                      <p className="mt-5 text-lg leading-8 text-[var(--blc-green-700)]">
+                        {consultantSection.intro}
+                      </p>
+                      <p className="mt-4 leading-7 text-[var(--blc-green-700)]">
+                        {consultantSection.body}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="mt-5 text-2xl font-bold text-[var(--blc-green-900)] sm:text-3xl">
+                        {consultantSection.consultantName}
+                      </h3>
+                      <p className="mt-3 leading-7 text-[var(--blc-green-700)]">
+                        {consultantSection.bio}
+                      </p>
+                      <p className="mt-4 leading-7 text-[var(--blc-green-700)]">
+                        {consultantSection.body}
+                      </p>
+                    </>
+                  )}
 
                   <div className="mt-8 grid gap-3 sm:grid-cols-3">
                     {consultantSection.highlights.map((highlight) => {
