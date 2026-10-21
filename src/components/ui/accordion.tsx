@@ -3,6 +3,50 @@
 import { useId, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
+function FormattedAnswer({ answer }: { answer: string }) {
+  const blocks = answer
+    .split(/\n\s*\n/)
+    .map((block) => block.trim())
+    .filter(Boolean);
+
+  return (
+    <>
+      {blocks.map((block, index) => {
+        const lines = block.split("\n").map((line) => line.trim());
+        const isUnorderedList = lines.every((line) => line.startsWith("- "));
+        const isOrderedList = lines.every((line) => /^\d+\. /.test(line));
+
+        if (isUnorderedList || isOrderedList) {
+          const List = isUnorderedList ? "ul" : "ol";
+          return (
+            <List
+              key={`${block}-${index}`}
+              className={`mb-4 space-y-2 ps-5 last:mb-0 ${
+                isUnorderedList ? "list-disc" : "list-decimal"
+              }`}
+            >
+              {lines.map((line) => (
+                <li key={line}>{line.replace(/^(?:- |\d+\. )/, "")}</li>
+              ))}
+            </List>
+          );
+        }
+
+        return (
+          <p key={`${block}-${index}`} className="mb-4 last:mb-0">
+            {lines.map((line, lineIndex) => (
+              <span key={`${line}-${lineIndex}`}>
+                {line}
+                {lineIndex < lines.length - 1 && <br />}
+              </span>
+            ))}
+          </p>
+        );
+      })}
+    </>
+  );
+}
+
 export function Accordion({
   items,
   defaultOpen = 0,
@@ -45,7 +89,7 @@ export function Accordion({
                 aria-labelledby={buttonId}
                 className="px-5 pb-5 text-[var(--blc-green-700)]"
               >
-                {item.answer}
+                <FormattedAnswer answer={item.answer} />
               </div>
             )}
           </div>

@@ -141,58 +141,43 @@ export const homeBlogPosts: HomeBlogPost[] = [
 ];
 export const homeFaqs: HomeFaq[] = [
   {
-    id: "coverage",
-    question_en: "Where do you provide care?",
-    question_ar: "أين تقدمون خدماتكم؟",
+    id: "qualified-team",
+    question_en: "Are your nurses and caregivers qualified?",
+    question_ar: "هل الممرضون ومقدمو الرعاية لديكم مؤهلون؟",
     answer_en:
-      "We currently serve Alexandria. [CONFIRM areas] Contact us to check your neighborhood.",
+      "Our nursing and caregiving team consists of trained professionals who are carefully selected based on their qualifications, experience, and ability to provide compassionate care.",
     answer_ar:
-      "نخدم حالياً مدينة الإسكندرية. [تأكيد] تواصلوا معنا للتأكد من منطقتكم.",
+      "يتكون فريق التمريض والرعاية لدينا من متخصصين مدربين يتم اختيارهم بعناية بناءً على مؤهلاتهم وخبراتهم وقدرتهم على تقديم رعاية رحيمة.",
     published: true,
   },
   {
-    id: "start",
-    question_en: "How do I start?",
-    question_ar: "كيف أبدأ؟",
+    id: "services",
+    question_en: "What services does your company provide?",
+    question_ar: "ما الخدمات التي تقدمها شركتكم؟",
     answer_en:
-      "Call us, message us on WhatsApp, or fill in the inquiry form. We will contact you to understand your needs.",
+      "We provide professional home care and nursing services to help individuals receive quality care in the comfort of their own homes.\n\nOur services may include:\n\n- Home nursing services\n- Elderly care and assistance\n- Bedridden patient care\n- Medication assistance and administration\n- Vital signs monitoring\n- Post-surgery care\n- Mobility and personal care assistance\n- Disability support\n- Hourly, daily, and live-in care\n\nOur goal is to ensure comfort, safety, and peace of mind for patients and their families.",
     answer_ar:
-      "اتصلوا بنا أو راسلونا عبر واتساب أو املؤوا نموذج الاستفسار، وسنتواصل معكم لفهم احتياجاتكم.",
+      "نقدم خدمات الرعاية المنزلية والتمريضية المتخصصة لمساعدة الأفراد على الحصول على رعاية عالية الجودة في راحة منازلهم.\n\nقد تشمل خدماتنا:\n\n- خدمات التمريض المنزلي\n- رعاية كبار السن ومساعدتهم\n- رعاية المرضى طريحي الفراش\n- المساعدة في الأدوية وإعطائها\n- متابعة العلامات الحيوية\n- الرعاية بعد العمليات الجراحية\n- المساعدة في الحركة والعناية الشخصية\n- دعم ذوي الإعاقة\n- رعاية بالساعة أو يومية أو إقامة كاملة\n\nهدفنا هو ضمان الراحة والأمان وراحة البال للمرضى وعائلاتهم.",
     published: true,
   },
   {
-    id: "personalized",
-    question_en: "Is the care personalized?",
-    question_ar: "هل الرعاية مخصصة لكل شخص؟",
+    id: "round-the-clock-care",
+    question_en: "Do you provide 24-hour home care?",
+    question_ar: "هل تقدمون رعاية منزلية على مدار 24 ساعة؟",
     answer_en:
-      "Yes. Every care plan starts with understanding the person, their lifestyle, and their preferences.",
-    answer_ar: "نعم. تبدأ كل خطة رعاية بفهم الشخص ونمط حياته وتفضيلاته.",
-    published: true,
-  },
-  {
-    id: "partners",
-    question_en: "Do you arrange doctor visits and tests at home?",
-    question_ar: "هل تنظمون زيارات الأطباء والتحاليل في المنزل؟",
-    answer_en: "Yes, through trusted medical and diagnostic partners.",
-    answer_ar: "نعم، عبر شركاء طبيين وتشخيصيين موثوقين.",
-    published: true,
-  },
-  {
-    id: "privacy",
-    question_en: "How is my family's privacy protected?",
-    question_ar: "كيف تُحمى خصوصية أسرتي؟",
-    answer_en:
-      "Medical and personal information is confidential and shared only with authorized professionals and family members.",
+      "Yes! We offer flexible care arrangements based on your needs, including hourly, daily, overnight, and 24-hour care, subject to availability.\n\nOur team will help you choose the most suitable care plan for your loved ones.",
     answer_ar:
-      "المعلومات الطبية والشخصية سرية، ولا تُشارَك إلا مع المختصين والأقارب المصرّح لهم.",
+      "نعم! نقدم ترتيبات رعاية مرنة تناسب احتياجاتكم، بما في ذلك الرعاية بالساعة أو يومياً أو طوال الليل أو على مدار 24 ساعة، وذلك حسب التوافر.\n\nسيساعدكم فريقنا في اختيار خطة الرعاية الأنسب لأحبائكم.",
     published: true,
   },
   {
-    id: "availability",
-    question_en: "Are you available 24/7?",
-    question_ar: "هل أنتم متاحون على مدار الساعة؟",
-    answer_en: "[CONFIRM]",
-    answer_ar: "[تأكيد]",
+    id: "booking",
+    question_en: "How can I book a nurse or caregiver?",
+    question_ar: "كيف يمكنني حجز ممرض أو مقدم رعاية؟",
+    answer_en:
+      "Booking our services is simple!\n\n1. Contact us by phone, WhatsApp, or direct message.\n2. Share the patient’s condition and care requirements.\n3. Our team will recommend a suitable care plan.\n4. Confirm the schedule and service details.\n5. Your assigned nurse or caregiver will begin providing care.\n\nWe’re here to make the process as easy and comfortable as possible.",
+    answer_ar:
+      "حجز خدماتنا سهل!\n\n1. تواصلوا معنا عبر الهاتف أو واتساب أو الرسائل المباشرة.\n2. شاركونا حالة المريض واحتياجات الرعاية.\n3. سيوصي فريقنا بخطة رعاية مناسبة.\n4. أكدوا الموعد وتفاصيل الخدمة.\n5. سيبدأ الممرض أو مقدم الرعاية المخصص لكم في تقديم الرعاية.\n\nنحن هنا لنجعل العملية سهلة ومريحة قدر الإمكان.",
     published: true,
   },
 ];
