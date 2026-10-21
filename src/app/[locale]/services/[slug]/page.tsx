@@ -44,11 +44,16 @@ function findService(services: Service[], slug: string) {
 }
 
 function stripHtml(html: string) {
-  return sanitizeHtml(html, { allowedTags: [], allowedAttributes: {} });
+  const decoded = decodeTextEntities(html);
+  return decodeTextEntities(
+    sanitizeHtml(decoded, { allowedTags: [], allowedAttributes: {} }),
+  ).trim();
 }
 
 function sanitizeServiceHtml(html: string) {
-  return sanitizeHtml(html, {
+  const decodedHtml = decodeTextEntities(html);
+
+  return sanitizeHtml(decodedHtml, {
     allowedTags: ["p", "br", "strong", "em", "ul", "ol", "li"],
     allowedAttributes: {},
   });
@@ -242,13 +247,20 @@ export default async function ServicePage({ params }: PageProps) {
     notFound();
   }
 
+  function toPlainText(html?: string | null) {
+    if (!html) return "";
+    return decodeTextEntities(stripHtml(decodeTextEntities(html))).trim();
+  }
+
   const title = isArabic
     ? service.service_name_ar || service.service_name
     : service.service_name;
 
-  const tagline = isArabic
-    ? service.service_sub_title_ar || service.service_sub_title
-    : service.service_sub_title;
+  const tagline = toPlainText(
+    isArabic
+      ? service.service_sub_title_ar || service.service_sub_title
+      : service.service_sub_title,
+  );
 
   const description = isArabic
     ? service.ar_service_description || service.service_description || ""
