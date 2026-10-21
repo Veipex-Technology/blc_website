@@ -215,12 +215,18 @@ export default async function HomePage({
             </Reveal>
 
             <HeroTextLayer delay={0.2} className="relative z-10">
-              <Reveal className="relative mx-auto w-full max-w-xl lg:max-w-none">
+              <Reveal className="relative mx-auto w-full max-w-xl overflow-visible lg:max-w-none">
                 <div
                   className="absolute -inset-5 rounded-[2rem] border border-[var(--blc-gold-300)]/50 lg:-inset-7"
                   aria-hidden="true"
                 />
-                <div className="relative aspect-[4/5] overflow-hidden rounded-[1.75rem] border border-white/70 bg-[var(--blc-green-900)] shadow-[0_24px_70px_rgb(2_56_48_/_0.2)] sm:aspect-[5/4] lg:aspect-[4/5]">
+                {/* A separate oval shadow stays outside the clipping layer for a curved floating effect. */}
+                <div
+                  className="pointer-events-none absolute inset-x-[8%] bottom-[-18px] z-0 h-10 rounded-[50%] bg-[rgb(2_56_48_/_0.24)] blur-[42px]"
+                  aria-hidden="true"
+                />
+                {/* The image card remains above the oval while clipping its own rounded contents. */}
+                <div className="relative z-10 isolate aspect-[4/5] overflow-hidden rounded-[1.75rem] border border-white/70 bg-[var(--blc-green-900)] sm:aspect-[5/4] lg:aspect-[4/5]">
                   <Image
                     src="/images/hero-placeholder.jpg"
                     alt={
@@ -233,15 +239,17 @@ export default async function HomePage({
                     sizes="(max-width: 1024px) 100vw, 52vw"
                     className="object-cover transition-transform duration-700 hover:scale-105"
                   />
+                  {/* Full-card overlay follows the image shape and stays above the photo. */}
                   <div
-                    className="absolute inset-0 bg-gradient-to-t from-[var(--blc-green-900)]/65 via-transparent to-[var(--blc-green-900)]/10"
+                    className="pointer-events-none absolute inset-0 z-10 rounded-[inherit] bg-gradient-to-t from-[var(--blc-green-900)]/65 via-transparent to-[var(--blc-green-900)]/10"
                     aria-hidden="true"
                   />
                   <div
                     className="absolute -end-16 -top-16 size-48 rounded-full border-[20px] border-[var(--blc-cream-100)]/20"
                     aria-hidden="true"
                   />
-                  <div className="absolute bottom-5 start-5 flex items-center gap-3 rounded-card border border-white/30 bg-[var(--blc-green-900)]/85 px-4 py-3 text-white shadow-soft backdrop-blur-sm sm:bottom-7 sm:start-7">
+                  {/* Brand badge remains above the gradient for readable contrast. */}
+                  <div className="absolute bottom-5 start-5 z-20 flex items-center gap-3 rounded-card border border-white/30 bg-[var(--blc-green-900)]/85 px-4 py-3 text-white shadow-soft backdrop-blur-sm sm:bottom-7 sm:start-7">
                     <HeartHandshake
                       size={21}
                       className="text-[var(--blc-gold-300)]"

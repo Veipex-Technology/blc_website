@@ -95,25 +95,27 @@ export function SiteHeader({
     <header
       className={`sticky top-0 z-40 border-b border-[var(--blc-sand-200)] bg-white/95 backdrop-blur transition-shadow duration-300 ${scrolled ? "shadow-soft" : "shadow-none"}`}
     >
-      <div className="mx-auto flex min-h-20 w-full max-w-7xl items-center justify-between gap-4 px-5 lg:px-8">
+      <div className="mx-auto flex min-h-[72px] w-full max-w-7xl items-center justify-between gap-3 px-4 lg:gap-4 lg:px-6">
         <Link
           href={`/${locale}`}
           onClick={closeNavigation}
-          className="shrink-0 rounded-xl focus-ring-light"
+          className="group shrink-0 rounded-xl focus-ring-light"
           aria-label={labels.logoAlt}
         >
+          {/* Responsive width and explicit intrinsic dimensions keep the header logo sharp and stable. */}
           <Image
             src={settings.logo_url}
             alt={labels.logoAlt}
             width={168}
             height={56}
+            sizes="(max-width: 767px) 96px, 132px"
             priority
-            className="h-12 w-auto object-contain"
+            className="h-auto w-[80px] object-contain transition-opacity duration-300 ease-out group-hover:opacity-100 opacity-90 md:w-[108px]"
           />
         </Link>
         <nav
           aria-label={labels.navLabel}
-          className="hidden items-center gap-1 md:flex lg:gap-2"
+          className="hidden items-center gap-0.5 md:flex lg:gap-1.5"
         >
           {links.map((link) => {
             const isServices = link.href === servicesHref;
@@ -124,7 +126,7 @@ export function SiteHeader({
                   key={link.href}
                   href={link.href}
                   onClick={closeNavigation}
-                  className="rounded-full px-3 py-2 text-sm font-semibold text-[var(--blc-green-900)] transition-colors hover:bg-[var(--blc-cream-100)] hover:text-[var(--blc-gold-500)] focus-ring-light lg:px-4"
+                  className="rounded-full px-2.5 py-1.5 text-sm font-semibold text-[var(--blc-green-900)] transition-colors hover:bg-[var(--blc-cream-100)] hover:text-[var(--blc-gold-500)] focus-ring-light lg:px-3"
                 >
                   {link.label}
                 </Link>
@@ -143,7 +145,7 @@ export function SiteHeader({
                   <Link
                     href={link.href}
                     onClick={closeNavigation}
-                    className="rounded-s-full px-3 py-2 focus-ring-light lg:px-4"
+                    className="rounded-s-full px-2.5 py-1.5 focus-ring-light lg:px-3"
                   >
                     {link.label}
                   </Link>
@@ -210,21 +212,21 @@ export function SiteHeader({
             <Link
               href={`/${locale}/contact`}
               onClick={closeNavigation}
-              className="inline-flex min-h-11 items-center rounded-full border border-[var(--blc-gold-500)] px-4 text-sm font-semibold text-[var(--blc-green-900)] transition-colors hover:bg-[var(--blc-gold-500)] hover:text-white focus-ring-light"
+              className="inline-flex min-h-10 items-center rounded-full border border-[var(--blc-gold-500)] px-3 text-sm font-semibold text-[var(--blc-green-900)] transition-colors hover:bg-[var(--blc-gold-500)] hover:text-white focus-ring-light"
             >
               {labels.contact}
             </Link>
           )}
           <a
             href={`tel:${settings.phone.replace(/[^+\d]/g, "")}`}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--blc-green-900)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--blc-green-700)] focus-ring-dark"
+            className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[var(--blc-green-900)] px-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--blc-green-700)] focus-ring-dark"
           >
             <Phone size={16} aria-hidden="true" />
             {labels.call}
           </a>
           <a
             href={whatsappHref}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--blc-green-700)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--blc-green-900)] focus-ring-dark"
+            className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[var(--blc-green-700)] px-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--blc-green-900)] focus-ring-dark"
           >
             <MessageCircle size={16} aria-hidden="true" />
             {labels.whatsapp}
@@ -248,7 +250,7 @@ export function SiteHeader({
       {menuOpen && (
         <div
           id="mobile-navigation"
-          className="fixed inset-0 top-20 z-50 flex min-h-[calc(100dvh-5rem)] flex-col bg-white px-5 py-8 md:hidden"
+          className="fixed inset-0 top-[72px] z-50 flex min-h-[calc(100dvh-72px)] flex-col bg-white px-5 py-8 md:hidden"
         >
           <nav aria-label={labels.navLabel} className="grid gap-2">
             {links.map((link) => {
