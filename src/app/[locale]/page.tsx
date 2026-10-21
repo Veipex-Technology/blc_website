@@ -289,7 +289,10 @@ export default async function HomePage({
             <SectionHeading
               eyebrow={t("trust_heading")}
               title={t("intro_title")}
-              subtitle={t("intro_text")}
+              subtitle={t.rich("intro_text", {
+                strong: (chunks) => <strong>{chunks}</strong>,
+                break: () => <span className="mt-4 block" />,
+              })}
             />
           </Reveal>
         </Container>
@@ -309,28 +312,34 @@ export default async function HomePage({
           </Reveal>
 
           <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {whyChooseCards.map(({ titleKey, descriptionKey, icon: Icon }, index) => {
-              return (
-                <Reveal key={titleKey} delay={index * 120} className="h-full">
-                  <article className="group flex h-full flex-col rounded-2xl border-t-4 border-[var(--blc-green-700)] bg-white p-6 text-start shadow-soft transition duration-300 hover:-translate-y-2 hover:shadow-[0_20px_45px_var(--blc-green-900)] motion-reduce:transition-none lg:p-8">
-                    <div className="flex items-center justify-between">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--blc-cream-100)] text-[var(--blc-green-700)] transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none">
-                        <Icon size={24} strokeWidth={1.8} aria-hidden="true" />
-                      </span>
-                      <span className="text-sm font-semibold text-[var(--blc-green-700)]/50">
-                        0{index + 1}
-                      </span>
-                    </div>
-                    <h3 className="mt-6 text-lg font-semibold leading-snug text-[var(--blc-green-900)]">
-                      {t(titleKey)}
-                    </h3>
-                    <p className="mt-3 text-base leading-relaxed text-[var(--blc-green-900)]/80">
-                      {t(descriptionKey)}
-                    </p>
-                  </article>
-                </Reveal>
-              );
-            })}
+            {whyChooseCards.map(
+              ({ titleKey, descriptionKey, icon: Icon }, index) => {
+                return (
+                  <Reveal key={titleKey} delay={index * 120} className="h-full">
+                    <article className="group flex h-full flex-col rounded-2xl border-t-4 border-[var(--blc-green-700)] bg-white p-6 text-start shadow-soft transition duration-300 hover:-translate-y-2 hover:shadow-[0_20px_45px_var(--blc-green-900)] motion-reduce:transition-none lg:p-8">
+                      <div className="flex items-center justify-between">
+                        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--blc-cream-100)] text-[var(--blc-green-700)] transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none">
+                          <Icon
+                            size={24}
+                            strokeWidth={1.8}
+                            aria-hidden="true"
+                          />
+                        </span>
+                        <span className="text-sm font-semibold text-[var(--blc-green-700)]/50">
+                          0{index + 1}
+                        </span>
+                      </div>
+                      <h3 className="mt-6 text-lg font-semibold leading-snug text-[var(--blc-green-900)]">
+                        {t(titleKey)}
+                      </h3>
+                      <p className="mt-3 text-base leading-relaxed text-[var(--blc-green-900)]/80">
+                        {t(descriptionKey)}
+                      </p>
+                    </article>
+                  </Reveal>
+                );
+              },
+            )}
           </div>
 
           <Reveal delay={360} className="mx-auto mt-12 max-w-3xl text-center">
