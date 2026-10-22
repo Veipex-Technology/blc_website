@@ -21,6 +21,7 @@ import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
+import { WHATSAPP_NUMBER, whatsappLink } from "@/lib/contact";
 import { getBlogPostsFromERP } from "@/lib/erp/blog";
 import type { BlogPost } from "@/lib/erp/blog";
 import type { Locale } from "@/i18n/routing";
@@ -74,8 +75,8 @@ async function getSiteSettingsFromERP() {
     // Fall back gracefully if website settings aren't exposed or configured
   }
   return {
-    phone: "+201000000000",
-    whatsapp_number: "201000000000",
+    phone: "+20 100 000 0000",
+    whatsapp_number: WHATSAPP_NUMBER,
   };
 }
 
@@ -169,7 +170,7 @@ export default async function BlogPostPage({
 
   const shareLinks = [
     {
-      href: `https://wa.me/?text=${encodeURIComponent(`${post.title}${canonical}`)}`,
+      href: whatsappLink(`${post.title}${canonical}`),
       label: t("share_whatsapp"),
     },
     {
@@ -193,7 +194,7 @@ export default async function BlogPostPage({
     .slice(0, 3);
 
   const phoneHref = `tel:${(settings.phone ?? "").replace(/[^+\d]/g, "")}`;
-  const whatsappHref = `https://wa.me/${settings.whatsapp_number ?? ""}?text=${encodeURIComponent(common("whatsapp_prefill"))}`;
+  const whatsappHref = whatsappLink(common("whatsapp_prefill"));
 
   const jsonLd = {
     "@context": "https://schema.org",

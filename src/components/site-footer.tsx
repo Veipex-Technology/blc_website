@@ -76,7 +76,6 @@ export async function SiteFooter({
   const contactInfo = contactInfoRecords[0];
 
   const phone = contactInfo?.phone_number?.trim() || "";
-  const whatsappNumber = contactInfo?.whats_app_number?.trim() || "";
   const email = contactInfo?.email?.trim() || "";
   const address = contactInfo?.address?.trim() || "";
 
@@ -88,10 +87,6 @@ export async function SiteFooter({
   /*
    * WhatsApp number is loaded from ERP as well.
    */
-  const whatsappHref = whatsappNumber
-    ? `https://wa.me/${whatsappNumber.replace(/[^\d]/g, "")}`
-    : "#";
-
   /*
    * Social links loaded dynamically from ERP.
    *

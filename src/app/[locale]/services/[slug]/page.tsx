@@ -14,6 +14,7 @@ import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
+import { whatsappLink } from "@/lib/contact";
 
 import { getSiteSettings } from "@/lib/erp/api";
 import { getServicesFromERP, type Service } from "@/lib/erp/services";
@@ -43,22 +44,6 @@ function findService(services: Service[], slug: string) {
   );
 }
 
-function stripHtml(html: string) {
-  const decoded = decodeTextEntities(html);
-  return decodeTextEntities(
-    sanitizeHtml(decoded, { allowedTags: [], allowedAttributes: {} }),
-  ).trim();
-}
-
-function sanitizeServiceHtml(html: string) {
-  const decodedHtml = decodeTextEntities(html);
-
-  return sanitizeHtml(decodedHtml, {
-    allowedTags: ["p", "br", "strong", "em", "ul", "ol", "li"],
-    allowedAttributes: {},
-  });
-}
-
 function decodeTextEntities(value: string) {
   return value
     .replaceAll("&nbsp;", " ")
@@ -68,6 +53,28 @@ function decodeTextEntities(value: string) {
     .replaceAll("&lt;", "<")
     .replaceAll("&gt;", ">")
     .replaceAll("&amp;", "&");
+}
+
+function stripHtml(html: string) {
+  const decoded = decodeTextEntities(html);
+  return decodeTextEntities(
+    sanitizeHtml(decoded, { allowedTags: [], allowedAttributes: {} }),
+  ).trim();
+}
+
+// Converts any ERP / Quill HTML value into clean plain text.
+function toPlainText(html?: string | null) {
+  if (!html) return "";
+  return stripHtml(html);
+}
+
+function sanitizeServiceHtml(html: string) {
+  const decodedHtml = decodeTextEntities(html);
+
+  return sanitizeHtml(decodedHtml, {
+    allowedTags: ["p", "br", "strong", "em", "ul", "ol", "li"],
+    allowedAttributes: {},
+  });
 }
 
 function removeNumbering(title: string) {
@@ -212,9 +219,11 @@ export async function generateMetadata({
 
   if (!service) return {};
 
-  const title = isArabic
-    ? service.service_name_ar || service.service_name
-    : service.service_name;
+  const title = toPlainText(
+    isArabic
+      ? service.service_name_ar || service.service_name
+      : service.service_name,
+  );
 
   const description = isArabic
     ? service.ar_service_description || service.service_description || ""
@@ -224,7 +233,7 @@ export async function generateMetadata({
     locale,
     path: `${isArabic ? "خدمات" : "services"}/${decodeSlug(slug)}`,
     title: title || "Service",
-    description: stripHtml(description),
+    description: toPlainText(description),
   });
 }
 
@@ -233,13 +242,13 @@ export default async function ServicePage({ params }: PageProps) {
   const isArabic = locale === "ar";
   const servicesSegment = isArabic ? "خدمات" : "services";
 
-  const [t, common, services, settings] = await Promise.all([
+  const [t, common, nav, services, settings] = await Promise.all([
     getTranslations({ locale, namespace: "services" }),
     getTranslations({ locale, namespace: "common" }),
+    getTranslations({ locale, namespace: "nav" }),
     getServicesFromERP(),
     getSiteSettings(locale),
   ]);
-  const nav = await getTranslations({ locale, namespace: "nav" });
 
   const service = findService(services, slug);
 
@@ -247,14 +256,11 @@ export default async function ServicePage({ params }: PageProps) {
     notFound();
   }
 
-  function toPlainText(html?: string | null) {
-    if (!html) return "";
-    return decodeTextEntities(stripHtml(decodeTextEntities(html))).trim();
-  }
-
-  const title = isArabic
-    ? service.service_name_ar || service.service_name
-    : service.service_name;
+  const title = toPlainText(
+    isArabic
+      ? service.service_name_ar || service.service_name
+      : service.service_name,
+  );
 
   const tagline = toPlainText(
     isArabic
@@ -289,9 +295,7 @@ export default async function ServicePage({ params }: PageProps) {
 
   const phoneHref = `tel:${settings.phone.replace(/[^+\d]/g, "")}`;
 
-  const whatsappHref = `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(
-    common("whatsapp_prefill"),
-  )}`;
+  const whatsappHref = whatsappLink(common("service_request_whatsapp_prefill"));
 
   // Change "contact" to your real contact/request route.
   const requestHref = `/${locale}/contact`;
@@ -300,19 +304,22 @@ export default async function ServicePage({ params }: PageProps) {
     "@context": "https://schema.org",
     "@type": "Service",
     name: title,
-    description: stripHtml(description),
+    description: toPlainText(description),
     serviceType: title,
     areaServed: { "@type": "City", name: "Alexandria" },
     provider: { "@type": "Organization", name: "Better Life Care" },
   };
+
+  // Escape "<" so ERP content can never close the script tag.
+  const jsonLdString = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
 
   return (
     <main>
       <ServiceOverview
         key={service.name}
         locale={locale}
-        title={title || ""}
-        tagline={tagline || ""}
+        title={title}
+        tagline={tagline}
         introHtml={introHtml}
         blocks={blocks}
         image={serviceImage}
@@ -352,7 +359,7 @@ export default async function ServicePage({ params }: PageProps) {
                           >
                             ✓
                           </span>
-                          <span>{feature.feature}</span>
+                          <span>{toPlainText(feature.feature)}</span>
                         </div>
                       </Reveal>
                     </li>
@@ -372,7 +379,7 @@ export default async function ServicePage({ params }: PageProps) {
                 <h2 className="text-xl font-bold">{common("cta_request")}</h2>
 
                 <p className="mt-3 text-[var(--blc-cream-100)]">
-                  {common("whatsapp_prefill")}
+                  {common("service_request_description")}
                 </p>
 
                 <div className="mt-7 grid gap-3">
@@ -418,15 +425,19 @@ export default async function ServicePage({ params }: PageProps) {
                   ? relatedService.ar_slug || relatedService.en_slug
                   : relatedService.en_slug;
 
-                const relatedTitle = isArabic
-                  ? relatedService.service_name_ar ||
-                    relatedService.service_name
-                  : relatedService.service_name;
+                const relatedTitle = toPlainText(
+                  isArabic
+                    ? relatedService.service_name_ar ||
+                        relatedService.service_name
+                    : relatedService.service_name,
+                );
 
-                const relatedTagline = isArabic
-                  ? relatedService.service_sub_title_ar ||
-                    relatedService.service_sub_title
-                  : relatedService.service_sub_title;
+                const relatedTagline = toPlainText(
+                  isArabic
+                    ? relatedService.service_sub_title_ar ||
+                        relatedService.service_sub_title
+                    : relatedService.service_sub_title,
+                );
 
                 if (!relatedSlug || !relatedTitle) return null;
 
@@ -434,17 +445,19 @@ export default async function ServicePage({ params }: PageProps) {
                   <Reveal key={relatedService.name} delay={index * 100}>
                     <Link
                       href={`/${locale}/${servicesSegment}/${encodeURIComponent(relatedSlug)}`}
-                      className="group block h-full rounded-card bg-white p-6 shadow-soft transition duration-300 hover:-translate-y-1 focus-ring-light motion-reduce:transition-none"
+                      className="group flex h-full flex-col items-start justify-between rounded-card bg-white p-6 shadow-soft transition duration-300 hover:-translate-y-1 focus-ring-light motion-reduce:transition-none"
                     >
-                      <h2 className="text-xl font-bold text-[var(--blc-green-900)]">
-                        {relatedTitle}
-                      </h2>
+                      <div>
+                        <h2 className="text-xl font-bold text-[var(--blc-green-900)]">
+                          {relatedTitle}
+                        </h2>
 
-                      {relatedTagline && (
-                        <p className="mt-3 text-[var(--blc-green-700)]">
-                          {relatedTagline}
-                        </p>
-                      )}
+                        {relatedTagline && (
+                          <p className="mt-3 text-[var(--blc-green-700)]">
+                            {relatedTagline}
+                          </p>
+                        )}
+                      </div>
 
                       <span className="mt-5 inline-flex items-center gap-2 font-semibold text-[var(--blc-gold-500)]">
                         {common("cta_learn_more")}
@@ -465,7 +478,7 @@ export default async function ServicePage({ params }: PageProps) {
 
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdString }}
       />
     </main>
   );

@@ -18,6 +18,9 @@ export type Service = {
   ar_slug?: string;
   ar_service_description?: string;
 
+  // ERPNext Check field: 1 = checked, 0 = unchecked.
+  is_main_service?: boolean | number | string;
+
   service_feature?: ServiceFeature[];
   ar_service_feature?: ServiceFeature[];
 };
@@ -31,6 +34,7 @@ export type ServiceNavigationItem = Pick<
   | "service_name_ar"
   | "service_sub_title_ar"
   | "ar_slug"
+  | "is_main_service"
 >;
 
 /**
@@ -71,9 +75,17 @@ const serviceListFields = [
   "service_name_ar",
   "service_sub_title_ar",
   "ar_slug",
+  "is_main_service",
 ];
 
 const contactServiceFields = ["name", "service_name", "service_name_ar"];
+
+/**
+ * Normalize ERPNext Check field values.
+ */
+function isChecked(value: unknown): boolean {
+  return value === true || value === 1 || value === "1";
+}
 
 /**
  * Fetch the lightweight service list for navigation.
@@ -104,11 +116,17 @@ async function fetchServiceList(): Promise<ServiceNavigationItem[]> {
     data?: ServiceNavigationItem[];
   };
 
-  return Array.isArray(result.data) ? result.data : [];
+  return Array.isArray(result.data)
+    ? result.data.map((service) => ({
+        ...service,
+        is_main_service: isChecked(service.is_main_service),
+      }))
+    : [];
 }
 
 /**
  * Fetch options for the Contact Us dropdown directly from Services BLC.
+ * Include all services here, regardless of is_main_service.
  */
 export async function getContactServiceOptionsFromERP(): Promise<
   ContactServiceOption[]
@@ -186,16 +204,27 @@ export async function getServicesFromERP(): Promise<Service[]> {
         return {
           ...service,
           ...full,
+          is_main_service: isChecked(full?.is_main_service),
           service_feature: full?.service_feature ?? [],
           ar_service_feature: full?.ar_service_feature ?? [],
         };
       } catch {
         return {
           ...service,
+          is_main_service: isChecked(service.is_main_service),
           service_feature: [],
           ar_service_feature: [],
         };
       }
     }),
   );
+}
+
+/**
+ * Return only services marked as main in ERPNext.
+ */
+export async function getMainServicesFromERP(): Promise<Service[]> {
+  const services = await getServicesFromERP();
+
+  return services.filter((service) => service.is_main_service === true);
 }

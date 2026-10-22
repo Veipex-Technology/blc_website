@@ -1,3 +1,5 @@
+import { WHATSAPP_NUMBER } from "@/lib/contact";
+
 export type SiteSocialLinks = {
   facebook_url?: string;
   instagram_url?: string;
@@ -21,7 +23,7 @@ export type SiteSettings = SiteSocialLinks & {
 
 export const mockSiteSettings: SiteSettings = {
   phone: "+20 100 000 0000",
-  whatsapp_number: "201000000000",
+  whatsapp_number: WHATSAPP_NUMBER,
   email: "hello@example.com",
   address_en: "Alexandria, Egypt",
   address_ar: "الإسكندرية، مصر",

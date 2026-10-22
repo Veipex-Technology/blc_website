@@ -23,6 +23,7 @@ import { Reveal } from "@/components/reveal";
 import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
+import { whatsappDisplayNumber, whatsappLink } from "@/lib/contact";
 import { contactLocation } from "@/lib/contact-location";
 import type { Locale } from "@/i18n/routing";
 
@@ -104,7 +105,7 @@ export default async function ContactPage({
   const contactInfo = contactInfoRecords[0];
 
   const phone = contactInfo?.phone_number?.trim() || "";
-  const whatsappNumber = contactInfo?.whats_app_number?.trim() || "";
+  const whatsappNumber = whatsappDisplayNumber;
   const email = contactInfo?.email?.trim() || "";
   const address = contactInfo?.address?.trim() || "";
   const configuredRecruitmentEmail = process.env.RECRUITMENT_EMAIL?.trim();
@@ -120,15 +121,9 @@ export default async function ContactPage({
    * becomes:
    * +201001234567
    */
-  const whatsappCleanNumber = whatsappNumber.replace(/[^\d]/g, "");
-
   const phoneHref = phone ? `tel:${phone.replace(/[^+\d]/g, "")}` : "#";
 
-  const whatsappHref = whatsappCleanNumber
-    ? `https://wa.me/${whatsappCleanNumber}?text=${encodeURIComponent(
-        common("whatsapp_prefill"),
-      )}`
-    : "#";
+  const whatsappHref = whatsappLink(common("whatsapp_prefill"));
 
   /*
    * Select service from URL:
