@@ -31,6 +31,7 @@ import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
+import { whatsappLink } from "@/lib/contact";
 import type { Locale } from "@/i18n/routing";
 import { getMissionVisionFromERP } from "@/lib/erp/mission-vision";
 
@@ -202,9 +203,7 @@ export default async function AboutPage({
 
   const phone = "tel:[Phone Number]";
 
-  const whatsapp = `https://wa.me/?text=${encodeURIComponent(
-    common("whatsapp_prefill"),
-  )}`;
+  const whatsapp = whatsappLink(common("whatsapp_prefill"));
 
   const consultant = (() =>
     null as {

@@ -4,6 +4,7 @@ import { getServicesForNavigationFromERP } from "@/lib/erp/services";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
 import type { Locale } from "@/i18n/routing";
+import { whatsappLink } from "@/lib/contact";
 
 export async function SiteShell({
   locale,
@@ -25,7 +26,7 @@ export async function SiteShell({
     { href: `/${locale}/contact`, label: nav("contact") },
   ];
   const phoneHref = `tel:${settings.phone.replace(/[^+\d]/g, "")}`;
-  const whatsappHref = `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(common("whatsapp_prefill"))}`;
+  const whatsappHref = whatsappLink(common("whatsapp_prefill"));
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const organizationJsonLd = {
     "@context": "https://schema.org",

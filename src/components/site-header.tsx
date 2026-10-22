@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import { LanguageSwitcher } from "./language-switcher";
 import type { Locale } from "@/i18n/routing";
 import type { SiteSettings } from "@/lib/erp/types";
+import { whatsappLink } from "@/lib/contact";
 
 type HeaderLink = { href: string; label: string };
 type HeaderService = { title: string; href: string };
@@ -46,7 +47,7 @@ export function SiteHeader({
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const servicesMenuRef = useRef<HTMLDivElement>(null);
-  const whatsappHref = `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(labels.prefill)}`;
+  const whatsappHref = whatsappLink(labels.prefill);
   const servicesHref = `/${locale}/services`;
 
   const closeNavigation = () => {

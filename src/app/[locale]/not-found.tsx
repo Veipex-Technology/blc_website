@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MessageCircle, Phone } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { getSiteSettings } from "@/lib/erp/api";
+import { whatsappLink } from "@/lib/contact";
 import type { Locale } from "@/i18n/routing";
 
 export default async function NotFound({
@@ -14,7 +15,7 @@ export default async function NotFound({
   const common = await getTranslations({ locale, namespace: "common" });
   const settings = await getSiteSettings(locale);
   const phoneHref = `tel:${settings.phone.replace(/[^+\d]/g, "")}`;
-  const whatsappHref = `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(common("whatsapp_prefill"))}`;
+  const whatsappHref = whatsappLink(common("whatsapp_prefill"));
   return (
     <main className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center px-5 py-20 text-center">
       <h1 className="text-4xl font-bold text-[var(--blc-green-900)]">

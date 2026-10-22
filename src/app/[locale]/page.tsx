@@ -32,6 +32,8 @@ import { AboutIntro } from "@/components/about-intro";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { NewsletterSection } from "@/components/newsletter-section";
 import { createPageMetadata } from "@/lib/metadata";
+import { whatsappLink } from "@/lib/contact";
+import { getMainServicesFromERP } from "@/lib/erp/services";
 import {
   getFaqs,
   getPartners,
@@ -129,18 +131,26 @@ export default async function HomePage({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "home" });
   const common = await getTranslations({ locale, namespace: "common" });
-  const [services, testimonials, partners, postsResult, faqs, settings] =
-    await Promise.all([
-      getServicesFromERP(),
-      getTestimonials(locale),
-      getPartners(locale),
-      getPosts({ lang: locale, page: 1 }),
-      getFaqs(locale),
-      getSiteSettings(locale),
-    ]);
+  const [
+    services,
+    mainServices,
+    testimonials,
+    partners,
+    postsResult,
+    faqs,
+    settings,
+  ] = await Promise.all([
+    getServicesFromERP(),
+    getMainServicesFromERP(),
+    getTestimonials(locale),
+    getPartners(locale),
+    getPosts({ lang: locale, page: 1 }),
+    getFaqs(locale),
+    getSiteSettings(locale),
+  ]);
   const posts = postsResult.posts;
   const phone = `tel:${settings.phone.replace(/[^+\d]/g, "")}`;
-  const whatsapp = `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(common("whatsapp_prefill"))}`;
+  const whatsapp = whatsappLink(common("whatsapp_prefill"));
   const publishedFaqs = faqs.filter((faq) => faq.published);
   const faqSchema = {
     "@context": "https://schema.org",
@@ -303,7 +313,7 @@ export default async function HomePage({
         />
       </Section>
 
-      <Services services={services} locale={locale} />
+      <Services services={mainServices} locale={locale} />
 
       <section className="overflow-hidden bg-[var(--blc-sand-200)] py-16 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

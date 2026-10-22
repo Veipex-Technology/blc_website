@@ -4,6 +4,7 @@ import Link from "next/link";
 import { MessageCircle, Phone } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { whatsappLink } from "@/lib/contact";
 
 export default function ErrorPage({
   reset,
@@ -15,7 +16,7 @@ export default function ErrorPage({
   const common = useTranslations("common");
   const pathname = usePathname();
   const locale = pathname.split("/")[1] === "en" ? "en" : "ar";
-  const whatsappHref = `https://wa.me/?text=${encodeURIComponent(common("whatsapp_prefill"))}`;
+  const whatsappHref = whatsappLink(common("whatsapp_prefill"));
   return (
     <main className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center px-5 py-20 text-center">
       <h1 className="text-4xl font-bold text-[var(--blc-green-900)]">
