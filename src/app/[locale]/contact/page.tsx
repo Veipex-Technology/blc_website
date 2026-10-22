@@ -1,4 +1,3 @@
-import Image from "next/image";
 import {
   ArrowUpRight,
   Clock3,
@@ -18,11 +17,13 @@ import { getBLCContactUsInfoFromERP } from "@/lib/erp/contact-info";
 import { getSocialPlatformsFromERP } from "@/lib/erp/social-platforms";
 
 import { ContactForm } from "@/components/contact-form";
+import { ContactMapLoader } from "@/components/contact-map-loader";
 import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/reveal";
 import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
+import { contactLocation } from "@/lib/contact-location";
 import type { Locale } from "@/i18n/routing";
 
 export async function generateMetadata({
@@ -198,27 +199,14 @@ export default async function ContactPage({
                 aria-hidden="true"
               />
               <div className="relative aspect-[4/3] overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-[var(--blc-green-900)] shadow-[0_18px_50px_rgb(2_56_48_/_0.16)]">
-                {settings.map_embed_url ? (
-                  <iframe
-                    title={t("map")}
-                    src={settings.map_embed_url}
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    className="absolute inset-0 h-full w-full border-0"
-                  />
-                ) : (
-                  <Image
-                    src="/images/hero-placeholder.jpg"
-                    alt={
-                      locale === "ar"
-                        ? "التواصل مع بيتر لايف كير"
-                        : "Contact Better Life Care"
-                    }
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 52vw"
-                    className="object-cover transition-transform duration-700 hover:scale-105"
-                  />
-                )}
+                <ContactMapLoader
+                  address={contactLocation.address}
+                  latitude={contactLocation.latitude}
+                  longitude={contactLocation.longitude}
+                  coordinatesConfirmed={contactLocation.coordinatesConfirmed}
+                  mapLabel={t("map")}
+                  coordinatesPendingLabel={t("map_coordinates_pending")}
+                />
                 <div className="absolute bottom-5 start-5 flex items-center gap-3 rounded-card border border-white/30 bg-[var(--blc-green-900)]/85 px-4 py-3 text-white shadow-soft backdrop-blur-sm sm:bottom-6 sm:start-6">
                   <MapPin
                     size={20}
