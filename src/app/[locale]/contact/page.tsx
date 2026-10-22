@@ -388,7 +388,7 @@ export default async function ContactPage({
                             <img
                               src={social.icon}
                               alt={social.platformName}
-                              className="h-5 w-5 object-contain"
+                              className="h-7 w-7 object-contain"
                             />
                           ) : (
                             <Link2 size={18} aria-hidden="true" />
