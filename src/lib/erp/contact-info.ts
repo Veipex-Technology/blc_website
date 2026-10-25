@@ -1,7 +1,5 @@
 export type BLCTimetable = {
   name?: string;
-
-  // Change these names if your BLC Timetable fields use different names.
   day?: string;
   start_time?: string;
   end_time?: string;
@@ -12,6 +10,7 @@ export type BLCContactUsInfo = {
 
   company_name?: string;
   phone_number?: string;
+  second_phone_number?: string;
   whats_app_number?: string;
   email?: string;
   address?: string;
@@ -52,6 +51,7 @@ export async function getBLCContactUsInfoFromERP(): Promise<
     "name",
     "company_name",
     "phone_number",
+    "second_phone_number",
     "whats_app_number",
     "email",
     "address",
@@ -72,7 +72,6 @@ export async function getBLCContactUsInfoFromERP(): Promise<
 
   if (!response.ok) {
     const errorText = await response.text();
-
     throw new Error(`BLC-Contact-us Info could not be loaded: ${errorText}`);
   }
 
@@ -82,10 +81,6 @@ export async function getBLCContactUsInfoFromERP(): Promise<
 
   const contactInfo = Array.isArray(result.data) ? result.data : [];
 
-  /*
-   * Load the complete document for each record
-   * because timetable is a child table.
-   */
   return Promise.all(
     contactInfo.map(async (info): Promise<BLCContactUsInfo> => {
       try {
