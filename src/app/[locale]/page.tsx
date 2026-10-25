@@ -2,8 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
-  ArrowUpRight,
-  BookOpen,
   ClipboardCheck,
   ClipboardList,
   Clock3,
@@ -37,13 +35,13 @@ import { getMainServicesFromERP } from "@/lib/erp/services";
 import {
   getFaqs,
   getPartners,
-  getPosts,
   getSiteSettings,
   getTestimonials,
 } from "@/lib/erp/api";
 
-import { getServicesFromERP } from "@/lib/erp/services";
 import type { Locale } from "@/i18n/routing";
+import { FounderVideo } from "@/components/founder-video";
+import { getMediaForWebsiteFromERP } from "@/lib/erp/media-for-website";
 
 const trustIcons = [ShieldCheck, GraduationCap, ClipboardCheck, HeartHandshake];
 const whyChooseCards = [
@@ -131,24 +129,20 @@ export default async function HomePage({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "home" });
   const common = await getTranslations({ locale, namespace: "common" });
-  const [
-    services,
-    mainServices,
-    testimonials,
-    partners,
-    postsResult,
-    faqs,
-    settings,
-  ] = await Promise.all([
-    getServicesFromERP(),
-    getMainServicesFromERP(),
-    getTestimonials(locale),
-    getPartners(locale),
-    getPosts({ lang: locale, page: 1 }),
-    getFaqs(locale),
-    getSiteSettings(locale),
-  ]);
-  const posts = postsResult.posts;
+  const [mainServices, testimonials, partners, faqs, settings, media] =
+    await Promise.all([
+      getMainServicesFromERP(),
+      getTestimonials(locale),
+      getPartners(locale),
+      getFaqs(locale),
+      getSiteSettings(locale),
+      getMediaForWebsiteFromERP("Home Page").catch((error) => {
+        console.log("media:", media, "founderVideoUrl:", founderVideoUrl);
+        return [];
+      }),
+    ]);
+  const founderVideoUrl = media[0]?.attach_wpov_url ?? null;
+  console.log("media:", media, "founderVideoUrl:", founderVideoUrl);
   const phone = `tel:${settings.phone.replace(/[^+\d]/g, "")}`;
   const whatsapp = whatsappLink(common("whatsapp_prefill"));
   const publishedFaqs = faqs.filter((faq) => faq.published);
@@ -312,6 +306,48 @@ export default async function HomePage({
           })}
         />
       </Section>
+
+      <Section variant="sand" className="overflow-hidden">
+        <Container>
+          <Reveal className="text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--blc-gold-500)]">
+              {t("founderMessage.label")}
+            </p>
+            <h2 className="mx-auto mt-4 max-w-3xl text-balance text-3xl font-bold leading-tight text-[var(--blc-green-900)] sm:text-4xl">
+              {t("founderMessage.title")}
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-[var(--blc-green-700)]">
+              {t("founderMessage.description")}
+            </p>
+          </Reveal>
+
+          {/* VIDEO PLACEHOLDER: replace this div's content with <video> or an <iframe> */}
+          <Reveal
+            className="relative mx-auto mt-10 max-w-[960px]"
+            variant="zoom"
+          >
+            <div
+              className="pointer-events-none absolute -inset-8 rounded-[4rem] bg-[var(--blc-gold-300)]/20 blur-3xl"
+              aria-hidden="true"
+            />
+            <div
+              className="pointer-events-none absolute -end-12 -top-10 size-40 rounded-full bg-[var(--blc-green-700)]/20 blur-3xl"
+              aria-hidden="true"
+            />
+            <FounderVideo
+              videoUrl={founderVideoUrl}
+              label={t("founderMessage.videoComingSoon")}
+            />
+          </Reveal>
+        </Container>
+      </Section>
+
+      <div aria-hidden="true" className="relative z-10 h-0 overflow-visible">
+        <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 items-center justify-center">
+          <span className="h-px w-full bg-gradient-to-r from-transparent via-[var(--blc-gold-500)]/45 to-transparent rtl:bg-gradient-to-l" />
+          <span className="absolute size-3 rounded-full border-2 border-[var(--blc-cream-100)] bg-[var(--blc-gold-500)] shadow-[0_0_0_5px_rgb(185_135_57_/_0.14)]" />
+        </div>
+      </div>
 
       <Services services={mainServices} locale={locale} />
 
@@ -571,48 +607,6 @@ export default async function HomePage({
           </Container>
         </Section>
       )}
-
-      <Section variant="cream">
-        <Container>
-          <Reveal>
-            <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-              <SectionHeading title={t("blog_title")} />
-              <Link
-                href={`/${locale}/blog`}
-                className="inline-flex items-center gap-2 font-semibold text-[var(--blc-gold-500)] focus-ring-light"
-              >
-                {t("blog_link")}
-                <ArrowUpRight
-                  size={18}
-                  aria-hidden="true"
-                  className="rtl:rotate-180"
-                />
-              </Link>
-            </div>
-          </Reveal>
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
-            {posts
-              .filter((post) => post.published)
-              .map((post) => (
-                <Reveal key={post.slug}>
-                  <article className="h-full rounded-card bg-white p-6 shadow-soft">
-                    <BookOpen
-                      size={26}
-                      className="text-[var(--blc-gold-500)]"
-                      aria-hidden="true"
-                    />
-                    <h3 className="mt-5 text-xl font-bold text-[var(--blc-green-900)]">
-                      {post.title}
-                    </h3>
-                    <p className="mt-3 text-[var(--blc-green-700)]">
-                      {post.excerpt}
-                    </p>
-                  </article>
-                </Reveal>
-              ))}
-          </div>
-        </Container>
-      </Section>
 
       <Section>
         <Container>
