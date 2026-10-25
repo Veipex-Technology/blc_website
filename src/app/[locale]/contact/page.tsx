@@ -105,6 +105,7 @@ export default async function ContactPage({
   const contactInfo = contactInfoRecords[0];
 
   const phone = contactInfo?.phone_number?.trim() || "";
+  const secondPhone = contactInfo?.second_phone_number?.trim() || "";
   const whatsappNumber = whatsappDisplayNumber;
   const email = contactInfo?.email?.trim() || "";
   const address = contactInfo?.address?.trim() || "";
@@ -241,8 +242,28 @@ export default async function ContactPage({
                         <strong className="block text-[var(--blc-green-900)]">
                           {t("phone")}
                         </strong>
-
                         {phone}
+                      </span>
+                    </a>
+                  )}
+
+                  {/* SECOND PHONE */}
+                  {secondPhone && (
+                    <a
+                      href={`tel:${secondPhone.replace(/[^\d+]/g, "")}`}
+                      className="flex items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
+                    >
+                      <Phone
+                        size={20}
+                        className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
+                        aria-hidden="true"
+                      />
+
+                      <span>
+                        <strong className="block text-[var(--blc-green-900)]">
+                          {t("second_phone")}
+                        </strong>
+                        {secondPhone}
                       </span>
                     </a>
                   )}

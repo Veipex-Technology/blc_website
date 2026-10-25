@@ -3,8 +3,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   ClipboardCheck,
-  ClipboardList,
-  Clock3,
   GraduationCap,
   HeartHandshake,
   HeartPulse,
@@ -12,17 +10,13 @@ import {
   Phone,
   Quote,
   ShieldCheck,
-  Stethoscope,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { Link as LocaleLink } from "@/i18n/navigation";
 import { Accordion } from "@/components/ui/accordion";
 import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/reveal";
-import { MotionCard } from "@/components/motion/motion-card";
-import { MotionSection } from "@/components/motion/motion-section";
 import { HeroMotion, HeroTextLayer } from "@/components/sections/HeroMotion";
 import { Section } from "@/components/ui/section";
 import { Services } from "@/components/sections/Services";
@@ -42,6 +36,8 @@ import {
 import type { Locale } from "@/i18n/routing";
 import { FounderVideo } from "@/components/founder-video";
 import { getMediaForWebsiteFromERP } from "@/lib/erp/media-for-website";
+import { HowItWorksSection } from "@/components/how-it-works-section";
+import { TrustBadgesSection } from "@/components/trust-badges-section";
 
 const trustIcons = [ShieldCheck, GraduationCap, ClipboardCheck, HeartHandshake];
 const whyChooseCards = [
@@ -61,52 +57,6 @@ const whyChooseCards = [
     icon: HeartPulse,
   },
 ] as const;
-const howItWorksSteps = [
-  {
-    icon: Phone,
-    titleKey: "how_step_1_title",
-    descriptionKey: "how_step_1_description",
-  },
-  {
-    icon: ClipboardList,
-    titleKey: "how_step_2_title",
-    descriptionKey: "how_step_2_description",
-  },
-  {
-    icon: HeartPulse,
-    titleKey: "how_step_3_title",
-    descriptionKey: "how_step_3_description",
-  },
-] as const;
-type TrustBadgeKey =
-  | "trust_german_standards"
-  | "trust_certified_nursing"
-  | "trust_24_7_support"
-  | "trust_personalized_care";
-
-const trustBadges: {
-  id: string;
-  icon: LucideIcon;
-  labelKey: TrustBadgeKey;
-}[] = [
-  {
-    id: "german-standards",
-    icon: ShieldCheck,
-    labelKey: "trust_german_standards",
-  },
-  {
-    id: "certified-nursing",
-    icon: Stethoscope,
-    labelKey: "trust_certified_nursing",
-  },
-  { id: "24-7-support", icon: Clock3, labelKey: "trust_24_7_support" },
-  {
-    id: "personalized-care",
-    icon: HeartHandshake,
-    labelKey: "trust_personalized_care",
-  },
-];
-
 export async function generateMetadata({
   params,
 }: {
@@ -406,146 +356,9 @@ export default async function HomePage({
         </div>
       </section>
 
-      <Section variant="dark" className="text-center">
-        <Container>
-          <Reveal>
-            <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--blc-gold-300)]">
-                {t("final_eyebrow")}
-              </p>
-              <h2 className="mt-4 max-w-3xl text-balance text-3xl font-bold sm:text-4xl">
-                {t("final_title")}
-              </h2>
-              <p className="mt-5 max-w-2xl text-[var(--blc-cream-100)]">
-                {t("final_text")}
-              </p>
-              <div className="mt-8 flex flex-col items-center gap-3">
-                <LocaleLink
-                  href="/contact"
-                  className="group relative inline-flex min-h-14 items-center justify-center gap-3 rounded-full bg-[var(--blc-cream-100)] px-10 py-4 text-base font-semibold text-[var(--blc-green-900)] shadow-soft transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-[0_16px_35px_rgb(2_56_48/0.25)] focus-visible:ring-2 focus-visible:ring-[var(--blc-gold-300)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--blc-green-900)] motion-reduce:transition-none"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute -inset-1 rounded-full border border-[var(--blc-gold-300)]/60 motion-safe:animate-[ping_2.4s_ease-out_infinite] motion-reduce:animate-none"
-                  />
-                  <span className="relative z-10 inline-flex items-center gap-3">
-                    {t("final_contact_cta")}
-                    <ArrowRight
-                      size={20}
-                      aria-hidden="true"
-                      className={`transition-transform duration-300 motion-reduce:transition-none ${
-                        locale === "ar"
-                          ? "rotate-180 group-hover:-translate-x-1"
-                          : "group-hover:translate-x-1"
-                      }`}
-                    />
-                  </span>
-                </LocaleLink>
-                <a
-                  href={whatsapp}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/50 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-ring-dark"
-                >
-                  <MessageCircle size={17} aria-hidden="true" />
-                  {common("cta_whatsapp")}
-                </a>
-              </div>
-              <p className="mt-5 text-sm text-[var(--blc-cream-100)]/80">
-                {t("final_reassurance")}
-              </p>
-            </div>
-          </Reveal>
-        </Container>
-      </Section>
+      <HowItWorksSection locale={locale} />
 
-      <section className="bg-white py-12 lg:py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Reveal className="text-center">
-            <h2 className="text-2xl font-bold text-[var(--blc-green-900)] sm:text-3xl"></h2>
-          </Reveal>
-
-          <MotionSection
-            variant="stagger"
-            className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4"
-          >
-            {trustBadges.map(({ id, icon: Icon, labelKey }) => (
-              <MotionCard
-                key={id}
-                withHoverShadow={false}
-                className="group flex items-center justify-center gap-3 text-center transition-transform duration-300 hover:-translate-y-1 motion-reduce:transition-none"
-              >
-                <div className="relative flex flex-col items-center gap-3">
-                  <span
-                    aria-hidden="true"
-                    className="relative flex h-16 w-16 items-center justify-center rounded-full border border-[var(--blc-green-700)] bg-[var(--blc-cream-100)] text-[var(--blc-green-700)] transition-colors duration-300 group-hover:bg-[var(--blc-green-700)] group-hover:text-white motion-reduce:transition-none lg:h-20 lg:w-20"
-                  >
-                    <span
-                      className="pointer-events-none absolute inset-0 rounded-full border border-[var(--blc-green-700)] motion-safe:animate-[ping_1s_ease-out_1] motion-reduce:animate-none"
-                      aria-hidden="true"
-                    />
-                    <Icon
-                      className="h-8 w-8 transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none"
-                      strokeWidth={1.75}
-                      aria-hidden="true"
-                    />
-                  </span>
-                  <span className="text-sm font-semibold leading-snug text-[var(--blc-green-900)] transition-colors duration-300 group-hover:text-[var(--blc-green-700)]">
-                    {t(labelKey)}
-                  </span>
-                </div>
-              </MotionCard>
-            ))}
-          </MotionSection>
-        </div>
-      </section>
-
-      <Section>
-        <Container>
-          <div className="mb-16 text-center">
-            <Reveal>
-              <h2 className="text-3xl font-bold leading-tight text-[var(--blc-green-900)] sm:text-4xl">
-                {t("how_title")}
-              </h2>
-              <p className="mx-auto mt-3 max-w-2xl text-lg text-[var(--blc-green-700)]">
-                {t("how_subtitle")}
-              </p>
-            </Reveal>
-          </div>
-          <div className="relative">
-            <Reveal className="pointer-events-none absolute start-0 top-1/2 hidden h-1 w-full -translate-y-1/2 md:block">
-              <span
-                className="block h-full w-full bg-[var(--blc-green-700)]/20"
-                aria-hidden="true"
-              />
-            </Reveal>
-            <div className="grid gap-12 md:grid-cols-3">
-              {howItWorksSteps.map(
-                ({ icon: Icon, titleKey, descriptionKey }, index) => (
-                  <Reveal key={titleKey} delay={index * 150}>
-                    <article className="relative text-center">
-                      <div className="relative z-10 mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-[var(--blc-green-700)] text-white shadow-lg ring-8 ring-white transition duration-300 hover:scale-105 hover:shadow-xl motion-reduce:transition-none">
-                        <Icon
-                          className="h-10 w-10"
-                          strokeWidth={2}
-                          aria-hidden="true"
-                        />
-                        <span className="absolute -end-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-[var(--blc-gold-500)] text-xs font-bold text-white">
-                          {index + 1}
-                        </span>
-                      </div>
-                      <h3 className="mb-2 mt-6 text-xl font-bold text-[var(--blc-green-900)]">
-                        {t(titleKey)}
-                      </h3>
-                      <p className="text-[var(--blc-green-700)] leading-relaxed">
-                        {t(descriptionKey)}
-                      </p>
-                    </article>
-                  </Reveal>
-                ),
-              )}
-            </div>
-          </div>
-        </Container>
-      </Section>
+      <TrustBadgesSection locale={locale} />
 
       {testimonials.length > 0 && (
         <Section variant="cream">
