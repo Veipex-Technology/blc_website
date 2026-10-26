@@ -227,11 +227,8 @@ export default async function ContactPage({
 
                 <div className="mt-7 grid gap-5 text-[var(--blc-green-700)]">
                   {/* PHONE */}
-                  {phone && (
-                    <a
-                      href={phoneHref}
-                      className="flex items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
-                    >
+                  {(phone || secondPhone) && (
+                    <div className="flex items-start gap-3">
                       <Phone
                         size={20}
                         className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
@@ -242,30 +239,26 @@ export default async function ContactPage({
                         <strong className="block text-[var(--blc-green-900)]">
                           {t("phone")}
                         </strong>
-                        {phone}
-                      </span>
-                    </a>
-                  )}
 
-                  {/* SECOND PHONE */}
-                  {secondPhone && (
-                    <a
-                      href={`tel:${secondPhone.replace(/[^\d+]/g, "")}`}
-                      className="flex items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
-                    >
-                      <Phone
-                        size={20}
-                        className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
-                        aria-hidden="true"
-                      />
+                        {phone && (
+                          <a
+                            href={`tel:${phone.replace(/[^\d+]/g, "")}`}
+                            className="block hover:text-[var(--blc-green-900)] focus-ring-light"
+                          >
+                            {phone}
+                          </a>
+                        )}
 
-                      <span>
-                        <strong className="block text-[var(--blc-green-900)]">
-                          {t("second_phone")}
-                        </strong>
-                        {secondPhone}
+                        {secondPhone && (
+                          <a
+                            href={`tel:${secondPhone.replace(/[^\d+]/g, "")}`}
+                            className="mt-1 block hover:text-[var(--blc-green-900)] focus-ring-light"
+                          >
+                            {secondPhone}
+                          </a>
+                        )}
                       </span>
-                    </a>
+                    </div>
                   )}
 
                   {/* WHATSAPP */}
