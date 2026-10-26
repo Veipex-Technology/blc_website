@@ -25,6 +25,13 @@ type PageProps = {
   params: Promise<{ locale: Locale; slug: string }>;
 };
 
+type HeadingMarker = {
+  start: number;
+  bodyStart: number;
+  end: number;
+  title: string;
+};
+
 function decodeSlug(slug: string): string {
   try {
     return decodeURIComponent(slug);
@@ -68,38 +75,43 @@ function toPlainText(html?: string | null) {
   return stripHtml(html);
 }
 
-function sanitizeServiceHtml(html: string) {
-  const decodedHtml = decodeTextEntities(html);
-
-  return sanitizeHtml(decodedHtml, {
+// Sanitizes a fragment that is already entity-decoded (no second decoding).
+function cleanFragment(html: string) {
+  return sanitizeHtml(html, {
     allowedTags: ["p", "br", "strong", "em", "ul", "ol", "li"],
     allowedAttributes: {},
+    // Some editors (and Arabic content) use <b> instead of <strong>.
+    transformTags: { b: "strong" },
   });
 }
 
+function sanitizeServiceHtml(html: string) {
+  return cleanFragment(decodeTextEntities(html));
+}
+
+// Normalizes text ONLY for detecting "1. Title" style numbering:
+// removes invisible bidi marks and converts Arabic-Indic / Persian digits.
+function normalizeForNumbering(value: string) {
+  return value
+    .replace(/[\u200e\u200f\u061c\u202a-\u202e\u2066-\u2069\ufeff]/g, "")
+    .replace(/[\u0660-\u0669]/g, (digit) =>
+      String(digit.charCodeAt(0) - 0x0660),
+    )
+    .replace(/[\u06f0-\u06f9]/g, (digit) =>
+      String(digit.charCodeAt(0) - 0x06f0),
+    )
+    .replace(/\u00a0/g, " ")
+    .trim();
+}
+
+// "1. Title", "2) Title", "١. عنوان"  ->  "Title" / "عنوان".
+// Returns null when the text is not a numbered title.
 function removeNumbering(title: string) {
-  let index = 0;
-  while (index < title.length && title[index].trim() === "") {
-    index += 1;
-  }
+  const normalized = normalizeForNumbering(title);
+  const match = /^\d+\s*[.)]\s*([\s\S]+)$/.exec(normalized);
+  if (!match) return null;
 
-  const numberStart = index;
-  while (index < title.length && title[index] >= "0" && title[index] <= "9") {
-    index += 1;
-  }
-  if (index === numberStart) return null;
-
-  while (index < title.length && title[index].trim() === "") {
-    index += 1;
-  }
-  if (title[index] !== "." && title[index] !== ")") return null;
-
-  index += 1;
-  while (index < title.length && title[index].trim() === "") {
-    index += 1;
-  }
-
-  const cleanTitle = decodeTextEntities(title.slice(index)).trim();
+  const cleanTitle = decodeTextEntities(match[1]).trim();
   return cleanTitle || null;
 }
 
@@ -113,17 +125,9 @@ function getShortBlockLabel(title: string) {
   return title.split(" ").filter(Boolean).slice(0, 2).join(" ");
 }
 
-function parseServiceDescription(html: string): {
-  introHtml: string;
-  blocks: ServiceOverviewBlock[];
-} {
-  const safeHtml = sanitizeServiceHtml(html);
-  const headings: Array<{
-    start: number;
-    bodyStart: number;
-    end: number;
-    title: string;
-  }> = [];
+// Finds numbered titles written as <strong>1. Title</strong>.
+function findStrongHeadings(safeHtml: string): HeadingMarker[] {
+  const headings: HeadingMarker[] = [];
   let searchFrom = 0;
 
   while (searchFrom < safeHtml.length) {
@@ -160,6 +164,40 @@ function parseServiceDescription(html: string): {
     searchFrom = headingEnd;
   }
 
+  return headings;
+}
+
+// Fallback: finds numbered titles that are NOT bold, i.e. a short plain
+// paragraph such as <p>1. رعاية سريرية متقدمة</p>.
+function findParagraphHeadings(safeHtml: string): HeadingMarker[] {
+  const headings: HeadingMarker[] = [];
+  const paragraphPattern = /<p>([\s\S]*?)<\/p>/g;
+  let match: RegExpExecArray | null;
+
+  while ((match = paragraphPattern.exec(safeHtml)) !== null) {
+    const title = removeNumbering(stripHtml(match[1]));
+
+    // Real titles are short; long numbered paragraphs are body text.
+    if (title && title.length <= 150) {
+      const end = match.index + match[0].length;
+      headings.push({ start: match.index, bodyStart: end, end, title });
+    }
+  }
+
+  return headings;
+}
+
+function parseServiceDescription(html: string): {
+  introHtml: string;
+  blocks: ServiceOverviewBlock[];
+} {
+  const safeHtml = sanitizeServiceHtml(html);
+
+  let headings = findStrongHeadings(safeHtml);
+  if (headings.length === 0) {
+    headings = findParagraphHeadings(safeHtml);
+  }
+
   if (headings.length === 0) {
     return {
       introHtml: "",
@@ -169,12 +207,11 @@ function parseServiceDescription(html: string): {
     };
   }
 
-  const introHtml = sanitizeServiceHtml(
-    safeHtml.slice(0, headings[0].start),
-  ).trim();
+  const introHtml = cleanFragment(safeHtml.slice(0, headings[0].start)).trim();
+
   const blocks = headings.map((heading, index) => {
     const bodyEnd = headings[index + 1]?.start ?? safeHtml.length;
-    const body = sanitizeServiceHtml(
+    const body = cleanFragment(
       safeHtml.slice(heading.bodyStart, bodyEnd),
     ).trim();
 
