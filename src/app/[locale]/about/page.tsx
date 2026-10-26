@@ -24,7 +24,7 @@ import {
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import sanitizeHtml from "sanitize-html";
-
+import { getMediaForWebsiteFromERP } from "@/lib/erp/media-for-website";
 import { MissionVisionCollage } from "@/components/motion/mission-vision-collage";
 import { Reveal } from "@/components/reveal";
 import { Container } from "@/components/ui/container";
@@ -34,6 +34,7 @@ import { createPageMetadata } from "@/lib/metadata";
 import { whatsappLink } from "@/lib/contact";
 import type { Locale } from "@/i18n/routing";
 import { getMissionVisionFromERP } from "@/lib/erp/mission-vision";
+import { getBLCConsultantInfoFromERP } from "@/lib/erp/consultant-info";
 
 function ImagePlaceholder({
   src,
@@ -91,6 +92,25 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * Convert ERPNext file paths to full URLs.
+ */
+const getErpImageUrl = (image?: string) => {
+  if (!image) return null;
+
+  if (image.startsWith("http://") || image.startsWith("https://")) {
+    return image;
+  }
+
+  const baseUrl = process.env.ERP_BASE_URL;
+
+  if (!baseUrl) {
+    return image;
+  }
+
+  return `${baseUrl}${image.startsWith("/") ? image : `/${image}`}`;
+};
+
 export default async function AboutPage({
   params,
 }: {
@@ -112,6 +132,23 @@ export default async function AboutPage({
 
   const missionVision = missionVisionRecords[0] ?? null;
 
+  const websiteMedia = await getMediaForWebsiteFromERP("About-us");
+
+  const consultantMedia = websiteMedia.find(
+    (media) =>
+      media.page_name?.trim().toLowerCase() === "about-us" &&
+      (media.attach_wpov_url || media.attach_wpov),
+  );
+  const consultantInfoRecords = await getBLCConsultantInfoFromERP();
+  const consultantInfo = consultantInfoRecords[0] ?? null;
+
+  const consultantImage = "/images/hero-placeholder.jpg";
+  const consultantPhotoUrl =
+    getErpImageUrl(consultantInfo?.photo ?? undefined) ?? consultantImage;
+
+  const consultantInformationHtml = consultantInfo?.information
+    ? sanitizeHtml(consultantInfo.information)
+    : "";
   /*
    * Select Mission/Vision content according to locale.
    *
@@ -150,25 +187,6 @@ export default async function AboutPage({
   const visionImage = isArabic
     ? missionVision?.ar_vission_image || missionVision?.vission_image
     : missionVision?.vission_image;
-
-  /**
-   * Convert ERPNext file paths to full URLs.
-   */
-  const getErpImageUrl = (image?: string) => {
-    if (!image) return null;
-
-    if (image.startsWith("http://") || image.startsWith("https://")) {
-      return image;
-    }
-
-    const baseUrl = process.env.ERP_BASE_URL;
-
-    if (!baseUrl) {
-      return image;
-    }
-
-    return `${baseUrl}${image.startsWith("/") ? image : `/${image}`}`;
-  };
 
   const missionImageUrl = getErpImageUrl(missionImage);
   const visionImageUrl = getErpImageUrl(visionImage);
@@ -570,12 +588,17 @@ export default async function AboutPage({
                   />
                   <div className="relative aspect-[4/5] overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-[var(--blc-sand-200)] shadow-soft">
                     <Image
-                      src="/images/hero-placeholder.jpg"
-                      alt={consultantSection.imageAlt}
+                      src={consultantPhotoUrl}
+                      alt={
+                        consultantInfo?.person_name ||
+                        consultantSection.imageAlt
+                      }
                       fill
                       sizes="(max-width: 1024px) 100vw, 45vw"
+                      unoptimized
                       className="object-cover transition-transform duration-700 hover:scale-105"
                     />
+
                     <div className="absolute inset-x-4 bottom-4 rounded-card border border-white/40 bg-[var(--blc-green-900)]/90 p-4 text-white backdrop-blur-sm sm:inset-x-6 sm:bottom-6">
                       <p className="text-sm font-semibold tracking-wide text-[var(--blc-gold-300)]">
                         {consultantSection.badge}
@@ -608,13 +631,18 @@ export default async function AboutPage({
                   ) : (
                     <>
                       <h3 className="mt-5 text-2xl font-bold text-[var(--blc-green-900)] sm:text-3xl">
-                        {consultantSection.consultantName}
+                        {consultantInfo?.person_name ||
+                          consultantSection.consultantName}
                       </h3>
                       <p className="mt-3 leading-7 text-[var(--blc-green-700)]">
-                        {consultantSection.bio}
-                      </p>
-                      <p className="mt-4 leading-7 text-[var(--blc-green-700)]">
-                        {consultantSection.body}
+                        {consultantInformationHtml ? (
+                          <div
+                            className="mt-3 leading-7 text-[var(--blc-green-700)] [&_p]:mb-3 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:ps-6 [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:ps-6 [&_strong]:font-bold"
+                            dangerouslySetInnerHTML={{
+                              __html: consultantInformationHtml,
+                            }}
+                          />
+                        ) : null}
                       </p>
                     </>
                   )}
