@@ -1,6 +1,8 @@
 export type ServiceFeature = {
   name: string;
-  feature?: string;
+  feature?: string; // English text
+  features_ar?: string; // Arabic text (label "Features_Ar" in the Service Feature DocType)
+  feature_ar_link?: string;
 };
 
 export type Service = {
@@ -87,6 +89,54 @@ function isChecked(value: unknown): boolean {
   return value === true || value === 1 || value === "1";
 }
 
+/**
+ * Normalize child-table rows from the Service Feature DocType.
+ *
+ * - Arabic rows: `feature` is filled from `features_ar` (falls back to `feature`).
+ * - English rows: `feature` is kept as is.
+ *
+ * The original `features_ar` value is always preserved on the row.
+ */
+function normalizeFeatures(
+  rows: ServiceFeature[] | undefined | null,
+  lang: "en" | "ar",
+  arabicLookup?: Map<string, string>,
+): ServiceFeature[] {
+  if (!Array.isArray(rows)) return [];
+
+  return rows.map((row) => {
+    const english = row.feature?.trim() || "";
+    const arabicLink = row.feature_ar_link?.trim() || "";
+    const arabicField = row.features_ar?.trim() || "";
+    const arabicMatched = arabicLookup?.get(english) || "";
+
+    const arabic = arabicLink || arabicField || arabicMatched;
+
+    return {
+      ...row,
+      feature: lang === "ar" ? arabic || english : english,
+      features_ar: arabic,
+      feature_ar_link: arabicLink || arabicMatched,
+    };
+  });
+}
+
+function buildArabicLookup(
+  rows: ServiceFeature[] | undefined | null,
+): Map<string, string> {
+  const map = new Map<string, string>();
+
+  if (!Array.isArray(rows)) return map;
+
+  for (const row of rows) {
+    const english = row.feature?.trim();
+    const arabic = row.feature_ar_link?.trim();
+
+    if (english && arabic) map.set(english, arabic);
+  }
+
+  return map;
+}
 /**
  * Fetch the lightweight service list for navigation.
  */
@@ -200,13 +250,18 @@ export async function getServicesFromERP(): Promise<Service[]> {
         };
 
         const full = result.data;
+        const arabicLookup = buildArabicLookup(full?.service_feature);
 
         return {
           ...service,
           ...full,
           is_main_service: isChecked(full?.is_main_service),
-          service_feature: full?.service_feature ?? [],
-          ar_service_feature: full?.ar_service_feature ?? [],
+          service_feature: normalizeFeatures(full?.service_feature, "en"),
+          ar_service_feature: normalizeFeatures(
+            full?.ar_service_feature,
+            "ar",
+            arabicLookup,
+          ),
         };
       } catch {
         return {
