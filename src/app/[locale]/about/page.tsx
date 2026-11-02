@@ -345,14 +345,14 @@ export default async function AboutPage({
           alt=""
           width={320}
           height={320}
-          className="pointer-events-none absolute -end-16 -top-24 w-72 opacity-[0.08] grayscale brightness-0 invert"
+          className="pointer-events-none absolute end-4 top-4 sm:end-8 sm:top-8 w-40 sm:w-56 lg:w-64 h-auto opacity-[0.08] grayscale brightness-0 invert"
           aria-hidden="true"
         />
         <div
           className="pointer-events-none absolute -bottom-28 -start-20 size-64 rounded-full border-[28px] border-[var(--blc-gold-300)]/15"
           aria-hidden="true"
         />
-        <Container className="relative">
+        <Container className="relative z-10">
           <Reveal className="max-w-4xl">
             <p className="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--blc-gold-300)]">
               {t("story_title")}
@@ -433,7 +433,7 @@ export default async function AboutPage({
               alt=""
               width={300}
               height={300}
-              className="pointer-events-none absolute -end-10 -top-16 z-0 w-64 opacity-[0.06] grayscale"
+              className="pointer-events-none absolute end-0 -top-16 z-0 h-auto w-64 opacity-[0.06] grayscale"
               aria-hidden="true"
             />
 

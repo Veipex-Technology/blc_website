@@ -43,15 +43,19 @@ body {
   color: var(--foreground);
 }
 html[lang="ar"] body {
-  font-family: var(--font-body);
+  font-family: var(--font-arabic-sans), sans-serif;
   font-size: 17px;
   line-height: 1.9;
   letter-spacing: normal;
 }
 html[lang="en"] body {
-  font-family: var(--font-body);
+  font-family: var(--font-fira-sans), sans-serif;
   font-size: 16px;
   line-height: 1.7;
+}
+html[dir="rtl"] *,
+html[lang="ar"] * {
+  letter-spacing: 0 !important;
 }
 a {
   text-decoration: none;

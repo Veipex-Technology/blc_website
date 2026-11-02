@@ -57,7 +57,7 @@ export default async function RootLayout({
     <html
       lang={locale}
       dir={locale === "ar" ? "rtl" : "ltr"}
-      className={`${arabicFont.variable} ${englishFont.variable}`}
+      className={`${arabicFont.variable} ${englishFont.variable} ${locale === "ar" ? "font-arabic" : "font-latin"}`}
     >
       <body>{children}</body>
     </html>

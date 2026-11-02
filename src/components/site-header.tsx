@@ -64,6 +64,16 @@ export function SiteHeader({
   }, []);
 
   useEffect(() => {
+    const direction = locale === "ar" ? "rtl" : "ltr";
+    const root = document.documentElement;
+
+    root.lang = locale;
+    root.dir = direction;
+    root.classList.toggle("font-arabic", locale === "ar");
+    root.classList.toggle("font-latin", locale === "en");
+  }, [locale]);
+
+  useEffect(() => {
     document.body.classList.toggle("overflow-hidden", menuOpen);
     return () => document.body.classList.remove("overflow-hidden");
   }, [menuOpen]);
