@@ -13,6 +13,8 @@ import { useEffect, useRef, useState } from "react";
 export function MissionVisionCollage({
   imageUrl,
   secondaryImageUrl,
+  secondaryImageAlt,
+  secondaryImageSizes,
   title,
   imageLabel,
   secondaryImageLabel,
@@ -20,6 +22,8 @@ export function MissionVisionCollage({
 }: {
   imageUrl?: string | null;
   secondaryImageUrl?: string | null;
+  secondaryImageAlt?: string;
+  secondaryImageSizes?: string;
   title: string;
   imageLabel: string;
   secondaryImageLabel: string;
@@ -79,16 +83,21 @@ export function MissionVisionCollage({
         </div>
       </div>
       <motion.div
-        className={`mission-vision-small absolute bottom-0 z-10 w-[45%] aspect-square rounded-2xl border-[6px] border-white shadow-[0_16px_35px_rgb(2_56_48_/_0.2)] ${mirrored ? "start-0" : "end-0"}`}
+        className={`mission-vision-small absolute bottom-0 z-10 w-[45%] aspect-square rounded-2xl border-[6px] border-white shadow-[0_16px_35px_rgb(2_56_48_/_0.2)] ${secondaryImageUrl ? "overflow-hidden" : ""} ${mirrored ? "start-0" : "end-0"}`}
         style={{ y: reducedMotion || isMobile ? 0 : smallImageY }}
       >
         {secondaryImageUrl ? (
           <Image
             src={secondaryImageUrl}
-            alt={title}
+            alt={secondaryImageAlt ?? title}
             fill
-            sizes="(max-width: 1024px) 45vw, 20vw"
-            className="rounded-xl object-cover"
+            sizes={
+              secondaryImageSizes ??
+              "(min-width: 1024px) 18vw, (min-width: 640px) 25vw, 45vw"
+            }
+            className={
+              mirrored ? "object-cover" : "rounded-[0.65rem] object-cover"
+            }
           />
         ) : (
           placeholder(secondaryImageLabel)

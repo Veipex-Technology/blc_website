@@ -69,6 +69,13 @@ function getErpConfig() {
   };
 }
 
+function toAbsoluteFileUrl(path?: string | null): string | undefined {
+  if (!path) return undefined;
+  if (/^https?:\/\//i.test(path)) return path;
+
+  const { baseUrl } = getErpConfig();
+  return `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
+}
 const serviceListFields = [
   "name",
   "service_name",
@@ -255,6 +262,8 @@ export async function getServicesFromERP(): Promise<Service[]> {
         return {
           ...service,
           ...full,
+          image_en: toAbsoluteFileUrl(full?.image_en),
+          image_ar: toAbsoluteFileUrl(full?.image_ar),
           is_main_service: isChecked(full?.is_main_service),
           service_feature: normalizeFeatures(full?.service_feature, "en"),
           ar_service_feature: normalizeFeatures(

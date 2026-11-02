@@ -149,17 +149,6 @@ export default async function AboutPage({
   const consultantInformationHtml = consultantInfo?.information
     ? sanitizeHtml(consultantInfo.information)
     : "";
-  /*
-   * Select Mission/Vision content according to locale.
-   *
-   * English:
-   * title / description / mission_image
-   * vission_title / vission_description / vission_image
-   *
-   * Arabic:
-   * ar_mission_title / ar_mission_description / ar_mission_image
-   * ar_vission_title / ar_vission_description / ar_vission_image
-   */
 
   const isArabic = locale === "ar";
 
@@ -171,10 +160,6 @@ export default async function AboutPage({
     ? missionVision?.ar_mission_description || missionVision?.description
     : missionVision?.description;
 
-  const missionImage = isArabic
-    ? missionVision?.ar_mission_image || missionVision?.mission_image
-    : missionVision?.mission_image;
-
   const visionTitle = isArabic
     ? missionVision?.ar_vission_title || missionVision?.vission_title
     : missionVision?.vission_title;
@@ -183,13 +168,6 @@ export default async function AboutPage({
     ? missionVision?.ar_vission_description ||
       missionVision?.vission_description
     : missionVision?.vission_description;
-
-  const visionImage = isArabic
-    ? missionVision?.ar_vission_image || missionVision?.vission_image
-    : missionVision?.vission_image;
-
-  const missionImageUrl = getErpImageUrl(missionImage);
-  const visionImageUrl = getErpImageUrl(visionImage);
 
   const missionHtml = missionDescription
     ? sanitizeHtml(missionDescription)
@@ -417,18 +395,23 @@ export default async function AboutPage({
               />
               <div className="relative flex aspect-[4/5] items-center justify-center overflow-hidden rounded-card bg-[var(--blc-green-900)] shadow-[0_20px_55px_rgb(2_56_48_/_0.18)] sm:aspect-[5/4] lg:aspect-[4/5]">
                 <Image
-                  src="/brand/logo.png"
+                  src="/images/illustrations/about-us-intro-section.jpg"
                   alt={common("brand_name")}
-                  width={420}
-                  height={420}
-                  className="relative z-10 w-3/5 max-w-xs object-contain brightness-0 invert opacity-90 transition-transform duration-700 hover:scale-105"
+                  fill
+                  sizes="(min-width: 1024px) 40vw, (min-width: 640px) 60vw, 100vw"
+                  priority={false}
+                  className="z-0 object-cover transition-transform duration-700 hover:scale-105"
                 />
                 <div
-                  className="absolute -bottom-20 -start-16 size-64 rounded-full border-[28px] border-[var(--blc-gold-300)]/20"
+                  className="absolute inset-0 z-10 bg-[var(--blc-green-900)]/10"
                   aria-hidden="true"
                 />
                 <div
-                  className="absolute -end-12 -top-12 size-44 rounded-full bg-[var(--blc-green-700)]/60"
+                  className="absolute -bottom-20 -start-16 z-10 size-64 rounded-full border-[28px] border-[var(--blc-gold-300)]/20"
+                  aria-hidden="true"
+                />
+                <div
+                  className="absolute -end-12 -top-12 z-10 size-44 rounded-full bg-[var(--blc-green-700)]/60"
                   aria-hidden="true"
                 />
               </div>
@@ -523,11 +506,12 @@ export default async function AboutPage({
                   className="absolute end-3 top-10 z-10 w-[76%] sm:end-8 lg:end-0"
                 >
                   <div className="standards-main-image group relative aspect-[4/5] overflow-hidden rounded-card bg-[var(--blc-cream-100)] shadow-[0_22px_55px_rgb(2_56_48_/_0.16)] sm:aspect-[4/3] lg:aspect-[4/5]">
-                    <ImagePlaceholder
-                      src={consultant?.photo_url}
+                    <Image
+                      src="/images/illustrations/standards-main-care-image.jpg"
                       alt={t("standards_main_image_alt")}
-                      label={t("standards_main_image_label")}
-                      className="absolute inset-0"
+                      fill
+                      sizes="(min-width: 1024px) 40vw, (min-width: 640px) 60vw, 100vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   </div>
                 </Reveal>
@@ -537,11 +521,15 @@ export default async function AboutPage({
                   className="absolute start-0 top-0 z-20 w-[58%] sm:start-2 sm:w-[52%]"
                 >
                   <article className="standards-feature-card overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-white p-3 shadow-[0_18px_45px_rgb(2_56_48_/_0.14)] sm:p-4">
-                    <ImagePlaceholder
-                      alt={t("standards_feature_image_alt")}
-                      label={t("standards_feature_image_label")}
-                      className="standards-feature-image aspect-[4/3] rounded-[0.75rem]"
-                    />
+                    <div className="relative overflow-hidden standards-feature-image aspect-[4/3] rounded-[0.75rem]">
+                      <Image
+                        src="/images/illustrations/standards-care-you-can-trust.jpg"
+                        alt="Caregiver offering warm, dignified support to a client at home"
+                        fill
+                        sizes="(min-width: 1024px) 40vw, (min-width: 640px) 50vw, 100vw"
+                        className="object-cover"
+                      />
+                    </div>
                     <p className="mt-3 text-sm font-semibold text-[var(--blc-gold-500)]">
                       {t("standards_feature_title")}
                     </p>
@@ -557,11 +545,15 @@ export default async function AboutPage({
                   className="absolute bottom-3 start-2 z-20 w-[35%] sm:bottom-0 sm:start-6 sm:w-[38%]"
                 >
                   <div className="standards-decorative-image rounded-card border-[6px] border-white bg-white p-1 shadow-[0_16px_35px_rgb(2_56_48_/_0.18)]">
-                    <ImagePlaceholder
-                      alt={t("standards_decorative_image_alt")}
-                      label={t("standards_decorative_image_label")}
-                      className="aspect-square rounded-[0.65rem]"
-                    />
+                    <div className="relative overflow-hidden aspect-square rounded-[0.65rem]">
+                      <Image
+                        src="/images/illustrations/standards-care-everyday-life.jpg"
+                        alt="Caregiver supporting a client with everyday activities at home"
+                        fill
+                        sizes="(min-width: 1024px) 40vw, (min-width: 640px) 50vw, 100vw"
+                        className="object-cover"
+                      />
+                    </div>
                   </div>
                 </Reveal>
               </div>
@@ -717,7 +709,8 @@ export default async function AboutPage({
             <article className="mission-vision-row grid items-center gap-12 overflow-hidden py-16 lg:grid-cols-2 lg:gap-20 lg:py-24">
               <Reveal className="relative min-w-0 px-3 sm:px-6 lg:order-1 lg:px-0">
                 <MissionVisionCollage
-                  imageUrl={missionImageUrl}
+                  imageUrl="/images/illustrations/mission-image.jpg"
+                  secondaryImageUrl="/images/illustrations/mission-small-image.jpg"
                   title={missionTitle || t("mission_title")}
                   imageLabel={t("mission_image_label")}
                   secondaryImageLabel={t("secondary_image_label")}
@@ -790,7 +783,10 @@ export default async function AboutPage({
 
               <Reveal className="relative min-w-0 px-3 sm:px-6 lg:order-2 lg:px-0">
                 <MissionVisionCollage
-                  imageUrl={visionImageUrl}
+                  imageUrl="/images/illustrations/vision-image.jpg"
+                  secondaryImageUrl="/images/illustrations/vision-small-image.jpg"
+                  secondaryImageAlt="Caregiver and client sharing a warm moment together"
+                  secondaryImageSizes="(max-width: 1024px) 25vw, 15vw"
                   title={visionTitle || t("vision_title")}
                   imageLabel={t("vision_image_label")}
                   secondaryImageLabel={t("secondary_image_label")}

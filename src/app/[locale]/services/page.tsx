@@ -158,7 +158,7 @@ export default async function ServicesPage({
             />
             <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem] bg-[var(--blc-sand-200)] shadow-[0_24px_60px_rgb(2_56_48_/_0.18)]">
               <Image
-                src={heroImage}
+                src="/images/illustrations/services-page-header.jpg"
                 alt={heroImage === fallbackImage ? "" : t("hero_image_alt")}
                 fill
                 priority

@@ -57,7 +57,7 @@ export function HeroMotion({ children }: HeroMotionProps) {
           }}
         >
           <Image
-            src="/images/hero-placeholder.jpg"
+            src="/images/illustrations/hero-section.jpg"
             alt=""
             fill
             priority

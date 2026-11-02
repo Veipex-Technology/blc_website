@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {};
 const erpUrl = new URL(process.env.ERP_BASE_URL ?? "http://127.0.0.1:8000");
 
 nextConfig.images = {
+  dangerouslyAllowLocalIP: true,
   remotePatterns: [
     {
       protocol: erpUrl.protocol.replace(":", "") as "http" | "https",

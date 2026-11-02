@@ -183,7 +183,7 @@ export default async function HomePage({
                 {/* The image card remains above the oval while clipping its own rounded contents. */}
                 <div className="relative z-10 isolate aspect-[4/5] overflow-hidden rounded-[1.75rem] border border-white/70 bg-[var(--blc-green-900)] sm:aspect-[5/4] lg:aspect-[4/5]">
                   <Image
-                    src="/images/hero-placeholder.jpg"
+                    src="/images/illustrations/hero-section.jpg"
                     alt={
                       locale === "ar"
                         ? "رعاية منزلية دافئة في الإسكندرية"
