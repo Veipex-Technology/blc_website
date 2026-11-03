@@ -11,6 +11,8 @@ import type { Swiper as SwiperInstance } from "swiper";
 import styles from "./services-swiper.module.css";
 import "swiper/css";
 
+const SERVICE_IMAGE_ASPECT = "aspect-[4/5]";
+
 export type ServiceSlide = {
   key: string;
   number: string;
@@ -31,22 +33,12 @@ type ServicesSwiperProps = {
   carouselRole: string;
   slideRole: string;
   paginationStatusLabel: (current: number, total: number) => string;
-  slideStatusLabel: (
-    current: number,
-    total: number,
-    title: string,
-  ) => string;
+  slideStatusLabel: (current: number, total: number, title: string) => string;
   goToSlideLabel: (number: number) => string;
   className?: string;
 };
 
-function ServiceImage({
-  image,
-  title,
-}: {
-  image?: string;
-  title: string;
-}) {
+function ServiceImage({ image, title }: { image?: string; title: string }) {
   const [imageFailed, setImageFailed] = useState(false);
 
   if (!image || imageFailed) {
@@ -72,7 +64,7 @@ function ServiceImage({
       alt={title}
       fill
       sizes="(max-width: 639px) 88vw, (max-width: 1023px) 46vw, 31vw"
-      className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04] motion-reduce:transition-none"
+      className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.04] motion-reduce:transition-none"
       onError={() => setImageFailed(true)}
     />
   );
@@ -119,7 +111,8 @@ export function ServicesSwiper({
     <div className={`mt-12 ${className}`}>
       <div className="mb-6 flex items-center justify-between gap-4">
         <p className="text-sm font-semibold text-[var(--blc-green-700)]">
-          {label} <span className="text-[var(--blc-gold-500)]">{services.length}</span>
+          {label}{" "}
+          <span className="text-[var(--blc-gold-500)]">{services.length}</span>
         </p>
         {canNavigate && (
           <div
@@ -211,9 +204,11 @@ export function ServicesSwiper({
                   href={service.href}
                   className="flex h-full flex-col outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--blc-gold-500)]"
                 >
-                  <div className="relative aspect-[1.48] overflow-hidden bg-[var(--blc-sand-200)]">
+                  <div
+                    className={`relative ${SERVICE_IMAGE_ASPECT} overflow-hidden bg-[var(--blc-sand-200)]`}
+                  >
                     <ServiceImage image={service.image} title={service.title} />
-                    <span className="absolute start-4 top-4 inline-flex min-h-9 items-center rounded-full border border-white/70 bg-white/90 px-3 text-xs font-bold tracking-[0.12em] text-[var(--blc-green-900)] shadow-sm backdrop-blur-sm">
+                    <span className="absolute start-4 top-4 z-10 inline-flex min-h-9 items-center rounded-full border border-white/70 bg-white/90 px-3 text-xs font-bold tracking-[0.12em] text-[var(--blc-green-900)] shadow-sm backdrop-blur-sm">
                       {service.number}
                     </span>
                   </div>
