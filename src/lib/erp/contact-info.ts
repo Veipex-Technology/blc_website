@@ -1,21 +1,22 @@
-export type BLCTimetable = {
-  name?: string;
-  day?: string;
-  start_time?: string;
-  end_time?: string;
-};
-
 export type BLCContactUsInfo = {
   name: string;
-
   company_name?: string;
   phone_number?: string;
   second_phone_number?: string;
   whats_app_number?: string;
   email?: string;
   address?: string;
+  ar_address?: string | null;
+  timetable?: string;
+  ar_timetable?: string | null;
+};
 
-  timetable?: BLCTimetable[];
+type ERPContactInfoListResponse = {
+  data?: BLCContactUsInfo[];
+};
+
+type ERPContactInfoDetailResponse = {
+  data?: Partial<BLCContactUsInfo>;
 };
 
 function getErpConfig() {
@@ -30,7 +31,7 @@ function getErpConfig() {
   }
 
   return {
-    baseUrl,
+    baseUrl: baseUrl.replace(/\/+$/, ""),
     headers: {
       Authorization: `token ${apiKey}:${apiSecret}`,
       Accept: "application/json",
@@ -39,14 +40,12 @@ function getErpConfig() {
   };
 }
 
-/**
- * GET BLC Contact-us Info records from ERP.
- */
 export async function getBLCContactUsInfoFromERP(): Promise<
   BLCContactUsInfo[]
 > {
   const { baseUrl, headers } = getErpConfig();
 
+  // These fieldnames must match the BLC-Contact-us Info DocType.
   const fields = [
     "name",
     "company_name",
@@ -55,6 +54,9 @@ export async function getBLCContactUsInfoFromERP(): Promise<
     "whats_app_number",
     "email",
     "address",
+    "ar_address",
+    "timetable",
+    "ar_timetable",
   ];
 
   const params = new URLSearchParams({
@@ -62,62 +64,78 @@ export async function getBLCContactUsInfoFromERP(): Promise<
     limit_page_length: "100",
   });
 
-  const response = await fetch(
-    `${baseUrl}/api/resource/BLC-Contact-us%20Info?${params.toString()}`,
-    {
-      headers,
-      cache: "no-store",
-    },
-  );
+  const listUrl = `${baseUrl}/api/resource/BLC-Contact-us%20Info?${params.toString()}`;
+
+  const response = await fetch(listUrl, {
+    method: "GET",
+    headers,
+    cache: "no-store",
+  });
 
   if (!response.ok) {
     const errorText = await response.text();
+
     throw new Error(`BLC-Contact-us Info could not be loaded: ${errorText}`);
   }
 
-  const result = (await response.json()) as {
-    data?: BLCContactUsInfo[];
-  };
+  const result = (await response.json()) as ERPContactInfoListResponse;
 
-  const contactInfo = Array.isArray(result.data) ? result.data : [];
+  const records = result.data ?? [];
 
-  return Promise.all(
-    contactInfo.map(async (info): Promise<BLCContactUsInfo> => {
+  // Fetch each complete document to retrieve all permitted DocType fields.
+  const detailedRecords = await Promise.all(
+    records.map(async (info): Promise<BLCContactUsInfo> => {
       try {
-        const response = await fetch(
-          `${baseUrl}/api/resource/BLC-Contact-us%20Info/${encodeURIComponent(
-            info.name,
-          )}`,
-          {
-            headers,
-            cache: "no-store",
-          },
-        );
+        const detailUrl = `${baseUrl}/api/resource/BLC-Contact-us%20Info/${encodeURIComponent(info.name)}`;
 
-        if (!response.ok) {
+        const detailResponse = await fetch(detailUrl, {
+          method: "GET",
+          headers,
+          cache: "no-store",
+        });
+
+        if (!detailResponse.ok) {
           return {
             ...info,
-            timetable: [],
+            address: info.address ?? "",
+            ar_address: info.ar_address ?? null,
+            timetable: info.timetable ?? "",
+            ar_timetable: info.ar_timetable ?? null,
           };
         }
 
-        const result = (await response.json()) as {
-          data?: BLCContactUsInfo;
-        };
+        const detailResult =
+          (await detailResponse.json()) as ERPContactInfoDetailResponse;
 
-        const full = result.data;
+        const full = detailResult.data ?? {};
 
         return {
           ...info,
           ...full,
-          timetable: full?.timetable ?? [],
+          name: full.name ?? info.name,
+          company_name: full.company_name ?? info.company_name,
+          phone_number: full.phone_number ?? info.phone_number,
+          second_phone_number:
+            full.second_phone_number ?? info.second_phone_number,
+          whats_app_number: full.whats_app_number ?? info.whats_app_number,
+          email: full.email ?? info.email,
+          address: full.address ?? info.address ?? "",
+          ar_address: full.ar_address ?? info.ar_address ?? null,
+          timetable: full.timetable ?? info.timetable ?? "",
+          ar_timetable: full.ar_timetable ?? info.ar_timetable ?? null,
         };
       } catch {
+        // Keep the list response as a fallback if a detail request fails.
         return {
           ...info,
-          timetable: [],
+          address: info.address ?? "",
+          ar_address: info.ar_address ?? null,
+          timetable: info.timetable ?? "",
+          ar_timetable: info.ar_timetable ?? null,
         };
       }
     }),
   );
+
+  return detailedRecords;
 }

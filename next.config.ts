@@ -9,6 +9,18 @@ nextConfig.images = {
   dangerouslyAllowLocalIP: true,
   remotePatterns: [
     {
+      protocol: "http",
+      hostname: "127.0.0.1",
+      port: "8000",
+      pathname: "/files/**",
+    },
+    {
+      protocol: "http",
+      hostname: "localhost",
+      port: "8000",
+      pathname: "/files/**",
+    },
+    {
       protocol: erpUrl.protocol.replace(":", "") as "http" | "https",
       hostname: erpUrl.hostname,
       port: erpUrl.port,

@@ -25,6 +25,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
 import { whatsappDisplayNumber, whatsappLink } from "@/lib/contact";
 import { contactLocation } from "@/lib/contact-location";
+import { pickLocalized } from "@/lib/localize";
 import type { Locale } from "@/i18n/routing";
 
 export async function generateMetadata({
@@ -73,20 +74,22 @@ export default async function ContactPage({
   });
 
   /*
-   * Load all dynamic data from ERP.
+   * Load dynamic data from ERPNext.
    *
    * BLC-Contact-us Info:
    * - phone_number
+   * - second_phone_number
    * - whats_app_number
    * - email
    * - address
+   * - ar_address
    * - timetable
+   * - ar_timetable
    *
    * Services:
    * - Used by ContactForm
    *
    * Site Settings:
-   * - Social links
    * - Map
    */
   const [contactInfoRecords, services, settings, socialPlatforms] =
@@ -97,42 +100,52 @@ export default async function ContactPage({
       getSocialPlatformsFromERP(),
     ]);
 
-  /*
-   * BLC-Contact-us Info normally contains the contact information.
-   *
-   * If there are multiple records, the first record is used.
-   */
+  // Use the first BLC contact information record.
   const contactInfo = contactInfoRecords[0];
 
   const phone = contactInfo?.phone_number?.trim() || "";
   const secondPhone = contactInfo?.second_phone_number?.trim() || "";
   const whatsappNumber = whatsappDisplayNumber;
   const email = contactInfo?.email?.trim() || "";
-  const address = contactInfo?.address?.trim() || "";
-  const configuredRecruitmentEmail = process.env.RECRUITMENT_EMAIL?.trim();
-  const recruitmentEmail =
-    configuredRecruitmentEmail || email || "careers@better-life-care.com";
-  const isRecruitmentEmailPlaceholder = !configuredRecruitmentEmail && !email;
 
   /*
-   * Remove spaces, brackets, dashes, etc. from WhatsApp number.
-   *
-   * Example:
-   * +20 100 123 4567
-   * becomes:
-   * +201001234567
+   * Localized address:
+   * English: address
+   * Arabic: ar_address
    */
+  const isArabic = locale.startsWith("ar");
+
+  const address =
+    (isArabic
+      ? contactInfo?.ar_address?.trim() || contactInfo?.address?.trim()
+      : contactInfo?.address?.trim()) || "";
+  /*
+   * Localized timetable:
+   * English: timetable
+   * Arabic: ar_timetable
+   *
+   * Both fields are ERPNext Data fields (strings).
+   */
+  const workingHours =
+    (locale === "ar"
+      ? contactInfo?.ar_timetable?.trim() || contactInfo?.timetable?.trim()
+      : contactInfo?.timetable?.trim()) || "";
+
+  const configuredRecruitmentEmail = process.env.RECRUITMENT_EMAIL?.trim();
+
+  const recruitmentEmail =
+    configuredRecruitmentEmail || email || "careers@better-life-care.com";
+
+  const isRecruitmentEmailPlaceholder = !configuredRecruitmentEmail && !email;
+
   const phoneHref = phone ? `tel:${phone.replace(/[^+\d]/g, "")}` : "#";
 
   const whatsappHref = whatsappLink(common("whatsapp_prefill"));
 
   /*
-   * Select service from URL:
-   *
-   * /contact?service=some-service
+   * Select service from URL.
+   * Supports ERP document names and localized slugs.
    */
-  // Select the service requested in the URL.
-  // Supports ERP document names and both localized slugs.
   const initialService = services.find(
     (service) =>
       service.name === query.service ||
@@ -140,7 +153,7 @@ export default async function ContactPage({
       service.ar_slug === query.service,
   )?.name;
 
-  // Prepare the actual Services BLC records for ContactForm.
+  // Prepare Services BLC records for ContactForm.
   const serviceOptions = services.map((service) => ({
     name: service.name,
     service_name: service.service_name,
@@ -149,10 +162,7 @@ export default async function ContactPage({
     ar_slug: service.ar_slug,
   }));
 
-  /*
-   * Social links can continue coming from Website Info /
-   * Site Settings.
-   */
+  // Social links from ERPNext Social Platforms.
   const socialLinks = socialPlatforms
     .map((social) => ({
       name: social.name,
@@ -161,11 +171,6 @@ export default async function ContactPage({
       icon: social.platform_icon?.trim() || "",
     }))
     .filter((social) => Boolean(social.platformName) && Boolean(social.href));
-
-  /*
-   * Dynamic timetable from BLC-Contact-us Info.
-   */
-  const timetable = contactInfo?.timetable ?? [];
 
   return (
     <main>
@@ -182,6 +187,7 @@ export default async function ContactPage({
                 <MapPin size={17} aria-hidden="true" />
                 {common("brand_name")}
               </p>
+
               <SectionHeading
                 title={t("title")}
                 subtitle={t("intro")}
@@ -194,6 +200,7 @@ export default async function ContactPage({
                 className="absolute -inset-4 rounded-[1.5rem] border border-[var(--blc-gold-300)]/50"
                 aria-hidden="true"
               />
+
               <div className="relative aspect-[4/3] overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-[var(--blc-green-900)] shadow-[0_18px_50px_rgb(2_56_48_/_0.16)]">
                 <ContactMapLoader
                   address={contactLocation.address}
@@ -203,12 +210,14 @@ export default async function ContactPage({
                   mapLabel={t("map")}
                   coordinatesPendingLabel={t("map_coordinates_pending")}
                 />
+
                 <div className="absolute bottom-5 start-5 flex items-center gap-3 rounded-card border border-white/30 bg-[var(--blc-green-900)]/85 px-4 py-3 text-white shadow-soft backdrop-blur-sm sm:bottom-6 sm:start-6">
                   <MapPin
                     size={20}
                     className="text-[var(--blc-gold-300)]"
                     aria-hidden="true"
                   />
+
                   <span className="text-sm font-semibold">
                     {address || t("details")}
                   </span>
@@ -242,7 +251,7 @@ export default async function ContactPage({
 
                         {phone && (
                           <a
-                            href={`tel:${phone.replace(/[^\d+]/g, "")}`}
+                            href={phoneHref}
                             className="block hover:text-[var(--blc-green-900)] focus-ring-light"
                           >
                             {phone}
@@ -251,7 +260,7 @@ export default async function ContactPage({
 
                         {secondPhone && (
                           <a
-                            href={`tel:${secondPhone.replace(/[^\d+]/g, "")}`}
+                            href={`tel:${secondPhone.replace(/[^+\d]/g, "")}`}
                             className="mt-1 block hover:text-[var(--blc-green-900)] focus-ring-light"
                           >
                             {secondPhone}
@@ -307,7 +316,7 @@ export default async function ContactPage({
                     </a>
                   )}
 
-                  {/* ADDRESS */}
+                  {/* LOCALIZED ADDRESS */}
                   {address && (
                     <div className="flex items-start gap-3">
                       <MapPin
@@ -321,14 +330,14 @@ export default async function ContactPage({
                           {t("address")}
                         </strong>
 
-                        {address}
+                        <bdi dir="auto">{address}</bdi>
                       </span>
                     </div>
                   )}
                 </div>
 
-                {/* DYNAMIC TIMETABLE */}
-                {timetable.length > 0 && (
+                {/* LOCALIZED TIMETABLE */}
+                {workingHours && (
                   <div className="mt-8 border-t border-[var(--blc-sand-200)] pt-6">
                     <div className="flex items-start gap-3">
                       <Clock3
@@ -337,26 +346,13 @@ export default async function ContactPage({
                         aria-hidden="true"
                       />
 
-                      <div className="w-full">
+                      <div className="min-w-0 flex-1">
                         <h3 className="font-semibold text-[var(--blc-green-900)]">
                           {t("working_hours")}
                         </h3>
 
-                        <div className="mt-3 grid gap-2">
-                          {timetable.map((item) => (
-                            <div
-                              key={item.name}
-                              className="flex items-center justify-between gap-4 text-sm text-[var(--blc-green-700)]"
-                            >
-                              <span>{item.day || item.name}</span>
-
-                              <span className="font-medium text-[var(--blc-green-900)]">
-                                {item.start_time && item.end_time
-                                  ? `${item.start_time} - ${item.end_time}`
-                                  : item.start_time || item.end_time || ""}
-                              </span>
-                            </div>
-                          ))}
+                        <div className="mt-3 whitespace-pre-line break-words text-sm leading-7 text-[var(--blc-green-700)]">
+                          <bdi dir="auto">{workingHours}</bdi>
                         </div>
                       </div>
                     </div>
@@ -395,6 +391,7 @@ export default async function ContactPage({
                     </div>
                   </div>
                 )}
+
                 {/* MAP */}
                 {settings.map_embed_url && (
                   <div className="mt-8">
@@ -430,6 +427,7 @@ export default async function ContactPage({
                         className="text-[var(--blc-gold-500)]"
                         aria-hidden="true"
                       />
+
                       <SectionHeading
                         title={joinFamily("title")}
                         subtitle={joinFamily("subtitle")}
@@ -438,19 +436,23 @@ export default async function ContactPage({
 
                       <div className="mt-6 text-[var(--blc-green-700)]">
                         <p className="leading-8">{joinFamily("description")}</p>
+
                         <p className="mt-5 font-semibold text-[var(--blc-green-900)]">
                           {joinFamily("cta")}
                         </p>
+
                         <div className="mt-6 border-s-4 border-[var(--blc-gold-500)] ps-4">
                           <span className="block text-sm font-semibold text-[var(--blc-green-900)]">
                             {joinFamily("emailLabel")}
                           </span>
+
                           <a
                             href={`mailto:${recruitmentEmail}`}
                             className="mt-1 inline-block break-all text-lg font-semibold text-[var(--blc-green-900)] underline decoration-[var(--blc-gold-500)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--blc-gold-500)] focus-ring-light"
                           >
                             {recruitmentEmail}
                           </a>
+
                           {isRecruitmentEmailPlaceholder && (
                             <p className="mt-2 text-sm text-[var(--blc-green-700)]">
                               {joinFamily("emailPlaceholderNote")}
@@ -482,6 +484,7 @@ export default async function ContactPage({
         </Container>
       </Section>
 
+      {/* MAP SECTION */}
       {settings.map_embed_url && (
         <Section variant="sand" dir={locale === "ar" ? "rtl" : "ltr"}>
           <Container>
@@ -514,6 +517,7 @@ export default async function ContactPage({
                     className="text-[var(--blc-gold-500)]"
                     aria-hidden="true"
                   />
+
                   <h2 className="mt-5 text-2xl font-bold text-[var(--blc-green-900)]">
                     {t("details")}
                   </h2>
@@ -524,9 +528,11 @@ export default async function ContactPage({
                         <strong className="block text-[var(--blc-green-900)]">
                           {t("address")}
                         </strong>
-                        {address}
+
+                        <bdi dir="auto">{address}</bdi>
                       </p>
                     )}
+
                     {phone && (
                       <a
                         href={phoneHref}
@@ -535,9 +541,11 @@ export default async function ContactPage({
                         <strong className="block text-[var(--blc-green-900)]">
                           {t("phone")}
                         </strong>
+
                         {phone}
                       </a>
                     )}
+
                     {email && (
                       <a
                         href={`mailto:${email}`}
@@ -546,6 +554,7 @@ export default async function ContactPage({
                         <strong className="block text-[var(--blc-green-900)]">
                           {t("email")}
                         </strong>
+
                         {email}
                       </a>
                     )}
@@ -558,6 +567,7 @@ export default async function ContactPage({
                     className="mt-auto inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--blc-green-900)] px-5 font-semibold text-white hover:bg-[var(--blc-green-700)] focus-ring-dark"
                   >
                     {t("map")}
+
                     <ArrowUpRight
                       size={17}
                       aria-hidden="true"
