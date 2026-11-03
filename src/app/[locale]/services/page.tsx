@@ -233,31 +233,16 @@ export default async function ServicesPage({
                     href={service.href}
                     className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[var(--blc-sand-200)] bg-white shadow-soft transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1 hover:border-[var(--blc-gold-500)] hover:shadow-[0_22px_42px_rgb(2_56_48/0.14)] focus-ring-light motion-reduce:transition-none"
                   >
-                    <div className="relative aspect-[16/10] overflow-hidden bg-[var(--blc-cream-100)]">
+                    <div className="relative aspect-[4/5] overflow-hidden bg-[var(--blc-sand-200)]">
                       <Image
-                        src={service.image}
-                        alt={
-                          service.image === fallbackImage ? "" : service.title
-                        }
+                        src={encodeURI(service.image)}
+                        alt={service.title}
                         fill
-                        unoptimized
-                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                        className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none"
+                        sizes="(max-width: 639px) 88vw, (max-width: 1023px) 46vw, 31vw"
+                        className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.04] motion-reduce:transition-none"
                       />
-                      {service.image === fallbackImage && (
-                        <div
-                          aria-hidden="true"
-                          className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_50%_45%,rgb(255_255_255/0.75),transparent_52%)]"
-                        >
-                          <HeartPulse
-                            size={74}
-                            strokeWidth={1.3}
-                            className="text-[var(--blc-green-700)]/75"
-                          />
-                        </div>
-                      )}
-                      <span className="absolute start-5 top-5 flex size-12 items-center justify-center rounded-full border border-white/70 bg-white/95 text-[var(--blc-gold-500)] shadow-soft">
-                        <Heart size={21} aria-hidden="true" />
+                      <span className="absolute start-4 top-4 z-10 inline-flex min-h-9 items-center rounded-full border border-white/70 bg-white/90 px-3 text-xs font-bold tracking-[0.12em] text-[var(--blc-green-900)] shadow-sm backdrop-blur-sm">
+                        {String(index + 1).padStart(2, "0")}
                       </span>
                     </div>
                     <div className="flex flex-1 flex-col p-6 sm:p-7">
