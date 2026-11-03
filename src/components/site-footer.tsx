@@ -46,21 +46,7 @@ export async function SiteFooter({
   };
 }) {
   /*
-   * Load all dynamic footer data directly from ERP.
-   *
-   * Services:
-   * - Used in the Services footer section.
-   *
-   * BLC-Contact-us Info:
-   * - phone_number
-   * - whats_app_number
-   * - email
-   * - address
-   *
-   * Social Platforms:
-   * - platform_name
-   * - platform_url
-   * - platform_icon
+   * Load dynamic footer data directly from ERP.
    */
   const [erpServices, contactInfoRecords, socialPlatforms] = await Promise.all([
     getServicesFromERP(),
@@ -70,14 +56,32 @@ export async function SiteFooter({
 
   /*
    * BLC-Contact-us Info
-   *
    * Uses the first ERP record.
    */
   const contactInfo = contactInfoRecords[0];
 
+  const isArabic = locale === "ar";
+
+  /*
+   * Contact information.
+   *
+   * English:
+   *   address
+   *
+   * Arabic:
+   *   ar_address
+   *
+   * If the Arabic address is empty, fall back to English.
+   */
   const phone = contactInfo?.phone_number?.trim() || "";
   const email = contactInfo?.email?.trim() || "";
-  const address = contactInfo?.address?.trim() || "";
+
+  const arabicAddress = contactInfo?.ar_address?.trim() || "";
+  const englishAddress = contactInfo?.address?.trim() || "";
+
+  const address = isArabic
+    ? arabicAddress || englishAddress
+    : englishAddress || arabicAddress;
 
   /*
    * Phone link.
@@ -85,13 +89,7 @@ export async function SiteFooter({
   const phoneHref = phone ? `tel:${phone.replace(/[^+\d]/g, "")}` : "#";
 
   /*
-   * WhatsApp number is loaded from ERP as well.
-   */
-  /*
    * Social links loaded dynamically from ERP.
-   *
-   * Only platforms that have both a name and URL
-   * are displayed.
    */
   const socialLinks = socialPlatforms
     .map((social) => ({
@@ -102,6 +100,9 @@ export async function SiteFooter({
     }))
     .filter((social) => Boolean(social.platformName) && Boolean(social.href));
 
+  /*
+   * Quick navigation links.
+   */
   const quickLinks = [
     {
       href: `/${locale}`,
@@ -125,19 +126,16 @@ export async function SiteFooter({
     },
   ];
 
-  const isArabic = locale === "ar";
-
   return (
     <footer
       className="bg-[var(--blc-green-900)] px-5 py-12 text-white lg:px-8"
       role="contentinfo"
+      dir={isArabic ? "rtl" : "ltr"}
     >
       <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-2 lg:grid-cols-4">
         {/* Brand */}
         <div>
-          {/* Slightly tighter padding keeps the smaller logo balanced across breakpoints. */}
           <div className="inline-flex rounded-xl bg-white p-1 md:p-1.5">
-            {/* Responsive width preserves the logo ratio while keeping the footer visually balanced. */}
             <Image
               src={settings.logo_url}
               alt={labels.logoAlt}
@@ -152,6 +150,7 @@ export async function SiteFooter({
           <h2 className="mt-4 text-lg font-semibold text-white">
             {labels.brandName}
           </h2>
+
           <p className="mt-2 max-w-xs text-sm leading-relaxed text-[var(--blc-cream-100)]">
             {labels.description}
           </p>
@@ -273,7 +272,7 @@ export async function SiteFooter({
             {/* Phone */}
             {phone && (
               <a href={phoneHref} className="hover:text-white focus-ring-dark">
-                {labels.phone}: {phone}
+                {labels.phone}: <bdi dir="auto">{phone}</bdi>
               </a>
             )}
 
@@ -283,15 +282,15 @@ export async function SiteFooter({
                 href={`mailto:${email}`}
                 className="break-all hover:text-white focus-ring-dark"
               >
-                {labels.email}: {email}
+                {labels.email}: <bdi dir="ltr">{email}</bdi>
               </a>
             )}
 
-            {/* Address */}
+            {/* Localized Address */}
             {address && (
-              <span>
-                {labels.address}: {address}
-              </span>
+              <p className="break-words leading-relaxed">
+                {labels.address}: <bdi dir="auto">{address}</bdi>
+              </p>
             )}
           </address>
         </div>
