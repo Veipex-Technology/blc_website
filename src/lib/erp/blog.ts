@@ -74,6 +74,7 @@ export function normalizeBlogRoute(route?: string): string {
 /**
  * GET Blog Post records from ERP.
  */
+
 export async function getBlogPostsFromERP(): Promise<BlogPost[]> {
   const { baseUrl, headers } = getErpConfig();
 
@@ -109,7 +110,7 @@ export async function getBlogPostsFromERP(): Promise<BlogPost[]> {
   });
 
   const response = await fetch(
-    `${baseUrl}/api/resource/Blog%20Post?${params.toString()}`,
+    `${baseUrl.replace(/\/$/, "")}/api/resource/Blog%20Post?${params.toString()}`,
     {
       headers,
       cache: "no-store",
@@ -118,20 +119,29 @@ export async function getBlogPostsFromERP(): Promise<BlogPost[]> {
 
   if (!response.ok) {
     const errorText = await response.text();
-
     throw new Error(`Blog Post records could not be loaded: ${errorText}`);
   }
 
   const result = (await response.json()) as {
     data?: Array<Omit<BlogPost, "slug">>;
+    posts?: Array<Omit<BlogPost, "slug">>;
   };
 
-  if (!Array.isArray(result.data)) {
+  // Support both standard Frappe and custom API responses.
+  const posts = result.data ?? result.posts ?? [];
+
+  if (!Array.isArray(posts)) {
     return [];
   }
 
-  return result.data.map((post) => ({
+  return posts.map((post) => ({
     ...post,
+
     slug: normalizeBlogRoute(post.route),
+
+    // Convert ERPNext relative image paths to absolute URLs.
+    meta_image: post.meta_image
+      ? new URL(post.meta_image, baseUrl).toString()
+      : undefined,
   }));
 }
