@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, MessageCircle, Phone } from "lucide-react";
+import { ArrowUpRight, MessageCircle } from "lucide-react";
 import sanitizeHtml from "sanitize-html";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -16,7 +16,6 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
 import { whatsappLink } from "@/lib/contact";
 
-import { getSiteSettings } from "@/lib/erp/api";
 import { getServicesFromERP, type Service } from "@/lib/erp/services";
 
 import type { Locale } from "@/i18n/routing";
@@ -279,12 +278,11 @@ export default async function ServicePage({ params }: PageProps) {
   const isArabic = locale === "ar";
   const servicesSegment = isArabic ? "خدمات" : "services";
 
-  const [t, common, nav, services, settings] = await Promise.all([
+  const [t, common, nav, services] = await Promise.all([
     getTranslations({ locale, namespace: "services" }),
     getTranslations({ locale, namespace: "common" }),
     getTranslations({ locale, namespace: "nav" }),
     getServicesFromERP(),
-    getSiteSettings(locale),
   ]);
 
   const service = findService(services, slug);
@@ -329,8 +327,6 @@ export default async function ServicePage({ params }: PageProps) {
       ),
     )
     .slice(0, 3);
-
-  const phoneHref = `tel:${settings.phone.replace(/[^+\d]/g, "")}`;
 
   const whatsappHref = whatsappLink(common("service_request_whatsapp_prefill"));
 
@@ -420,14 +416,6 @@ export default async function ServicePage({ params }: PageProps) {
                 </p>
 
                 <div className="mt-7 grid gap-3">
-                  <a
-                    href={phoneHref}
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-5 font-semibold text-[var(--blc-green-900)] hover:bg-[var(--blc-cream-100)] focus-ring-light"
-                  >
-                    <Phone size={18} aria-hidden="true" />
-                    {common("cta_call")}
-                  </a>
-
                   <a
                     href={whatsappHref}
                     className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border-2 border-[var(--blc-gold-300)] px-5 font-semibold text-white hover:bg-[var(--blc-green-700)] focus-ring-dark"

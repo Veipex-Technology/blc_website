@@ -7,7 +7,6 @@ import {
   Clock3,
   Link2,
   MessageCircle,
-  Phone,
   UserRound,
 } from "lucide-react";
 import sanitizeHtml from "sanitize-html";
@@ -21,29 +20,10 @@ import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
-import { WHATSAPP_NUMBER, whatsappLink } from "@/lib/contact";
+import { whatsappLink } from "@/lib/contact";
 import { getBlogPostsFromERP } from "@/lib/erp/blog";
 import type { BlogPost } from "@/lib/erp/blog";
 import type { Locale } from "@/i18n/routing";
-
-function getErpConfig() {
-  const baseUrl = process.env.ERP_BASE_URL;
-  const apiKey = process.env.ERP_API_KEY;
-  const apiSecret = process.env.ERP_API_SECRET;
-  if (!baseUrl || !apiKey || !apiSecret) {
-    throw new Error(
-      "Missing ERP_BASE_URL, ERP_API_KEY or ERP_API_SECRET in environment.",
-    );
-  }
-  return {
-    baseUrl,
-    headers: {
-      Authorization: `token ${apiKey}:${apiSecret}`,
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-  };
-}
 
 /**
  * Localized display values.
@@ -97,26 +77,6 @@ async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
  * Fetch optional site settings (e.g. phone/whatsapp) from ERP if configured,
  * with built-in safe fallbacks.
  */
-async function getSiteSettingsFromERP() {
-  try {
-    const { baseUrl, headers } = getErpConfig();
-    const response = await fetch(`${baseUrl}/api/resource/Website Settings`, {
-      headers,
-      cache: "no-store",
-    });
-    if (response.ok) {
-      const result = await response.json();
-      return result.data ?? {};
-    }
-  } catch {
-    // Fall back gracefully if website settings aren't exposed or configured
-  }
-  return {
-    phone: "+20 100 000 0000",
-    whatsapp_number: WHATSAPP_NUMBER,
-  };
-}
-
 function dateLabel(value: string, locale: Locale) {
   return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-EG", {
     year: "numeric",
@@ -173,10 +133,9 @@ export default async function BlogPostPage({
   params: Promise<{ locale: Locale; slug: string }>;
 }) {
   const { locale, slug } = await params;
-  const [post, allPosts, settings] = await Promise.all([
+  const [post, allPosts] = await Promise.all([
     getBlogPostBySlug(slug),
     getBlogPostsFromERP(),
-    getSiteSettingsFromERP(),
   ]);
 
   if (!post || !post.title?.trim() || !post.published) {
@@ -243,7 +202,6 @@ export default async function BlogPostPage({
     )
     .slice(0, 3);
 
-  const phoneHref = `tel:${(settings.phone ?? "").replace(/[^+\d]/g, "")}`;
   const whatsappHref = whatsappLink(common("whatsapp_prefill"));
 
   const jsonLd = {
@@ -484,13 +442,6 @@ export default async function BlogPostPage({
               {t("cta_text")}
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <a
-                href={phoneHref}
-                className="inline-flex min-h-12 items-center gap-2 rounded-full bg-white px-6 font-semibold text-[var(--blc-green-900)] hover:bg-[var(--blc-cream-100)] focus-ring-light"
-              >
-                <Phone size={18} aria-hidden="true" />
-                {common("cta_call")}
-              </a>
               <a
                 href={whatsappHref}
                 className="inline-flex min-h-12 items-center gap-2 rounded-full border-2 border-[var(--blc-gold-300)] px-6 font-semibold text-white hover:bg-[var(--blc-green-700)] focus-ring-dark"

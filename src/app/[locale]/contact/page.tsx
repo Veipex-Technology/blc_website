@@ -23,7 +23,7 @@ import { Reveal } from "@/components/reveal";
 import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
-import { whatsappDisplayNumber, whatsappLink } from "@/lib/contact";
+import { landline, whatsappDisplayNumber, whatsappLink } from "@/lib/contact";
 import { contactLocation } from "@/lib/contact-location";
 import { pickLocalized } from "@/lib/localize";
 import type { Locale } from "@/i18n/routing";
@@ -138,8 +138,6 @@ export default async function ContactPage({
 
   const isRecruitmentEmailPlaceholder = !configuredRecruitmentEmail && !email;
 
-  const phoneHref = phone ? `tel:${phone.replace(/[^+\d]/g, "")}` : "#";
-
   const whatsappHref = whatsappLink(common("whatsapp_prefill"));
 
   /*
@@ -249,22 +247,10 @@ export default async function ContactPage({
                           {t("phone")}
                         </strong>
 
-                        {phone && (
-                          <a
-                            href={phoneHref}
-                            className="block hover:text-[var(--blc-green-900)] focus-ring-light"
-                          >
-                            {phone}
-                          </a>
-                        )}
+                        {phone && <span className="block">{phone}</span>}
 
                         {secondPhone && (
-                          <a
-                            href={`tel:${secondPhone.replace(/[^+\d]/g, "")}`}
-                            className="mt-1 block hover:text-[var(--blc-green-900)] focus-ring-light"
-                          >
-                            {secondPhone}
-                          </a>
+                          <span className="mt-1 block">{secondPhone}</span>
                         )}
                       </span>
                     </div>
@@ -293,6 +279,29 @@ export default async function ContactPage({
                       </span>
                     </a>
                   )}
+
+                  {/* LANDLINE */}
+                  <a
+                    href={landline.href}
+                    aria-label={`${t("landline")}: ${landline.display}`}
+                    className="flex min-h-11 items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
+                  >
+                    <Phone
+                      size={20}
+                      className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
+                      aria-hidden="true"
+                    />
+
+                    <span>
+                      <strong className="block text-[var(--blc-green-900)]">
+                        {t("landline")}
+                      </strong>
+
+                      <span dir="ltr" className="[unicode-bidi:isolate]">
+                        {landline.display}
+                      </span>
+                    </span>
+                  </a>
 
                   {/* EMAIL */}
                   {email && (
@@ -534,16 +543,13 @@ export default async function ContactPage({
                     )}
 
                     {phone && (
-                      <a
-                        href={phoneHref}
-                        className="block hover:text-[var(--blc-green-900)] focus-ring-light"
-                      >
+                      <span className="block">
                         <strong className="block text-[var(--blc-green-900)]">
                           {t("phone")}
                         </strong>
 
                         {phone}
-                      </a>
+                      </span>
                     )}
 
                     {email && (

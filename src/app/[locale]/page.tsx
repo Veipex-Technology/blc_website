@@ -2,12 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
+  ArrowUpRight,
   ClipboardCheck,
   GraduationCap,
   HeartHandshake,
   HeartPulse,
-  MessageCircle,
-  Phone,
   Quote,
   ShieldCheck,
 } from "lucide-react";
@@ -26,12 +25,7 @@ import { NewsletterSection } from "@/components/newsletter-section";
 import { createPageMetadata } from "@/lib/metadata";
 import { whatsappLink } from "@/lib/contact";
 import { getMainServicesFromERP } from "@/lib/erp/services";
-import {
-  getFaqs,
-  getPartners,
-  getSiteSettings,
-  getTestimonials,
-} from "@/lib/erp/api";
+import { getFaqs, getPartners, getTestimonials } from "@/lib/erp/api";
 
 import type { Locale } from "@/i18n/routing";
 import { FounderVideo } from "@/components/founder-video";
@@ -79,21 +73,20 @@ export default async function HomePage({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "home" });
   const common = await getTranslations({ locale, namespace: "common" });
-  const [mainServices, testimonials, partners, faqs, settings, media] =
-    await Promise.all([
+  const [mainServices, testimonials, partners, faqs, media] = await Promise.all(
+    [
       getMainServicesFromERP(),
       getTestimonials(locale),
       getPartners(locale),
       getFaqs(locale),
-      getSiteSettings(locale),
       getMediaForWebsiteFromERP("Home Page").catch((error) => {
         console.log("media:", media, "founderVideoUrl:", founderVideoUrl);
         return [];
       }),
-    ]);
+    ],
+  );
   const founderVideoUrl = media[0]?.attach_wpov_url ?? null;
   console.log("media:", media, "founderVideoUrl:", founderVideoUrl);
-  const phone = `tel:${settings.phone.replace(/[^+\d]/g, "")}`;
   const whatsapp = whatsappLink(common("whatsapp_prefill"));
   const publishedFaqs = faqs.filter((faq) => faq.published);
   const faqSchema = {
@@ -144,26 +137,30 @@ export default async function HomePage({
                 </p>
               </HeroTextLayer>
               <HeroTextLayer delay={0.38}>
-                <div className="mt-9 flex flex-wrap items-center gap-3">
-                  <a
-                    href={phone}
-                    className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[var(--blc-green-900)] px-6 font-semibold text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-[var(--blc-green-700)] focus-ring-dark"
-                  >
-                    <Phone size={18} aria-hidden="true" />
-                    {common("cta_call")}
-                  </a>
+                <div className="mt-8 flex flex-wrap items-center gap-4">
                   <a
                     href={whatsapp}
-                    className="inline-flex min-h-12 items-center gap-2 rounded-full border-2 border-[var(--blc-green-900)] px-6 font-semibold text-[var(--blc-green-900)] transition hover:-translate-y-0.5 hover:bg-white/60 focus-ring-light"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-12 items-center gap-3 rounded-full bg-[var(--blc-green-900)] px-6 font-semibold text-white shadow-soft transition hover:bg-[var(--blc-green-700)] focus-ring-dark motion-reduce:transition-none"
                   >
-                    <MessageCircle size={18} aria-hidden="true" />
                     {common("cta_whatsapp")}
+                    <ArrowUpRight
+                      size={18}
+                      aria-hidden="true"
+                      className="rtl:rotate-180"
+                    />
                   </a>
                   <Link
                     href={`/${locale}/contact`}
-                    className="inline-flex min-h-11 items-center text-start font-semibold text-[var(--blc-green-900)] underline decoration-[var(--blc-gold-500)] underline-offset-4 hover:text-[var(--blc-green-700)] focus-ring-light"
+                    className="inline-flex min-h-12 items-center gap-3 rounded-full bg-[var(--blc-green-900)] px-6 font-semibold text-white shadow-soft transition hover:bg-[var(--blc-green-700)] focus-ring-dark motion-reduce:transition-none"
                   >
                     {t("request_care")}
+                    <ArrowUpRight
+                      size={18}
+                      aria-hidden="true"
+                      className="rtl:rotate-180"
+                    />
                   </Link>
                 </div>
               </HeroTextLayer>
