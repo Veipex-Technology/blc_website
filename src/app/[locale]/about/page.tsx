@@ -569,12 +569,14 @@ export default async function AboutPage({
             />
 
             <div className="relative grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+              {/* Consultant Image */}
               <Reveal>
                 <div className="relative mx-auto w-full max-w-xl lg:mx-0">
                   <div
                     className="absolute -bottom-4 -start-4 size-28 rounded-card bg-[var(--blc-green-900)]/10 sm:-bottom-5 sm:-start-5"
                     aria-hidden="true"
                   />
+
                   <div className="relative aspect-[4/5] overflow-hidden rounded-card border border-[var(--blc-sand-200)] bg-[var(--blc-sand-200)] shadow-soft">
                     <Image
                       src={consultantPhotoUrl}
@@ -597,22 +599,27 @@ export default async function AboutPage({
                 </div>
               </Reveal>
 
+              {/* Consultant Information */}
               <Reveal>
                 <div className="max-w-2xl">
                   <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--blc-gold-500)]">
                     {consultantSection.eyebrow}
                   </p>
+
                   <h2 className="mt-3 text-3xl font-bold leading-tight text-[var(--blc-green-900)] sm:text-4xl lg:text-5xl">
                     {consultantSection.title}
                   </h2>
+
                   {isArabic ? (
                     <>
                       <p className="mt-4 text-lg font-semibold text-[var(--blc-green-700)]">
                         {consultantSection.subtitle}
                       </p>
+
                       <p className="mt-5 text-lg leading-8 text-[var(--blc-green-700)]">
                         {consultantSection.intro}
                       </p>
+
                       <p className="mt-4 leading-7 text-[var(--blc-green-700)]">
                         {consultantSection.body}
                       </p>
@@ -623,19 +630,19 @@ export default async function AboutPage({
                         {consultantInfo?.person_name ||
                           consultantSection.consultantName}
                       </h3>
-                      <p className="mt-3 leading-7 text-[var(--blc-green-700)]">
-                        {consultantInformationHtml ? (
-                          <div
-                            className="mt-3 leading-7 text-[var(--blc-green-700)] [&_p]:mb-3 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:ps-6 [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:ps-6 [&_strong]:font-bold"
-                            dangerouslySetInnerHTML={{
-                              __html: consultantInformationHtml,
-                            }}
-                          />
-                        ) : null}
-                      </p>
+
+                      {consultantInformationHtml ? (
+                        <div
+                          className="mt-3 leading-7 text-[var(--blc-green-700)] [&_p]:mb-3 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:ps-6 [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:ps-6 [&_strong]:font-bold"
+                          dangerouslySetInnerHTML={{
+                            __html: consultantInformationHtml,
+                          }}
+                        />
+                      ) : null}
                     </>
                   )}
 
+                  {/* Consultant Highlights */}
                   <div className="mt-8 grid gap-3 sm:grid-cols-3">
                     {consultantSection.highlights.map((highlight) => {
                       const Icon = highlight.icon;
@@ -650,9 +657,11 @@ export default async function AboutPage({
                             className="text-[var(--blc-gold-500)]"
                             aria-hidden="true"
                           />
+
                           <h3 className="mt-4 text-base font-bold text-[var(--blc-green-900)]">
                             {highlight.title}
                           </h3>
+
                           <p className="mt-2 text-sm leading-6 text-[var(--blc-green-700)]">
                             {highlight.text}
                           </p>

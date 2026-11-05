@@ -6,9 +6,12 @@ import { useTranslations } from "next-intl";
 import { createInquirySchema, type InquiryPayload } from "@/lib/inquiry-schema";
 import type { Locale } from "@/i18n/routing";
 
-type ServiceOption = {
-  slug: string;
-  title: string;
+export type ContactServiceOption = {
+  name: string;
+  service_name?: string;
+  service_name_ar?: string;
+  en_slug?: string;
+  ar_slug?: string;
 };
 
 type ServiceChild = {
@@ -32,13 +35,15 @@ type FormValues = Omit<InquiryPayload, "consent"> & {
 type ContactFormProps = {
   locale: Locale;
   initialService?: string;
+  services: ContactServiceOption[];
 };
 
-export function ContactForm({ locale, initialService }: ContactFormProps) {
+export function ContactForm({
+  locale,
+  initialService,
+  services,
+}: ContactFormProps) {
   const t = useTranslations("contact");
-
-  const [services, setServices] = useState<ServiceOption[]>([]);
-  const [loadingServices, setLoadingServices] = useState(true);
 
   const [values, setValues] = useState<FormValues>({
     full_name: "",
@@ -66,59 +71,6 @@ export function ContactForm({ locale, initialService }: ContactFormProps) {
     message: t("v_message"),
     consent: t("v_consent"),
   });
-
-  /*
-   * ---------------------------------------------------------
-   * GET needed_services FROM ERP
-   * ---------------------------------------------------------
-   */
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadServices() {
-      try {
-        setLoadingServices(true);
-
-        const response = await fetch(`/api/contact-us-form?locale=${locale}`, {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-          },
-          cache: "no-store",
-        });
-
-        if (!response.ok) {
-          throw new Error("Services could not be loaded.");
-        }
-
-        const result = (await response.json()) as {
-          services?: ServiceOption[];
-          error?: string;
-        };
-
-        if (cancelled) return;
-
-        setServices(result.services ?? []);
-      } catch (error) {
-        console.error("Failed to load services:", error);
-
-        if (!cancelled) {
-          setServices([]);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoadingServices(false);
-        }
-      }
-    }
-
-    loadServices();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [locale]);
 
   /*
    * ---------------------------------------------------------
@@ -391,16 +343,17 @@ export function ContactForm({ locale, initialService }: ContactFormProps) {
           name="service"
           value={values.service}
           onChange={(event) => update("service", event.target.value)}
-          disabled={loadingServices}
-          className="min-h-12 rounded-xl border border-[var(--blc-sand-200)] bg-white px-4 focus:border-[var(--blc-gold-500)] focus-ring-light disabled:cursor-wait disabled:opacity-60"
+          className="min-h-12 rounded-xl border border-[var(--blc-sand-200)] bg-white px-4 focus:border-[var(--blc-gold-500)] focus-ring-light"
         >
-          <option value="">
-            {loadingServices ? "Loading services..." : t("service_choose")}
-          </option>
+          <option value="">{t("service_choose")}</option>
 
           {services.map((service) => (
-            <option key={service.slug} value={service.slug}>
-              {service.title}
+            <option key={service.name} value={service.name}>
+              {locale === "ar"
+                ? service.service_name_ar ||
+                  service.service_name ||
+                  service.name
+                : service.service_name || service.name}
             </option>
           ))}
         </select>
