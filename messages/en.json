@@ -335,9 +335,13 @@
     "submit": "Send inquiry",
     "success": "Thank you. We received your inquiry and will contact you soon.",
     "error": "Something went wrong. Please call or message us on WhatsApp.",
+
+    "v_required": "This field is required.",
+    "v_phone": "Please enter a valid phone number.",
     "v_email": "Please enter a valid email address.",
     "v_message": "Message must be 1000 characters or fewer.",
     "v_consent": "Please agree to the Privacy Policy.",
+
     "details": "Contact details",
     "form_title": "Send an inquiry",
     "working_hours": "Working hours",

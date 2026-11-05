@@ -46,6 +46,43 @@ function getErpConfig() {
 }
 
 /**
+ * Localized display values.
+ * Arabic mode uses the custom Arabic fields, with fallback to English
+ * values when they are empty.
+ */
+function getCategoryLabel(post: BlogPost, locale: Locale): string {
+  return locale === "ar"
+    ? post.blog_category_arabic_title || post.blog_category || ""
+    : post.blog_category || "";
+}
+
+function getBloggerLabel(post: BlogPost, locale: Locale): string {
+  return locale === "ar"
+    ? post.blogger_arabic_short_name ||
+        post.blogger_short_name ||
+        post.blogger ||
+        ""
+    : post.blogger_short_name || post.blogger || "";
+}
+
+function getTitle(post: BlogPost, locale: Locale): string {
+  return locale === "ar"
+    ? post.custom_arabic_title || post.title || ""
+    : post.title || "";
+}
+
+function getIntro(post: BlogPost, locale: Locale): string {
+  return locale === "ar"
+    ? post.custom_arabic_blog_intro || post.blog_intro || ""
+    : post.blog_intro || "";
+}
+
+function getContent(post: BlogPost, locale: Locale): string {
+  const english = post.content_html || post.content_md || post.content || "";
+  return locale === "ar" ? post.custom_arabic_content || english : english;
+}
+
+/**
  * Fetch a single blog post by matching its normalized slug against ERP routes.
  */
 async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
@@ -111,8 +148,15 @@ export async function generateMetadata({
 
   if (!post || !post.title?.trim()) return {};
 
-  const title = post.meta_title?.trim() || post.title;
-  const description = post.meta_description?.trim() || post.blog_intro || title;
+  const arabicTitle =
+    locale === "ar" ? post.custom_arabic_title?.trim() : undefined;
+
+  const title = arabicTitle || post.meta_title?.trim() || post.title;
+  const description =
+    (locale === "ar" ? post.custom_arabic_blog_intro?.trim() : undefined) ||
+    post.meta_description?.trim() ||
+    post.blog_intro ||
+    title;
 
   return createPageMetadata({
     locale,
@@ -142,8 +186,14 @@ export default async function BlogPostPage({
   const t = await getTranslations({ locale, namespace: "blog" });
   const common = await getTranslations({ locale, namespace: "common" });
 
-  // Select the appropriate content field depending on ERP configuration
-  const rawContent = post.content_html || post.content_md || post.content || "";
+  const isArabic = locale === "ar";
+  const title = getTitle(post, locale);
+  const intro = getIntro(post, locale);
+  const categoryLabel = getCategoryLabel(post, locale);
+  const bloggerLabel = getBloggerLabel(post, locale);
+
+  // Arabic content in ar mode, English content otherwise (with fallback)
+  const rawContent = getContent(post, locale);
 
   const safeBody = sanitizeHtml(rawContent, {
     allowedTags: [
@@ -170,7 +220,7 @@ export default async function BlogPostPage({
 
   const shareLinks = [
     {
-      href: whatsappLink(`${post.title}${canonical}`),
+      href: whatsappLink(`${title} ${canonical}`),
       label: t("share_whatsapp"),
     },
     {
@@ -178,12 +228,12 @@ export default async function BlogPostPage({
       label: t("share_facebook"),
     },
     {
-      href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(canonical)}&text=${encodeURIComponent(post.title)}`,
+      href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(canonical)}&text=${encodeURIComponent(title)}`,
       label: t("share_x"),
     },
   ];
 
-  // Find related posts within the same category
+  // Find related posts within the same category (compared by original value)
   const related = allPosts
     .filter(
       (candidate) =>
@@ -199,23 +249,23 @@ export default async function BlogPostPage({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: post.title,
-    description: post.blog_intro,
+    inLanguage: locale,
+    headline: title,
+    description: intro,
     datePublished: post.published_on,
     author: {
       "@type": "Organization",
-      name: post.blogger ?? "Better Life Care",
+      name: bloggerLabel || "Better Life Care",
     },
-    image: post.meta_image
-      ? `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}${post.meta_image}`
-      : undefined,
+    // meta_image is already an absolute URL (see getBlogPostsFromERP)
+    image: post.meta_image || undefined,
     mainEntityOfPage: canonical,
     publisher: { "@type": "Organization", name: "Better Life Care" },
   };
 
   return (
     <main>
-      <Section variant="cream" dir={locale === "ar" ? "rtl" : "ltr"}>
+      <Section variant="cream" dir={isArabic ? "rtl" : "ltr"}>
         <Container>
           <article>
             <Reveal variant="zoom">
@@ -247,32 +297,32 @@ export default async function BlogPostPage({
                     className="shrink-0 text-[var(--blc-gold-500)] rtl:rotate-180"
                   />
                   <span className="truncate" aria-current="page">
-                    {post.title}
+                    {title}
                   </span>
                 </nav>
 
                 <BlogHeroImage
                   src={post.meta_image}
-                  alt={post.title ?? t("image_alt")}
+                  alt={title || t("image_alt")}
                 />
               </div>
             </Reveal>
 
             <Reveal delay={100}>
               <header className="mx-auto mt-10 max-w-4xl text-center">
-                {post.blog_category && (
+                {categoryLabel && (
                   <span className="inline-flex rounded-full border border-[var(--blc-gold-500)]/40 bg-[var(--blc-white)] px-4 py-2 text-sm font-semibold uppercase tracking-wide text-[var(--blc-gold-500)] shadow-sm">
-                    {post.blog_category}
+                    {categoryLabel}
                   </span>
                 )}
 
                 <h1 className="mt-6 text-4xl font-bold leading-[1.1] text-[var(--blc-green-900)] sm:text-6xl">
-                  {post.title}
+                  {title}
                 </h1>
 
-                {post.blog_intro && (
+                {intro && (
                   <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-[var(--blc-green-700)] sm:text-xl">
-                    {post.blog_intro}
+                    {intro}
                   </p>
                 )}
 
@@ -300,14 +350,14 @@ export default async function BlogPostPage({
                       {post.read_time} {t("read_time")}
                     </span>
                   )}
-                  {post.blogger && (
+                  {bloggerLabel && (
                     <span className="inline-flex items-center gap-2">
                       <UserRound
                         size={17}
                         className="text-[var(--blc-gold-500)]"
                         aria-hidden="true"
                       />
-                      {post.blogger}
+                      {bloggerLabel}
                     </span>
                   )}
                 </div>
@@ -321,9 +371,9 @@ export default async function BlogPostPage({
                   dangerouslySetInnerHTML={{ __html: safeBody }}
                 />
               ) : (
-                post.blog_intro && (
+                intro && (
                   <p className="mt-6 text-lg text-[var(--blc-green-700)]">
-                    {post.blog_intro}
+                    {intro}
                   </p>
                 )
               )}
@@ -356,58 +406,75 @@ export default async function BlogPostPage({
       </Section>
 
       {related.length > 0 && (
-        <Section variant="cream">
+        <Section variant="cream" dir={isArabic ? "rtl" : "ltr"}>
           <Container>
             <Reveal>
               <SectionHeading title={t("related")} />
             </Reveal>
             <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {related.map((relatedPost) => (
-                <Reveal key={relatedPost.name}>
-                  <Link
-                    href={`/${locale}/blog/${relatedPost.slug}`}
-                    className="group block h-full rounded-card bg-white p-6 shadow-soft hover:-translate-y-1 focus-ring-light"
-                  >
-                    <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-[var(--blc-sand-200)]">
-                      {relatedPost.meta_image ? (
-                        <Image
-                          src={relatedPost.meta_image}
-                          alt={relatedPost.title ?? "Related post"}
-                          fill
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-xs font-semibold text-[var(--blc-green-700)]">
-                          {relatedPost.title}
-                        </div>
+              {related.map((relatedPost) => {
+                const relatedTitle = getTitle(relatedPost, locale);
+                const relatedIntro = getIntro(relatedPost, locale);
+                const relatedCategory = getCategoryLabel(relatedPost, locale);
+
+                return (
+                  <Reveal key={relatedPost.name}>
+                    <Link
+                      href={`/${locale}/blog/${relatedPost.slug}`}
+                      className="group block h-full rounded-card bg-white p-6 shadow-soft hover:-translate-y-1 focus-ring-light"
+                    >
+                      <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-[var(--blc-sand-200)]">
+                        {relatedPost.meta_image ? (
+                          <Image
+                            src={relatedPost.meta_image}
+                            alt={relatedTitle || "Related post"}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 33vw"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-xs font-semibold text-[var(--blc-green-700)]">
+                            {relatedTitle}
+                          </div>
+                        )}
+                      </div>
+
+                      {relatedCategory && (
+                        <span className="mt-5 inline-block text-sm font-semibold text-[var(--blc-gold-500)]">
+                          {relatedCategory}
+                        </span>
                       )}
-                    </div>
-                    <h2 className="mt-5 text-xl font-bold text-[var(--blc-green-900)]">
-                      {relatedPost.title}
-                    </h2>
-                    {relatedPost.blog_intro && (
-                      <p className="mt-3 text-[var(--blc-green-700)] line-clamp-2">
-                        {relatedPost.blog_intro}
-                      </p>
-                    )}
-                    <span className="mt-5 inline-flex items-center gap-2 font-semibold text-[var(--blc-gold-500)]">
-                      {t("read_more")}
-                      <ArrowUpRight
-                        size={17}
-                        aria-hidden="true"
-                        className="rtl:rotate-180"
-                      />
-                    </span>
-                  </Link>
-                </Reveal>
-              ))}
+
+                      <h2 className="mt-2 text-xl font-bold text-[var(--blc-green-900)]">
+                        {relatedTitle}
+                      </h2>
+                      {relatedIntro && (
+                        <p className="mt-3 text-[var(--blc-green-700)] line-clamp-2">
+                          {relatedIntro}
+                        </p>
+                      )}
+                      <span className="mt-5 inline-flex items-center gap-2 font-semibold text-[var(--blc-gold-500)]">
+                        {t("read_more")}
+                        <ArrowUpRight
+                          size={17}
+                          aria-hidden="true"
+                          className="rtl:rotate-180"
+                        />
+                      </span>
+                    </Link>
+                  </Reveal>
+                );
+              })}
             </div>
           </Container>
         </Section>
       )}
 
-      <Section variant="dark" className="text-center">
+      <Section
+        variant="dark"
+        dir={isArabic ? "rtl" : "ltr"}
+        className="text-center"
+      >
         <Container>
           <Reveal>
             <h2 className="mx-auto max-w-3xl text-3xl font-bold sm:text-4xl">
