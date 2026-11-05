@@ -12,7 +12,7 @@ import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
-import { getBlogPostsFromERP } from "@/lib/erp/blog";
+import { getBlogPostsFromERP, type BlogPost } from "@/lib/erp/blog";
 import type { Locale } from "@/i18n/routing";
 
 const pageSize = 9;
@@ -55,16 +55,35 @@ export default async function BlogPage({
     namespace: "blog",
   });
 
+  const isArabic = locale === "ar";
+
+  /**
+   * Display labels. Arabic mode uses the custom Arabic fields,
+   * with fallback to the English values when they are empty.
+   */
+  const getCategoryLabel = (post: BlogPost): string =>
+    isArabic
+      ? post.blog_category_arabic_title || post.blog_category || ""
+      : post.blog_category || "";
+
+  const getBloggerLabel = (post: BlogPost): string =>
+    isArabic
+      ? post.blogger_arabic_short_name ||
+        post.blogger_short_name ||
+        post.blogger ||
+        ""
+      : post.blogger_short_name || post.blogger || "";
+
+  const getTitle = (post: BlogPost): string =>
+    isArabic ? post.custom_arabic_title || post.title || "" : post.title || "";
+
+  const getIntro = (post: BlogPost): string =>
+    isArabic
+      ? post.custom_arabic_blog_intro || post.blog_intro || ""
+      : post.blog_intro || "";
+
   /**
    * Get Blog Posts directly from ERPNext.
-   *
-   * Fields:
-   * - blog_category
-   * - title
-   * - blog_intro
-   * - route
-   * - published_on
-   * - meta_image
    */
   const allPosts = await getBlogPostsFromERP();
 
@@ -76,23 +95,21 @@ export default async function BlogPage({
   /**
    * Build categories from the ERP blog_category field.
    *
-   * Example:
-   * blog_category = "Healthcare"
-   *
-   * The category itself is used as the category label.
+   * slug  -> original blog_category value (used in the URL and filter)
+   * title -> localized label (Arabic title in ar mode)
    */
-  const categoryNames = Array.from(
-    new Set(
-      publishedPosts
-        .map((post) => post.blog_category)
-        .filter((category): category is string => Boolean(category)),
-    ),
-  );
+  const categoryMap = new Map<string, { title: string; slug: string }>();
 
-  const categories = categoryNames.map((category) => ({
-    title: category,
-    slug: category,
-  }));
+  for (const post of publishedPosts) {
+    if (post.blog_category && !categoryMap.has(post.blog_category)) {
+      categoryMap.set(post.blog_category, {
+        title: getCategoryLabel(post),
+        slug: post.blog_category,
+      });
+    }
+  }
+
+  const categories = Array.from(categoryMap.values());
 
   /**
    * Validate requested category.
@@ -126,14 +143,11 @@ export default async function BlogPage({
 
   const visiblePosts = filteredPosts.slice(startIndex, startIndex + pageSize);
 
-  const dateFormatter = new Intl.DateTimeFormat(
-    locale === "ar" ? "ar-EG" : "en-EG",
-    {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    },
-  );
+  const dateFormatter = new Intl.DateTimeFormat(isArabic ? "ar-EG" : "en-EG", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   const hrefFor = (page: number) => {
     const params = new URLSearchParams();
@@ -156,7 +170,7 @@ export default async function BlogPage({
       {/* Editorial Blog Header */}
       <Section
         variant="dark"
-        dir={locale === "ar" ? "rtl" : "ltr"}
+        dir={isArabic ? "rtl" : "ltr"}
         className="relative overflow-hidden py-16 lg:py-24"
       >
         <div
@@ -170,7 +184,7 @@ export default async function BlogPage({
 
         <Container className="relative">
           <MotionHero
-            dir={locale === "ar" ? "rtl" : "ltr"}
+            dir={isArabic ? "rtl" : "ltr"}
             className="mx-auto max-w-4xl text-center"
           >
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--blc-gold-300)]">
@@ -247,22 +261,18 @@ export default async function BlogPage({
           ) : (
             <MotionSection className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {visiblePosts.map((post) => {
-                /**
-                 * Blog Post ERP fields:
-                 *
-                 * title       -> post.title
-                 * category    -> post.blog_category
-                 * intro       -> post.blog_intro
-                 * slug        -> post.route
-                 * image       -> post.meta_image
-                 */
+                const categoryLabel = getCategoryLabel(post);
+                const bloggerLabel = getBloggerLabel(post);
+                const title = getTitle(post);
+                const intro = getIntro(post);
+
                 return (
                   <MotionCard
                     key={post.name}
                     className="group h-full overflow-hidden rounded-card bg-white shadow-soft"
                   >
                     <Link
-                      href={`/${locale}/blog/${post.route}`}
+                      href={`/${locale}/blog/${post.slug}`}
                       className="block h-full focus-ring-light"
                     >
                       {/* Blog Image */}
@@ -270,7 +280,7 @@ export default async function BlogPage({
                         {post.meta_image ? (
                           <MotionImage
                             src={post.meta_image}
-                            alt={post.title ?? "Blog post"}
+                            alt={title || "Blog post"}
                             fill
                             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                             className="blog-card-image object-cover"
@@ -283,9 +293,9 @@ export default async function BlogPage({
                       <div className="p-6">
                         {/* Category + Date */}
                         <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--blc-green-700)]">
-                          {post.blog_category && (
+                          {categoryLabel && (
                             <span className="font-semibold text-[var(--blc-gold-500)]">
-                              {post.blog_category}
+                              {categoryLabel}
                             </span>
                           )}
 
@@ -300,13 +310,20 @@ export default async function BlogPage({
 
                         {/* Blog Title */}
                         <h2 className="blog-card-title mt-4 text-xl font-bold text-[var(--blc-green-900)]">
-                          {post.title}
+                          {title}
                         </h2>
 
+                        {/* Blogger */}
+                        {bloggerLabel && (
+                          <p className="mt-2 text-sm text-[var(--blc-green-700)]">
+                            {bloggerLabel}
+                          </p>
+                        )}
+
                         {/* Blog Intro */}
-                        {post.blog_intro && (
+                        {intro && (
                           <p className="mt-3 text-[var(--blc-green-700)]">
-                            {post.blog_intro}
+                            {intro}
                           </p>
                         )}
 

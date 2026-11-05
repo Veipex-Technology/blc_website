@@ -3,21 +3,15 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {};
 
-const erpUrl = new URL(process.env.ERP_BASE_URL ?? "http://127.0.0.1:8000");
+const erpUrl = new URL(
+  process.env.ERP_BASE_URL ?? "https://better-life-care.frappe.cloud",
+);
 
 nextConfig.images = {
-  dangerouslyAllowLocalIP: true,
   remotePatterns: [
     {
-      protocol: "http",
-      hostname: "127.0.0.1",
-      port: "8000",
-      pathname: "/files/**",
-    },
-    {
-      protocol: "http",
-      hostname: "localhost",
-      port: "8000",
+      protocol: "https",
+      hostname: "better-life-care.frappe.cloud",
       pathname: "/files/**",
     },
     {
