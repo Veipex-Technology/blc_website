@@ -1,12 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Link2 } from "lucide-react";
+import { Link2, Phone } from "lucide-react";
 
 import type { Locale } from "@/i18n/routing";
 import type { SiteSettings } from "@/lib/erp/types";
 import { getServicesFromERP } from "@/lib/erp/services";
 import { getBLCContactUsInfoFromERP } from "@/lib/erp/contact-info";
 import { getSocialPlatformsFromERP } from "@/lib/erp/social-platforms";
+import { landline } from "@/lib/contact";
 
 export async function SiteFooter({
   locale,
@@ -28,6 +29,7 @@ export async function SiteFooter({
     follow: string;
     logoAlt: string;
     phone: string;
+    landline: string;
     email: string;
     address: string;
     facebook: string;
@@ -82,11 +84,6 @@ export async function SiteFooter({
   const address = isArabic
     ? arabicAddress || englishAddress
     : englishAddress || arabicAddress;
-
-  /*
-   * Phone link.
-   */
-  const phoneHref = phone ? `tel:${phone.replace(/[^+\d]/g, "")}` : "#";
 
   /*
    * Social links loaded dynamically from ERP.
@@ -271,10 +268,24 @@ export async function SiteFooter({
           <address className="mt-4 grid gap-2 text-sm not-italic text-[var(--blc-cream-100)]">
             {/* Phone */}
             {phone && (
-              <a href={phoneHref} className="hover:text-white focus-ring-dark">
+              <span>
                 {labels.phone}: <bdi dir="auto">{phone}</bdi>
-              </a>
+              </span>
             )}
+
+            <a
+              href={landline.href}
+              aria-label={`${labels.landline}: ${landline.display}`}
+              className="inline-flex min-h-11 items-center gap-2 hover:text-white focus-ring-dark"
+            >
+              <Phone size={16} aria-hidden="true" />
+              <span>
+                {labels.landline}:{" "}
+                <span dir="ltr" className="[unicode-bidi:isolate]">
+                  {landline.display}
+                </span>
+              </span>
+            </a>
 
             {/* Email */}
             {email && (

@@ -2,14 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ChevronDown,
-  Menu,
-  MessageCircle,
-  Phone,
-  Stethoscope,
-  X,
-} from "lucide-react";
+import { ChevronDown, Menu, MessageCircle, Stethoscope, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { LanguageSwitcher } from "./language-switcher";
 import type { Locale } from "@/i18n/routing";
@@ -33,7 +26,6 @@ export function SiteHeader({
   labels: {
     menu: string;
     close: string;
-    call: string;
     whatsapp: string;
     logoAlt: string;
     prefill: string;
@@ -229,13 +221,6 @@ export function SiteHeader({
             </Link>
           )}
           <a
-            href={`tel:${settings.phone.replace(/[^+\d]/g, "")}`}
-            className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[var(--blc-green-900)] px-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--blc-green-700)] focus-ring-dark"
-          >
-            <Phone size={16} aria-hidden="true" />
-            {labels.call}
-          </a>
-          <a
             href={whatsappHref}
             className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[var(--blc-green-700)] px-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--blc-green-900)] focus-ring-dark"
           >
@@ -333,13 +318,6 @@ export function SiteHeader({
             })}
           </nav>
           <div className="mt-auto grid gap-3 border-t border-[var(--blc-sand-200)] pt-6">
-            <a
-              href={`tel:${settings.phone.replace(/[^+\d]/g, "")}`}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--blc-green-900)] px-5 font-semibold text-white focus-ring-dark"
-            >
-              <Phone size={18} aria-hidden="true" />
-              {labels.call}
-            </a>
             <a
               href={whatsappHref}
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--blc-green-700)] px-5 font-semibold text-white focus-ring-dark"

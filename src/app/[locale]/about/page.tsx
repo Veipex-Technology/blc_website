@@ -13,7 +13,6 @@ import {
   ImageIcon,
   MessageCircle,
   PersonStanding,
-  Phone,
   ShieldCheck,
   ShieldPlus,
   TrendingUp,
@@ -196,8 +195,6 @@ export default async function AboutPage({
         missionFallback: "Mission",
         visionFallback: "Vision",
       };
-
-  const phone = "tel:[Phone Number]";
 
   const whatsapp = whatsappLink(common("whatsapp_prefill"));
 
@@ -933,14 +930,6 @@ export default async function AboutPage({
             </p>
 
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <a
-                href={phone}
-                className="inline-flex min-h-12 items-center gap-2 rounded-full bg-white px-6 font-semibold text-[var(--blc-green-900)] hover:bg-[var(--blc-cream-100)] focus-ring-light"
-              >
-                <Phone size={18} aria-hidden="true" />
-                {common("cta_call")}
-              </a>
-
               <a
                 href={whatsapp}
                 className="inline-flex min-h-12 items-center gap-2 rounded-full border-2 border-[var(--blc-gold-300)] px-6 font-semibold text-white hover:bg-[var(--blc-green-700)] focus-ring-dark"

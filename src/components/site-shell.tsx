@@ -4,7 +4,7 @@ import { getServicesForNavigationFromERP } from "@/lib/erp/services";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
 import type { Locale } from "@/i18n/routing";
-import { whatsappLink } from "@/lib/contact";
+import { landline, whatsappLink } from "@/lib/contact";
 
 export async function SiteShell({
   locale,
@@ -25,7 +25,6 @@ export async function SiteShell({
     { href: `/${locale}/blog`, label: nav("blog") },
     { href: `/${locale}/contact`, label: nav("contact") },
   ];
-  const phoneHref = `tel:${settings.phone.replace(/[^+\d]/g, "")}`;
   const whatsappHref = whatsappLink(common("whatsapp_prefill"));
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const organizationJsonLd = {
@@ -34,7 +33,7 @@ export async function SiteShell({
     name: common("brand_name"),
     url: siteUrl,
     logo: `${siteUrl}${settings.logo_url}`,
-    telephone: settings.phone,
+    telephone: [settings.phone, landline.href.slice(4)],
     sameAs: Object.values(settings.social).filter(Boolean),
   };
   const headerServices = erpServices.flatMap((service) => {
@@ -77,7 +76,6 @@ export async function SiteShell({
         labels={{
           menu: common("menu_open"),
           close: common("menu_close"),
-          call: common("cta_call"),
           whatsapp: common("cta_whatsapp"),
           logoAlt: footer("logo_alt"),
           prefill: common("whatsapp_prefill"),
@@ -104,6 +102,7 @@ export async function SiteShell({
           follow: footer("follow"),
           logoAlt: footer("logo_alt"),
           phone: footer("phone"),
+          landline: footer("landline"),
           email: footer("email"),
           address: footer("address"),
           facebook: footer("facebook"),
@@ -131,13 +130,6 @@ export async function SiteShell({
           className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-full bg-[var(--blc-green-700)] px-4 font-semibold text-white shadow-soft hover:bg-[var(--blc-green-900)] focus-ring-dark sm:min-w-0"
         >
           {common("cta_whatsapp")}
-        </a>
-        <a
-          href={phoneHref}
-          aria-label={common("cta_call")}
-          className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-full bg-[var(--blc-green-900)] px-4 font-semibold text-white shadow-soft hover:bg-[var(--blc-green-700)] focus-ring-dark sm:min-w-0 md:hidden"
-        >
-          {common("cta_call")}
         </a>
       </div>
     </div>

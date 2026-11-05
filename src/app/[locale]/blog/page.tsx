@@ -8,6 +8,7 @@ import { MotionFilters } from "@/components/motion/motion-filters";
 import { MotionHero } from "@/components/motion/motion-hero";
 import { MotionImage } from "@/components/motion/motion-image";
 import { MotionSection } from "@/components/motion/motion-section";
+import { BlogHeroImage } from "@/components/blog/BlogHeroImage";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -171,7 +172,7 @@ export default async function BlogPage({
       <Section
         variant="dark"
         dir={isArabic ? "rtl" : "ltr"}
-        className="relative overflow-hidden py-16 lg:py-24"
+        className="relative overflow-hidden py-16 md:py-24 lg:py-28"
       >
         <div
           className="pointer-events-none absolute -end-24 -top-32 size-80 rounded-full border-[32px] border-[var(--blc-gold-300)]/15"
@@ -181,27 +182,31 @@ export default async function BlogPage({
           className="pointer-events-none absolute -bottom-40 -start-20 size-72 rounded-full border border-white/10"
           aria-hidden="true"
         />
+        <div
+          className="pointer-events-none absolute end-[12%] top-1/2 size-[28rem] -translate-y-1/2 rounded-full bg-[radial-gradient(circle,_rgb(51_78_61_/_0.42),_transparent_68%)] blur-2xl"
+          aria-hidden="true"
+        />
 
-        <Container className="relative">
+        <Container className="relative grid items-center gap-14 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12">
           <MotionHero
             dir={isArabic ? "rtl" : "ltr"}
-            className="mx-auto max-w-4xl text-center"
+            className="max-w-2xl text-start"
           >
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--blc-gold-300)]">
               {t("header_eyebrow")}
             </p>
 
-            <h1 className="mt-5 text-4xl font-bold leading-tight text-white sm:text-6xl lg:text-7xl">
+            <h1 className="mt-5 text-4xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
               {t("header_title")}
             </h1>
 
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[var(--blc-cream-100)] sm:text-xl">
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--blc-cream-100)] sm:text-xl">
               {t("header_description")}
             </p>
 
             <nav
               aria-label={t("breadcrumb_label")}
-              className="mt-8 flex items-center justify-center gap-2 text-sm text-[var(--blc-cream-100)]/75"
+              className="mt-8 flex items-center gap-2 text-sm text-[var(--blc-cream-100)]/75"
             >
               <Link
                 href={`/${locale}`}
@@ -219,6 +224,10 @@ export default async function BlogPage({
               </span>
             </nav>
           </MotionHero>
+          <BlogHeroImage
+            alt={t("header_image_alt")}
+            badge={t("header_badge")}
+          />
         </Container>
       </Section>
 
@@ -239,7 +248,11 @@ export default async function BlogPage({
 
           {/* Empty State */}
           {visiblePosts.length === 0 ? (
-            <MotionSection variant="fade" className="mt-12">
+            <MotionSection
+              key={`empty-${currentCategory ?? "all"}`}
+              variant="fade"
+              className="mt-12"
+            >
               <div className="rounded-card border border-[var(--blc-sand-200)] bg-[var(--blc-cream-100)] p-10 text-center shadow-soft">
                 <div className="mx-auto flex size-14 items-center justify-center rounded-full border border-[var(--blc-gold-300)] bg-white text-[var(--blc-gold-500)]">
                   <NotebookText size={25} aria-hidden="true" />
@@ -259,7 +272,10 @@ export default async function BlogPage({
               </div>
             </MotionSection>
           ) : (
-            <MotionSection className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <MotionSection
+              key={`${currentCategory ?? "all"}-${safePage}`}
+              className="mt-12 grid items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3"
+            >
               {visiblePosts.map((post) => {
                 const categoryLabel = getCategoryLabel(post);
                 const bloggerLabel = getBloggerLabel(post);
@@ -273,7 +289,7 @@ export default async function BlogPage({
                   >
                     <Link
                       href={`/${locale}/blog/${post.slug}`}
-                      className="block h-full focus-ring-light"
+                      className="flex h-full flex-col focus-ring-light"
                     >
                       {/* Blog Image */}
                       <div className="relative aspect-[16/9] overflow-hidden bg-[var(--blc-sand-200)]">
@@ -290,7 +306,7 @@ export default async function BlogPage({
                         )}
                       </div>
 
-                      <div className="p-6">
+                      <div className="flex flex-1 flex-col p-6">
                         {/* Category + Date */}
                         <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--blc-green-700)]">
                           {categoryLabel && (
@@ -322,13 +338,13 @@ export default async function BlogPage({
 
                         {/* Blog Intro */}
                         {intro && (
-                          <p className="mt-3 text-[var(--blc-green-700)]">
+                          <p className="mt-3 line-clamp-4 text-[var(--blc-green-700)]">
                             {intro}
                           </p>
                         )}
 
                         {/* Read More */}
-                        <span className="blog-card-read-more mt-6 inline-flex items-center gap-2 font-semibold text-[var(--blc-gold-500)]">
+                        <span className="blog-card-read-more mt-auto inline-flex items-center gap-2 pt-4 font-semibold text-[var(--blc-gold-500)]">
                           {t("read_more")}
 
                           <ArrowUpRight

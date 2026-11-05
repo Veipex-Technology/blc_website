@@ -40,6 +40,7 @@ export function MotionFilters({
           <Link
             key={filter.slug || "all"}
             href={href}
+            prefetch={false}
             aria-current={active ? "page" : undefined}
             className={`relative isolate overflow-hidden rounded-full border px-4 py-2 text-sm font-semibold focus-ring-light ${
               active
