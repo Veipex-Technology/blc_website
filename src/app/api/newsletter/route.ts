@@ -6,6 +6,14 @@ import {
   getNewslettersFromERP,
 } from "@/lib/erp/newsletter";
 
+const ALLOWED_CONTENT_TYPES = ["Rich Text", "Markdown", "HTML"] as const;
+
+type NewsletterContentType = (typeof ALLOWED_CONTENT_TYPES)[number];
+
+type NewsletterEmailGroup = {
+  email_group: string;
+};
+
 /**
  * GET
  * Get Newsletter records from ERPNext.
@@ -40,7 +48,7 @@ export async function GET() {
  */
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body: unknown = await request.json();
 
     // 1. Validate request body.
     if (!body || typeof body !== "object" || Array.isArray(body)) {
@@ -50,13 +58,16 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Validate subscriber email.
-    const subscriberEmail =
-      typeof body.subscriber_email === "string"
-        ? body.subscriber_email.trim().toLowerCase()
-        : "";
+    const data = body as Record<string, unknown>;
 
+    // 2. Email validation helper.
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // 3. Validate subscriber email.
+    const subscriberEmail =
+      typeof data.subscriber_email === "string"
+        ? data.subscriber_email.trim().toLowerCase()
+        : "";
 
     if (!emailPattern.test(subscriberEmail)) {
       return NextResponse.json(
@@ -68,17 +79,19 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Validate newsletter subject.
-    if (typeof body.subject !== "string" || !body.subject.trim()) {
+    // 4. Validate newsletter subject.
+    if (typeof data.subject !== "string" || !data.subject.trim()) {
       return NextResponse.json(
         { error: "Newsletter subject is required." },
         { status: 400 },
       );
     }
 
-    // 4. Validate sender email (mandatory in ERPNext).
+    // 5. Validate sender email.
     const senderEmail =
-      typeof body.sender_email === "string" ? body.sender_email.trim() : "";
+      typeof data.sender_email === "string"
+        ? data.sender_email.trim().toLowerCase()
+        : "";
 
     if (!emailPattern.test(senderEmail)) {
       return NextResponse.json(
@@ -87,22 +100,35 @@ export async function POST(request: Request) {
       );
     }
 
-    // 5. Validate Newsletter audience groups.
-    if (!Array.isArray(body.email_group) || body.email_group.length === 0) {
+    // 6. Validate Newsletter audience groups.
+    if (!Array.isArray(data.email_group) || data.email_group.length === 0) {
       return NextResponse.json(
-        { error: "At least one Newsletter Email Group is required." },
+        {
+          error: "At least one Newsletter Email Group is required.",
+        },
         { status: 400 },
       );
     }
 
-    const emailGroups: { email_group: string }[] = [];
+    const emailGroups: NewsletterEmailGroup[] = [];
     const seenGroups = new Set<string>();
 
-    for (const item of body.email_group) {
+    for (const item of data.email_group) {
+      if (!item || typeof item !== "object" || Array.isArray(item)) {
+        return NextResponse.json(
+          {
+            error:
+              "Each audience row must contain a valid email_group document name.",
+          },
+          { status: 400 },
+        );
+      }
+
+      const groupItem = item as Record<string, unknown>;
+
       if (
-        !item ||
-        typeof item.email_group !== "string" ||
-        !item.email_group.trim()
+        typeof groupItem.email_group !== "string" ||
+        !groupItem.email_group.trim()
       ) {
         return NextResponse.json(
           {
@@ -113,24 +139,22 @@ export async function POST(request: Request) {
         );
       }
 
-      const emailGroup = item.email_group.trim();
+      const emailGroup = groupItem.email_group.trim();
 
       if (!seenGroups.has(emailGroup)) {
         seenGroups.add(emailGroup);
-        emailGroups.push({ email_group: emailGroup });
+        emailGroups.push({
+          email_group: emailGroup,
+        });
       }
     }
 
-    // 6. Validate content type.
-    const allowedContentTypes = ["Rich Text", "Markdown", "HTML"] as const;
-
-    const contentType = body.content_type ?? "Rich Text";
+    // 7. Validate Newsletter content type.
+    const rawContentType: unknown = data.content_type ?? "Rich Text";
 
     if (
-      typeof contentType !== "string" ||
-      !allowedContentTypes.includes(
-        contentType as (typeof allowedContentTypes)[number],
-      )
+      typeof rawContentType !== "string" ||
+      !ALLOWED_CONTENT_TYPES.some((type) => type === rawContentType)
     ) {
       return NextResponse.json(
         { error: "Invalid newsletter content_type." },
@@ -138,14 +162,18 @@ export async function POST(request: Request) {
       );
     }
 
-    // 7. Validate content for the selected editor.
+    const contentType = rawContentType as NewsletterContentType;
+
+    // 8. Validate content for the selected editor.
     const messageField = {
       "Rich Text": "message",
       Markdown: "message_md",
       HTML: "message_html",
-    }[contentType as (typeof allowedContentTypes)[number]];
+    }[contentType];
 
-    if (typeof body[messageField] !== "string" || !body[messageField].trim()) {
+    const messageContent = data[messageField];
+
+    if (typeof messageContent !== "string" || !messageContent.trim()) {
       return NextResponse.json(
         {
           error: `Newsletter content is required in ${messageField}.`,
@@ -154,9 +182,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // 8. Validate publication settings.
-    const published = body.published === true;
-    const sendWebviewLink = body.send_webview_link === true;
+    // 9. Validate publication settings.
+    const published = data.published === true;
+    const sendWebviewLink = data.send_webview_link === true;
 
     if (sendWebviewLink && !published) {
       return NextResponse.json(
@@ -168,48 +196,63 @@ export async function POST(request: Request) {
       );
     }
 
-    // 9. Ensure the Email Group exists first.
+    // 10. Ensure the Website Subscribers Email Group exists.
     const subscriberGroup = await ensureNewsletterEmailGroupInERP(
       "Website Subscribers",
     );
 
-    // 10. Register the subscriber in that group.
+    // 11. Register the subscriber in that group.
     const subscriber = await addNewsletterSubscriberToERP({
       email: subscriberEmail,
       email_group: subscriberGroup.name,
     });
 
-    // 11. Create the Newsletter.
+    // 12. Create the Newsletter in ERPNext.
     const newsletter = await createNewsletterInERP({
-      subject: body.subject.trim(),
+      subject: data.subject.trim(),
+
       email_group: emailGroups,
+
       sender_name:
-        typeof body.sender_name === "string" ? body.sender_name.trim() : "",
+        typeof data.sender_name === "string" ? data.sender_name.trim() : "",
+
       sender_email: senderEmail,
+
       send_from:
-        typeof body.send_from === "string" ? body.send_from.trim() : "",
+        typeof data.send_from === "string" ? data.send_from.trim() : "",
+
       content_type: contentType,
-      message: typeof body.message === "string" ? body.message : "",
-      message_md: typeof body.message_md === "string" ? body.message_md : "",
+
+      message: typeof data.message === "string" ? data.message : "",
+
+      message_md: typeof data.message_md === "string" ? data.message_md : "",
+
       message_html:
-        typeof body.message_html === "string" ? body.message_html : "",
-      campaign: typeof body.campaign === "string" ? body.campaign.trim() : "",
-      send_unsubscribe_link: body.send_unsubscribe_link === true,
+        typeof data.message_html === "string" ? data.message_html : "",
+
+      campaign: typeof data.campaign === "string" ? data.campaign.trim() : "",
+
+      send_unsubscribe_link: data.send_unsubscribe_link === true,
+
       send_webview_link: sendWebviewLink,
+
       published,
-      route: typeof body.route === "string" ? body.route.trim() : "",
+
+      route: typeof data.route === "string" ? data.route.trim() : "",
     });
 
-    // 11. Return both results.
+    // 13. Return successful response.
     return NextResponse.json(
       {
         success: true,
         message: "Subscriber processed and Newsletter created successfully.",
+
         subscriber: {
           email: subscriber.email,
           email_group: subscriber.email_group,
           already_exists: subscriber.already_exists ?? false,
         },
+
         newsletter,
       },
       { status: 201 },
