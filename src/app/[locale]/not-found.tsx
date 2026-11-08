@@ -1,15 +1,10 @@
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { whatsappLink } from "@/lib/contact";
-import type { Locale } from "@/i18n/routing";
 
-export default async function NotFound({
-  params,
-}: {
-  params: Promise<{ locale: Locale }>;
-}) {
-  const { locale } = await params;
+export default async function NotFound() {
+  const locale = await getLocale();
   const errors = await getTranslations({ locale, namespace: "errors" });
   const common = await getTranslations({ locale, namespace: "common" });
   const whatsappHref = whatsappLink(common("whatsapp_prefill"));
