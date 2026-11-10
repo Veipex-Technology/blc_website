@@ -23,7 +23,7 @@ import { Reveal } from "@/components/reveal";
 import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
-import { landline, whatsappDisplayNumber, whatsappLink } from "@/lib/contact";
+import { landline } from "@/lib/contact";
 import { contactLocation } from "@/lib/contact-location";
 import { pickLocalized } from "@/lib/localize";
 import type { Locale } from "@/i18n/routing";
@@ -105,7 +105,7 @@ export default async function ContactPage({
 
   const phone = contactInfo?.phone_number?.trim() || "";
   const secondPhone = contactInfo?.second_phone_number?.trim() || "";
-  const whatsappNumber = whatsappDisplayNumber;
+  const whatsappNumber = contactInfo?.whats_app_number?.trim() || "";
   const email = contactInfo?.email?.trim() || "";
 
   /*
@@ -138,7 +138,12 @@ export default async function ContactPage({
 
   const isRecruitmentEmailPlaceholder = !configuredRecruitmentEmail && !email;
 
-  const whatsappHref = whatsappLink(common("whatsapp_prefill"));
+  // Generate the WhatsApp link using the ERPNext number.
+  const whatsappHref = whatsappNumber
+    ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(
+        common("whatsapp_prefill"),
+      )}`
+    : "";
 
   /*
    * Select service from URL.
@@ -257,12 +262,14 @@ export default async function ContactPage({
                   )}
 
                   {/* WHATSAPP */}
-                  {whatsappNumber && (
+                  {whatsappNumber && whatsappHref && (
                     <a
                       href={whatsappHref}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
+                      dir="ltr"
                       className="flex items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
+                      aria-label={`WhatsApp: ${whatsappNumber}`}
                     >
                       <MessageCircle
                         size={20}
@@ -275,7 +282,9 @@ export default async function ContactPage({
                           {t("whatsapp")}
                         </strong>
 
-                        {whatsappNumber}
+                        <span className="[unicode-bidi:isolate]">
+                          {whatsappNumber}
+                        </span>
                       </span>
                     </a>
                   )}
