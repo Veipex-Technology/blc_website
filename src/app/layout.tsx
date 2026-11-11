@@ -58,8 +58,9 @@ export default async function RootLayout({
       lang={locale}
       dir={locale === "ar" ? "rtl" : "ltr"}
       className={`${arabicFont.variable} ${englishFont.variable} ${locale === "ar" ? "font-arabic" : "font-latin"}`}
+      suppressHydrationWarning
     >
-      <body>{children}</body>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }
