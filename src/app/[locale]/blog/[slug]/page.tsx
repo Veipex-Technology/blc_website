@@ -21,6 +21,7 @@ import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
 import { whatsappLink } from "@/lib/contact";
+import { getWhatsAppNumberFromERP } from "@/lib/erp/contact-info";
 import { getBlogPostsFromERP } from "@/lib/erp/blog";
 import type { BlogPost } from "@/lib/erp/blog";
 import type { Locale } from "@/i18n/routing";
@@ -144,6 +145,7 @@ export default async function BlogPostPage({
 
   const t = await getTranslations({ locale, namespace: "blog" });
   const common = await getTranslations({ locale, namespace: "common" });
+  const whatsappNumber = await getWhatsAppNumberFromERP().catch(() => null);
 
   const isArabic = locale === "ar";
   const title = getTitle(post, locale);
@@ -179,7 +181,7 @@ export default async function BlogPostPage({
 
   const shareLinks = [
     {
-      href: whatsappLink(`${title} ${canonical}`),
+      href: whatsappLink(whatsappNumber, `${title} ${canonical}`),
       label: t("share_whatsapp"),
     },
     {
@@ -202,7 +204,7 @@ export default async function BlogPostPage({
     )
     .slice(0, 3);
 
-  const whatsappHref = whatsappLink(common("whatsapp_prefill"));
+  const whatsappHref = whatsappLink(whatsappNumber, common("whatsapp_prefill"));
 
   const jsonLd = {
     "@context": "https://schema.org",

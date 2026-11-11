@@ -3,8 +3,10 @@ import { getSiteSettings } from "@/lib/erp/api";
 import { getServicesForNavigationFromERP } from "@/lib/erp/services";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
+import { WhatsAppNumberProvider } from "./whatsapp-number-provider";
 import type { Locale } from "@/i18n/routing";
 import { landline, whatsappLink } from "@/lib/contact";
+import { getWhatsAppNumberFromERP } from "@/lib/erp/contact-info";
 
 export async function SiteShell({
   locale,
@@ -17,6 +19,7 @@ export async function SiteShell({
   const nav = await getTranslations({ locale, namespace: "nav" });
   const footer = await getTranslations({ locale, namespace: "footer" });
   const settings = await getSiteSettings(locale);
+  const whatsappNumber = await getWhatsAppNumberFromERP().catch(() => null);
   const erpServices = await getServicesForNavigationFromERP().catch(() => []);
   const headerLinks = [
     { href: `/${locale}`, label: nav("home") },
@@ -25,7 +28,7 @@ export async function SiteShell({
     { href: `/${locale}/blog`, label: nav("blog") },
     { href: `/${locale}/contact`, label: nav("contact") },
   ];
-  const whatsappHref = whatsappLink(common("whatsapp_prefill"));
+  const whatsappHref = whatsappLink(whatsappNumber, common("whatsapp_prefill"));
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const organizationJsonLd = {
     "@context": "https://schema.org",
@@ -57,81 +60,86 @@ export async function SiteShell({
   });
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
-      />
-      <a
-        href="#main-content"
-        className="sr-only z-50 rounded-md bg-[var(--blc-green-900)] px-4 py-3 text-white focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus-ring-dark"
-      >
-        {common("skip_to_content")}
-      </a>
-      <SiteHeader
-        locale={locale}
-        settings={settings}
-        links={headerLinks}
-        services={headerServices}
-        labels={{
-          menu: common("menu_open"),
-          close: common("menu_close"),
-          whatsapp: common("cta_whatsapp"),
-          logoAlt: footer("logo_alt"),
-          prefill: common("whatsapp_prefill"),
-          navLabel: nav("label"),
-          language: common("lang_switch"),
-          contact: nav("contact"),
-        }}
-      />
-      <main id="main-content" className="flex-1">
-        {children}
-      </main>
-      <SiteFooter
-        locale={locale}
-        settings={settings}
-        labels={{
-          brandName: common("brand_name"),
-          description: common("footer_description"),
-          rights: common("footer_rights"),
-          privacy: common("privacy"),
-          services: footer("services"),
-          quickLinks: footer("quick_links"),
-          joinFamily: footer("join_family"),
-          contact: footer("contact"),
-          follow: footer("follow"),
-          logoAlt: footer("logo_alt"),
-          phone: footer("phone"),
-          landline: footer("landline"),
-          email: footer("email"),
-          address: footer("address"),
-          facebook: footer("facebook"),
-          instagram: footer("instagram"),
-          linkedin: footer("linkedin"),
-          youtube: footer("youtube"),
-          tiktok: footer("tiktok"),
-          x: footer("x"),
-        }}
-        navLabels={{
-          home: nav("home"),
-          about: nav("about"),
-          services: nav("services"),
-          blog: nav("blog"),
-          contact: nav("contact"),
-        }}
-      />
-      <div
-        className="fixed bottom-4 end-4 z-30 flex flex-col gap-3"
-        aria-label={common("floating_actions")}
-      >
+    <WhatsAppNumberProvider number={whatsappNumber}>
+      <div className="flex min-h-screen flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd),
+          }}
+        />
         <a
-          href={whatsappHref}
-          aria-label={common("cta_whatsapp")}
-          className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-full bg-[var(--blc-green-700)] px-4 font-semibold text-white shadow-soft hover:bg-[var(--blc-green-900)] focus-ring-dark sm:min-w-0"
+          href="#main-content"
+          className="sr-only z-50 rounded-md bg-[var(--blc-green-900)] px-4 py-3 text-white focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus-ring-dark"
         >
-          {common("cta_whatsapp")}
+          {common("skip_to_content")}
         </a>
+        <SiteHeader
+          locale={locale}
+          settings={settings}
+          whatsappNumber={whatsappNumber}
+          links={headerLinks}
+          services={headerServices}
+          labels={{
+            menu: common("menu_open"),
+            close: common("menu_close"),
+            whatsapp: common("cta_whatsapp"),
+            logoAlt: footer("logo_alt"),
+            prefill: common("whatsapp_prefill"),
+            navLabel: nav("label"),
+            language: common("lang_switch"),
+            contact: nav("contact"),
+          }}
+        />
+        <main id="main-content" className="flex-1">
+          {children}
+        </main>
+        <SiteFooter
+          locale={locale}
+          settings={settings}
+          labels={{
+            brandName: common("brand_name"),
+            description: common("footer_description"),
+            rights: common("footer_rights"),
+            privacy: common("privacy"),
+            services: footer("services"),
+            quickLinks: footer("quick_links"),
+            joinFamily: footer("join_family"),
+            contact: footer("contact"),
+            follow: footer("follow"),
+            logoAlt: footer("logo_alt"),
+            phone: footer("phone"),
+            landline: footer("landline"),
+            email: footer("email"),
+            address: footer("address"),
+            facebook: footer("facebook"),
+            instagram: footer("instagram"),
+            linkedin: footer("linkedin"),
+            youtube: footer("youtube"),
+            tiktok: footer("tiktok"),
+            x: footer("x"),
+          }}
+          navLabels={{
+            home: nav("home"),
+            about: nav("about"),
+            services: nav("services"),
+            blog: nav("blog"),
+            contact: nav("contact"),
+          }}
+        />
+        <div
+          className="fixed bottom-4 end-4 z-30 flex flex-col gap-3"
+          aria-label={common("floating_actions")}
+        >
+          <a
+            href={whatsappHref}
+            aria-label={common("cta_whatsapp")}
+            className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-full bg-[var(--blc-green-700)] px-4 font-semibold text-white shadow-soft hover:bg-[var(--blc-green-900)] focus-ring-dark sm:min-w-0"
+          >
+            {common("cta_whatsapp")}
+          </a>
+        </div>
       </div>
-    </div>
+    </WhatsAppNumberProvider>
   );
 }
