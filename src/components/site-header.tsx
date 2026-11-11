@@ -15,12 +15,14 @@ type HeaderService = { title: string; href: string };
 export function SiteHeader({
   locale,
   settings,
+  whatsappNumber,
   links,
   services,
   labels,
 }: {
   locale: Locale;
   settings: SiteSettings;
+  whatsappNumber: string | null;
   links: HeaderLink[];
   services: HeaderService[];
   labels: {
@@ -39,7 +41,7 @@ export function SiteHeader({
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const servicesMenuRef = useRef<HTMLDivElement>(null);
-  const whatsappHref = whatsappLink(labels.prefill);
+  const whatsappHref = whatsappLink(whatsappNumber, labels.prefill);
   const servicesHref = `/${locale}/services`;
 
   const closeNavigation = () => {

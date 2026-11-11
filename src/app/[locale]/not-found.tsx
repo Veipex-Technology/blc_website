@@ -2,12 +2,14 @@ import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { whatsappLink } from "@/lib/contact";
+import { getWhatsAppNumberFromERP } from "@/lib/erp/contact-info";
 
 export default async function NotFound() {
   const locale = await getLocale();
   const errors = await getTranslations({ locale, namespace: "errors" });
   const common = await getTranslations({ locale, namespace: "common" });
-  const whatsappHref = whatsappLink(common("whatsapp_prefill"));
+  const whatsappNumber = await getWhatsAppNumberFromERP().catch(() => null);
+  const whatsappHref = whatsappLink(whatsappNumber, common("whatsapp_prefill"));
   return (
     <main className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center px-5 py-20 text-center">
       <h1 className="text-4xl font-bold text-[var(--blc-green-900)]">

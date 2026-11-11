@@ -5,6 +5,7 @@ import { MessageCircle } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { whatsappLink } from "@/lib/contact";
+import { useWhatsAppNumber } from "@/components/whatsapp-number-provider";
 
 export default function ErrorPage({
   reset,
@@ -16,7 +17,10 @@ export default function ErrorPage({
   const common = useTranslations("common");
   const pathname = usePathname();
   const locale = pathname.split("/")[1] === "en" ? "en" : "ar";
-  const whatsappHref = whatsappLink(common("whatsapp_prefill"));
+  const whatsappHref = whatsappLink(
+    useWhatsAppNumber(),
+    common("whatsapp_prefill"),
+  );
   return (
     <main className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center px-5 py-20 text-center">
       <h1 className="text-4xl font-bold text-[var(--blc-green-900)]">

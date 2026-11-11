@@ -15,6 +15,7 @@ import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
 import { whatsappLink } from "@/lib/contact";
+import { getWhatsAppNumberFromERP } from "@/lib/erp/contact-info";
 
 import { getServicesFromERP, type Service } from "@/lib/erp/services";
 
@@ -328,7 +329,11 @@ export default async function ServicePage({ params }: PageProps) {
     )
     .slice(0, 3);
 
-  const whatsappHref = whatsappLink(common("service_request_whatsapp_prefill"));
+  const whatsappNumber = await getWhatsAppNumberFromERP().catch(() => null);
+  const whatsappHref = whatsappLink(
+    whatsappNumber,
+    common("service_request_whatsapp_prefill"),
+  );
 
   // Change "contact" to your real contact/request route.
   const requestHref = `/${locale}/contact`;

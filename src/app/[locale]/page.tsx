@@ -24,6 +24,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { NewsletterSection } from "@/components/newsletter-section";
 import { createPageMetadata } from "@/lib/metadata";
 import { whatsappLink } from "@/lib/contact";
+import { getWhatsAppNumberFromERP } from "@/lib/erp/contact-info";
 import { getMainServicesFromERP } from "@/lib/erp/services";
 import { getFaqs, getPartners, getTestimonials } from "@/lib/erp/api";
 
@@ -87,7 +88,8 @@ export default async function HomePage({
   );
   const founderVideoUrl = media[0]?.attach_wpov_url ?? null;
   console.log("media:", media, "founderVideoUrl:", founderVideoUrl);
-  const whatsapp = whatsappLink(common("whatsapp_prefill"));
+  const whatsappNumber = await getWhatsAppNumberFromERP().catch(() => null);
+  const whatsapp = whatsappLink(whatsappNumber, common("whatsapp_prefill"));
   const publishedFaqs = faqs.filter((faq) => faq.published);
   const faqSchema = {
     "@context": "https://schema.org",

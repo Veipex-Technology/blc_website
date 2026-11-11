@@ -31,6 +31,7 @@ import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
 import { whatsappLink } from "@/lib/contact";
+import { getWhatsAppNumberFromERP } from "@/lib/erp/contact-info";
 import type { Locale } from "@/i18n/routing";
 import { getMissionVisionFromERP } from "@/lib/erp/mission-vision";
 import { getBLCConsultantInfoFromERP } from "@/lib/erp/consultant-info";
@@ -196,7 +197,8 @@ export default async function AboutPage({
         visionFallback: "Vision",
       };
 
-  const whatsapp = whatsappLink(common("whatsapp_prefill"));
+  const whatsappNumber = await getWhatsAppNumberFromERP().catch(() => null);
+  const whatsapp = whatsappLink(whatsappNumber, common("whatsapp_prefill"));
 
   const consultant = (() =>
     null as {

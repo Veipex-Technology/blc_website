@@ -23,7 +23,7 @@ import { Reveal } from "@/components/reveal";
 import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { createPageMetadata } from "@/lib/metadata";
-import { landline } from "@/lib/contact";
+import { landline, whatsappLink } from "@/lib/contact";
 import { contactLocation } from "@/lib/contact-location";
 import { pickLocalized } from "@/lib/localize";
 import type { Locale } from "@/i18n/routing";
@@ -139,11 +139,7 @@ export default async function ContactPage({
   const isRecruitmentEmailPlaceholder = !configuredRecruitmentEmail && !email;
 
   // Generate the WhatsApp link using the ERPNext number.
-  const whatsappHref = whatsappNumber
-    ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(
-        common("whatsapp_prefill"),
-      )}`
-    : "";
+  const whatsappHref = whatsappLink(whatsappNumber, common("whatsapp_prefill"));
 
   /*
    * Select service from URL.
