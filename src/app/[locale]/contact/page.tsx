@@ -233,10 +233,16 @@ export default async function ContactPage({
                   {t("details")}
                 </h2>
 
-                <div className="mt-7 grid gap-5 text-[var(--blc-green-700)]">
+                <div
+                  dir={locale === "ar" ? "rtl" : "ltr"}
+                  className="mt-7 flex flex-col items-start gap-4 text-start text-[var(--blc-green-700)]"
+                >
                   {/* PHONE */}
                   {(phone || secondPhone) && (
-                    <div className="flex items-start gap-3">
+                    <div
+                      dir={locale === "ar" ? "rtl" : "ltr"}
+                      className="flex items-start gap-3 text-start"
+                    >
                       <Phone
                         size={20}
                         className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
@@ -248,10 +254,16 @@ export default async function ContactPage({
                           {t("phone")}
                         </strong>
 
-                        {phone && <span className="block">{phone}</span>}
+                        {phone && (
+                          <bdi dir="ltr" className="block">
+                            {phone}
+                          </bdi>
+                        )}
 
                         {secondPhone && (
-                          <span className="mt-1 block">{secondPhone}</span>
+                          <bdi dir="ltr" className="mt-1 block">
+                            {secondPhone}
+                          </bdi>
                         )}
                       </span>
                     </div>
@@ -263,8 +275,8 @@ export default async function ContactPage({
                       href={whatsappHref}
                       target="_blank"
                       rel="noopener noreferrer"
-                      dir="ltr"
-                      className="flex items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
+                      dir={locale === "ar" ? "rtl" : "ltr"}
+                      className="flex items-start gap-3 text-start hover:text-[var(--blc-green-900)] focus-ring-light"
                       aria-label={`WhatsApp: ${whatsappNumber}`}
                     >
                       <MessageCircle
@@ -278,9 +290,7 @@ export default async function ContactPage({
                           {t("whatsapp")}
                         </strong>
 
-                        <span className="[unicode-bidi:isolate]">
-                          {whatsappNumber}
-                        </span>
+                        <bdi dir="ltr">{whatsappNumber}</bdi>
                       </span>
                     </a>
                   )}
@@ -289,7 +299,8 @@ export default async function ContactPage({
                   <a
                     href={landline.href}
                     aria-label={`${t("landline")}: ${landline.display}`}
-                    className="flex min-h-11 items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
+                    dir={locale === "ar" ? "rtl" : "ltr"}
+                    className="flex min-h-11 items-start gap-3 text-start hover:text-[var(--blc-green-900)] focus-ring-light"
                   >
                     <Phone
                       size={20}
@@ -312,7 +323,8 @@ export default async function ContactPage({
                   {email && (
                     <a
                       href={`mailto:${email}`}
-                      className="flex items-start gap-3 hover:text-[var(--blc-green-900)] focus-ring-light"
+                      dir={locale === "ar" ? "rtl" : "ltr"}
+                      className="flex items-start gap-3 text-start hover:text-[var(--blc-green-900)] focus-ring-light"
                     >
                       <Mail
                         size={20}
@@ -332,7 +344,10 @@ export default async function ContactPage({
 
                   {/* LOCALIZED ADDRESS */}
                   {address && (
-                    <div className="flex items-start gap-3">
+                    <div
+                      dir={locale === "ar" ? "rtl" : "ltr"}
+                      className="flex items-start gap-3 text-start"
+                    >
                       <MapPin
                         size={20}
                         className="mt-1 shrink-0 text-[var(--blc-gold-500)]"
