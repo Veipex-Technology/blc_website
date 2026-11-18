@@ -290,9 +290,7 @@ export default async function ContactPage({
                           {t("whatsapp")}
                         </strong>
 
-                        <bdi dir="ltr">
-                          {whatsappNumber}
-                        </bdi>
+                        <bdi dir="ltr">{whatsappNumber}</bdi>
                       </span>
                     </a>
                   )}
